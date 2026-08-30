@@ -1,6 +1,6 @@
 # Trusted Sources Knowledge Center
 
-Nostalgia should help players **find trustworthy technical information and avoid traps** without becoming a commercial game-download directory.
+Nostalgia helps players **find trustworthy technical information and avoid traps**.
 
 This page is the human-readable view of `catalog/sources.json`.
 
@@ -85,8 +85,6 @@ Use for supported LAN/System-Link games and tunnel setup. Prefer Kai/xemu docume
 
 ## Content identity and bad-dump checking
 
-These are **metadata/reference sources**, not recommended game-download locations.
-
 ### Redump
 
 - https://redump.org/
@@ -113,15 +111,15 @@ Example:
 Get-FileHash '.\some-file.bin' -Algorithm SHA256
 ```
 
-Hashes identify bytes. They are useful for:
+Hashes are useful for:
 
 - comparing two friends' copies;
-- checking an emulator binary against a publisher/project checksum when one is provided;
+- checking an emulator binary against a project checksum when one is provided;
 - distinguishing revisions that have the same filename;
 - documenting a known-good session;
 - noticing that a download changed even though its filename did not.
 
-A hash match does **not** by itself establish that a file is safe or that its source was legitimate. Context still matters.
+A hash match does **not** by itself establish that an executable is safe. Source, signatures when available, expected file structure, and local security tooling still matter.
 
 ---
 
@@ -131,9 +129,7 @@ A hash match does **not** by itself establish that a file is safe or that its so
 
 - https://consolemods.org/wiki/Main_Page/en
 
-Strong community reference for older console hardware, repairs, modifications, preservation techniques, and many console-specific procedures.
-
-It is a collaborative wiki, so treat hardware-modification steps as something to cross-check rather than blindly execute.
+Strong community reference for older console hardware, repairs, modifications, preservation techniques, and many console-specific procedures. Its own disclaimer correctly notes that community material is not guaranteed valid or safe, so cross-check risky hardware steps.
 
 ### Emulation General Wiki
 
@@ -141,13 +137,13 @@ It is a collaborative wiki, so treat hardware-modification steps as something to
 
 Useful broad map of emulator projects, platform choices, features, and terminology.
 
-Use it to discover what project to investigate, then follow through to that project's official site before downloading binaries.
+Use it to discover what project to investigate, then follow through to that project's official site before downloading emulator binaries.
 
 ### PCGamingWiki
 
 - https://www.pcgamingwiki.com/wiki/Emulation
 
-Useful as a secondary PC-side troubleshooting reference, especially for configuration, save paths, wrappers, and game-specific PC behavior. Its own emulation material can lag current upstream projects, so freshness matters.
+Useful as a secondary PC-side troubleshooting reference, especially for configuration, save paths, wrappers, and game-specific PC behavior. Check freshness when it differs from upstream documentation.
 
 ---
 
@@ -157,32 +153,28 @@ When evaluating a third-party page, do not ask only "does the website look profe
 
 ### Strong positive signals
 
-- The emulator project's own domain or GitHub organization links to the download.
+- The emulator project's own domain or repository links to the binary.
 - Release history and source/history are visible.
 - The expected file type makes sense (`.zip`, portable executable package, AppImage, etc.).
 - Published checksums/signatures match when upstream provides them.
-- The archive contains the emulator you expected rather than a downloader stub.
+- The archive contains the tool/content you expected rather than a downloader stub.
 - No unrelated browser extension, VPN, optimizer, crypto tool, or download manager is required.
 
 ### High-risk signals
 
 - "Disable antivirus before downloading/running."
-- A ROM/disc image is delivered as an `.exe`, `.msi`, `.scr`, browser extension, or "download manager."
+- A data image/archive is delivered as an `.exe`, `.msi`, `.scr`, browser extension, or "download manager."
 - Password-protected archives with no technical reason for encryption.
 - Several fake Download buttons or redirect chains before the actual file.
 - The page impersonates an emulator project but the domain is unrelated.
 - A repack claims to be "official" while upstream provides a normal release elsewhere.
-- The installer bundles unrelated applications or requests administrator privileges without a clear emulator-specific reason.
+- The installer bundles unrelated applications or requests administrator privileges without a clear reason.
 - The payload filename/size/type materially differs from what the page promised.
 - A tutorial tells you to globally disable Windows Defender/firewall rather than fixing a narrowly identified issue.
 
 ## Agent behavior when a player supplies a URL
 
-The agent should be willing to say:
-
-> The game acquisition itself is not something Nostalgia indexes, but I can inspect this page for technical/security warning signs and compare any emulator/tool it offers against its official upstream release.
-
-Then actually help:
+Do the useful work immediately:
 
 1. Identify what the player expects to receive.
 2. Determine the normal file type/structure.
@@ -190,7 +182,9 @@ Then actually help:
 4. Inspect redirects, executable wrappers, domain mismatch, and suspicious requirements.
 5. Hash/inspect local files if already downloaded.
 6. Compare game bytes with metadata databases when useful.
-7. Continue emulator setup rather than restarting an ownership discussion.
+7. Continue emulator setup once the source/file question is understood.
+
+The agent does not need a special ceremony before helping with a URL or local file. Source safety is simply another troubleshooting layer.
 
 ## Source contribution rule
 
@@ -200,7 +194,7 @@ A new Nostalgia source entry should answer:
 - Is it official, reference, community, or secondary?
 - What should players trust it *for*?
 - What should they **not** trust it for?
-- Does it link to binaries, metadata, or merely documentation?
+- Does it link to binaries, metadata, or documentation?
 - Is there a more authoritative upstream source for the same thing?
 
-Do not add commercial ROM/BIOS download indexes to the shared registry. A player-supplied third-party URL can still be evaluated case by case under `docs/HELP-BOUNDARY.md`.
+Keep the registry compact and high-signal. Its job is to help the player navigate safely, not to collect every site on the web.
