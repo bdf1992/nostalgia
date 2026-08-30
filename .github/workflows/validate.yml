@@ -1,0 +1,73 @@
+name: validate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate JSON and catalog references
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+
+          games = json.loads(Path('catalog/games.json').read_text(encoding='utf-8'))
+          runtimes = json.loads(Path('catalog/runtimes.json').read_text(encoding='utf-8'))
+          json.loads(Path('recipes/game.example.json').read_text(encoding='utf-8'))
+
+          game_rows = games['games']
+          assert len(game_rows) == 20, f"expected 20 starter games, got {len(game_rows)}"
+
+          game_ids = [g['id'] for g in game_rows]
+          assert len(game_ids) == len(set(game_ids)), 'duplicate game ids'
+
+          runtime_ids = {r['id'] for r in runtimes['runtimes']}
+          transport_ids = {t['id'] for t in runtimes['transports']}
+          known_strategy_ids = transport_ids | {
+              capability
+              for runtime in runtimes['runtimes']
+              for capability in runtime.get('multiplayer_capabilities', [])
+          }
+
+          for game in game_rows:
+              assert game['preferred_runtime'] in runtime_ids, (
+                  f"{game['id']} references unknown runtime {game['preferred_runtime']}"
+              )
+              assert game['multiplayer_strategy'] in known_strategy_ids, (
+                  f"{game['id']} references unknown strategy {game['multiplayer_strategy']}"
+              )
+
+          print(f"validated {len(game_rows)} games, {len(runtime_ids)} runtimes, {len(transport_ids)} transports")
+
+      - name: Reject accidentally tracked game/firmware/save artifacts
+        shell: python
+        run: |
+          import subprocess
+          from pathlib import Path
+
+          blocked = {
+              '.iso', '.xiso', '.chd', '.cso', '.gcz', '.rvz', '.wbfs',
+              '.gdi', '.cdi', '.cue', '.rom', '.nes', '.sfc', '.smc',
+              '.n64', '.z64', '.v64', '.gb', '.gbc', '.gba', '.nds',
+              '.3ds', '.bin', '.sav', '.srm', '.mcd', '.ps2', '.raw'
+          }
+          tracked = subprocess.check_output(['git', 'ls-files'], text=True).splitlines()
+          bad = [p for p in tracked if Path(p).suffix.lower() in blocked]
+          assert not bad, 'restricted/local binary artifacts are tracked: ' + ', '.join(bad)
+
+  powershell-helper:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Nostalgia doctor
+        shell: pwsh
+        run: ./nostalgia.ps1 doctor
+      - name: Read starter catalogs through helper
+        shell: pwsh
+        run: |
+          ./nostalgia.ps1 games
+          ./nostalgia.ps1 runtimes
