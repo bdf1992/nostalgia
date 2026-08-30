@@ -1,6 +1,16 @@
 {
-  "schema": "nostalgia.runtime-catalog/0.1",
+  "schema": "nostalgia.runtime-catalog/0.2",
   "status": "experimental",
+  "recommendation_policy": {
+    "default_profile": "latency-first",
+    "profiles": {
+      "latency-first": "Prefer the viable topology with the lowest expected end-to-end input-to-display delay. Favor local rendering/native netplay or original LAN/System-Link over video streaming when a credible implementation exists. Mark predictions as candidates until measured in a real session.",
+      "easy-first": "Prefer the smallest setup surface and fastest path to a playable session, even if it adds streaming encode/decode latency.",
+      "balanced": "Prefer a well-supported topology with good expected latency without adding disproportionate setup complexity.",
+      "fallback": "Use when the preferred topology fails compatibility, stability, reachability, or latency acceptance."
+    },
+    "evidence_rule": "Recommendation labels describe intent and expected topology. A route becomes proven only after an actual session records measured/observed results."
+  },
   "runtimes": [
     {
       "id": "dolphin",
@@ -9,6 +19,7 @@
       "official_download": "https://dolphin-emu.org/download/",
       "documentation": "https://dolphin-emu.org/docs/guides/netplay-guide/",
       "multiplayer_capabilities": ["dolphin-netplay"],
+      "recommendation_labels": ["latency-first", "balanced"],
       "notes": "Desktop NetPlay supports local-multiplayer GameCube/Wii titles. Matching Dolphin versions and matching game region/revision are important; identical dumps are strongly recommended. Wii NetPlay is documented as more temperamental than GameCube NetPlay."
     },
     {
@@ -18,6 +29,7 @@
       "official_download": "https://xemu.app/docs/download/",
       "documentation": "https://xemu.app/docs/networking/",
       "multiplayer_capabilities": ["xemu-udp-tunnel", "xlink-kai-system-link", "local-system-link"],
+      "recommendation_labels": ["latency-first", "balanced"],
       "notes": "xemu supports NAT, UDP Tunnel, and Bridged Adapter networking. UDP Tunnel is intended for xemu-to-xemu Internet play; Bridged Adapter is useful with real Xbox hardware and XLink Kai. Virtual Xbox MAC addresses must be unique."
     },
     {
@@ -27,14 +39,15 @@
       "official_download": "https://github.com/stenzek/duckstation/releases/tag/latest",
       "documentation": "https://github.com/stenzek/duckstation",
       "multiplayer_capabilities": ["local-multiplayer", "ps1-multitap-up-to-8"],
-      "default_transport": "parsec-remote-couch",
-      "alternate_transports": ["sunshine-moonlight-remote-couch"],
+      "easy_transport": "parsec-remote-couch",
+      "low_latency_stream_transport": "sunshine-moonlight-remote-couch",
+      "recommendation_labels": ["easy-first", "balanced"],
       "controller_topology": {
         "direct_ports": 2,
         "multitap_supported": true,
         "emulated_devices_max": 8
       },
-      "notes": "Preferred PS1 runtime. Start with one authoritative DuckStation host plus Parsec because it minimizes setup. If measured or observed streaming latency is the limiting layer, Sunshine + Moonlight is an alternate remote-couch transport. If remote-couch remains unacceptable, evaluate Mednafen native netplay as a separate two-emulator topology."
+      "notes": "Preferred PS1 local-emulation runtime. Pair with Parsec for the easiest remote-couch setup or Sunshine + Moonlight when streaming remains desirable but latency is prioritized. For the lowest expected remote-play latency, compare against Mednafen native netplay rather than assuming any streaming path is optimal."
     },
     {
       "id": "mednafen",
@@ -43,7 +56,8 @@
       "official_download": "https://mednafen.github.io/releases/",
       "documentation": "https://mednafen.github.io/documentation/netplay.html",
       "multiplayer_capabilities": ["native-netplay", "local-rendering-per-player"],
-      "notes": "Advanced PS1 latency fallback, not the default. Both players run matching local emulation/content and connect through a Mednafen netplay server. Mednafen uses save states for synchronization; important memory-card state should be backed up or isolated before netplay testing."
+      "recommendation_labels": ["latency-first", "advanced", "candidate-until-measured"],
+      "notes": "Primary PS1 latency-first candidate. Both players run matching local emulation/content and connect through a Mednafen netplay server, avoiding video encode/decode and remote video transport. Actual advantage depends on network conditions and synchronization behavior; validate with a real match. Mednafen uses save states for synchronization, so important memory-card state should be backed up or isolated."
     },
     {
       "id": "pcsx2",
@@ -52,8 +66,9 @@
       "official_download": "https://pcsx2.net/downloads/",
       "documentation": "https://pcsx2.net/",
       "multiplayer_capabilities": ["local-multiplayer"],
-      "default_transport": "parsec-remote-couch",
-      "notes": "Nostalgia v0.1 does not assume a universal PCSX2 netplay layer. For local multiplayer titles, remote couch is the default starter path unless a game-specific network recipe is validated."
+      "easy_transport": "parsec-remote-couch",
+      "recommendation_labels": ["easy-first"],
+      "notes": "Nostalgia v0.1 does not assume a universal PCSX2 native netplay layer. For local multiplayer titles, remote couch remains a practical route unless a lower-latency game-specific network recipe is validated."
     },
     {
       "id": "retroarch",
@@ -63,7 +78,8 @@
       "documentation": "https://docs.libretro.com/guides/netplay-faq/",
       "multiplayer_capabilities": ["retroarch-netplay", "local-multiplayer"],
       "netplay_exclusions": ["PlayStation", "Nintendo 64", "Dreamcast", "GameCube", "Wii", "Nintendo 3DS"],
-      "notes": "RetroArch netplay requires matching RetroArch/core/content and a deterministic, sufficiently performant core. Current Libretro FAQ explicitly says the netplay model is unsuitable for PSX/N64/Dreamcast/GameCube/Wii/3DS-class systems; do not use RetroArch netplay as a PS1 fallback."
+      "recommendation_labels": ["system-dependent"],
+      "notes": "RetroArch netplay requires matching RetroArch/core/content and a deterministic, sufficiently performant core. Current Libretro FAQ explicitly says the netplay model is unsuitable for PSX/N64/Dreamcast/GameCube/Wii/3DS-class systems; do not use RetroArch netplay as a PS1 latency fallback."
     },
     {
       "id": "flycast-dojo",
@@ -72,6 +88,7 @@
       "official_download": "https://github.com/blueminder/flycast-dojo/releases",
       "documentation": "https://github.com/blueminder/flycast-dojo",
       "multiplayer_capabilities": ["flycast-dojo-match-code", "direct-ip", "virtual-lan"],
+      "recommendation_labels": ["latency-first", "balanced"],
       "notes": "Flycast Dojo focuses on netplay/replay and documents P2P Match Codes, direct-IP play, and virtual-LAN options. Matching game files are required for netplay."
     }
   ],
@@ -81,7 +98,8 @@
       "kind": "remote-input-streaming",
       "official_download": "https://parsec.app/downloads",
       "documentation": "https://support.parsec.app/hc/en-us/articles/32381705301908-Setup-Gamepad",
-      "notes": "Default remote-couch transport. One player hosts the emulator. Remote gamepads are exposed to the host as virtual controllers. Ensure each player maps to a distinct emulator controller slot. Guest controllers are created when guests press buttons; controller order can require host-side repair after reconnects."
+      "recommendation_labels": ["easy-first", "fallback"],
+      "notes": "Easiest remote-couch transport. One player hosts the emulator and remote gamepads are exposed as virtual controllers. Good baseline, but the guest experiences network plus encode/decode/display latency."
     },
     {
       "id": "sunshine-moonlight-remote-couch",
@@ -89,13 +107,15 @@
       "official_download": "https://docs.lizardbyte.dev/projects/sunshine/master/md_docs_2getting__started.html",
       "documentation": "https://docs.lizardbyte.dev/projects/sunshine/master/",
       "client": "https://moonlight-stream.org/",
-      "notes": "Alternate remote-couch transport when Parsec's streaming path is suspected to be the latency bottleneck. Sunshine is the host and Moonlight is the client. On Windows, full virtual gamepad support requires the virtual-input setup documented by Sunshine."
+      "recommendation_labels": ["balanced", "low-latency-streaming", "fallback"],
+      "notes": "Remote-couch option to evaluate when streaming is desired but latency matters more than setup simplicity. Sunshine is the host and Moonlight is the client. On Windows, full virtual gamepad support requires the documented virtual-input setup. Treat lower-latency claims as a candidate until measured on the players' hardware/network."
     },
     {
       "id": "xlink-kai-system-link",
       "kind": "lan-system-link-tunnel",
       "official_download": "https://www.teamxlink.co.uk/",
       "documentation": "https://www.teamxlink.co.uk/wiki/Xemu_XLink_Kai_Setup",
+      "recommendation_labels": ["latency-first", "balanced"],
       "notes": "Used with games whose original console LAN/System-Link mode is verified by XLink Kai. With xemu, use the bridged-network path described by xemu/XLink documentation."
     }
   ],
@@ -103,26 +123,50 @@
     {
       "id": "dolphin-party",
       "members": ["dolphin"],
+      "recommendation_labels": ["latency-first", "balanced"],
       "use_for": "GameCube/Wii local multiplayer transported through Dolphin NetPlay"
     },
     {
       "id": "xbox-system-link",
       "members": ["xemu", "xlink-kai-system-link"],
+      "recommendation_labels": ["latency-first", "balanced"],
       "use_for": "Original Xbox System Link over Internet or mixed emulator/real-hardware sessions"
     },
     {
       "id": "remote-couch-classics",
       "members": ["duckstation", "pcsx2", "retroarch", "parsec-remote-couch"],
+      "recommendation_labels": ["easy-first", "fallback"],
       "use_for": "Local multiplayer games where one authoritative emulator host is simplest"
     },
     {
       "id": "ps1-stress",
       "members": ["duckstation", "parsec-remote-couch", "sunshine-moonlight-remote-couch", "mednafen"],
-      "use_for": "PS1 campaign: begin with DuckStation + Parsec, test alternate streaming only when latency evidence warrants it, and escalate to Mednafen native netplay when local rendering on both players is worth the added setup"
+      "recommendations": {
+        "latency-first": {
+          "runtime": "mednafen",
+          "transport": "native-netplay",
+          "status": "candidate-until-measured",
+          "reason": "Both players render locally; removes streaming encode/decode and remote video delivery from the control loop."
+        },
+        "balanced": {
+          "runtime": "duckstation",
+          "transport": "sunshine-moonlight-remote-couch",
+          "status": "candidate-until-measured",
+          "reason": "Keeps DuckStation's simple authoritative-host model while targeting a low-latency streaming stack."
+        },
+        "easy-first": {
+          "runtime": "duckstation",
+          "transport": "parsec-remote-couch",
+          "status": "baseline",
+          "reason": "Smallest setup surface and easiest controller passthrough."
+        }
+      },
+      "use_for": "PS1 campaign that explicitly compares latency-first, balanced streaming, and easy-first paths and records which one actually wins on the players' network."
     },
     {
       "id": "dreamcast-versus",
       "members": ["flycast-dojo"],
+      "recommendation_labels": ["latency-first", "balanced"],
       "use_for": "Dreamcast-era P2P/match-code netplay experiments"
     }
   ]
