@@ -2,7 +2,7 @@
   "schema": "nostalgia.game-catalog/0.1",
   "pack_id": "classics-v0.1",
   "status": "experimental",
-  "policy": "Catalog entries contain no commercial game data. All player content is user-supplied and must be lawfully possessed/used.",
+  "policy": "Catalog entries contain no commercial game data. Content acquisition provenance is outside this compatibility catalog; agents may still help inspect and troubleshoot user-supplied local files and URLs.",
   "games": [
     {
       "id": "twisted-metal-2-ps1",
