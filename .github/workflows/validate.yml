@@ -14,9 +14,11 @@ jobs:
         run: |
           import json
           from pathlib import Path
+          from urllib.parse import urlparse
 
           games = json.loads(Path('catalog/games.json').read_text(encoding='utf-8'))
           runtimes = json.loads(Path('catalog/runtimes.json').read_text(encoding='utf-8'))
+          sources = json.loads(Path('catalog/sources.json').read_text(encoding='utf-8'))
           ps1 = json.loads(Path('catalog/ps1-stress.json').read_text(encoding='utf-8'))
           json.loads(Path('recipes/game.example.json').read_text(encoding='utf-8'))
 
@@ -64,9 +66,28 @@ jobs:
           assert any('shared-controller' in g['stress'] for g in ps1_rows), 'PS1 pack must test shared-controller semantics'
           assert any('save-heavy' in g['stress'] for g in ps1_rows), 'PS1 pack must test save-heavy persistence'
 
+          source_rows = sources['sources']
+          source_ids = [s['id'] for s in source_rows]
+          assert len(source_ids) == len(set(source_ids)), 'duplicate source ids'
+          assert len(source_rows) >= 10, 'trusted source registry is unexpectedly thin'
+          allowed_trust = {'official', 'reference', 'community', 'secondary'}
+          required_trust = {'official', 'reference', 'community'}
+          assert required_trust <= {s['trust'] for s in source_rows}, 'missing required source trust tiers'
+
+          for source in source_rows:
+              assert source['trust'] in allowed_trust, f"unknown trust tier: {source['trust']}"
+              assert source.get('use_for'), f"{source['id']} has no use_for guidance"
+              for key, value in source.items():
+                  if key == 'url' or key.endswith('_url'):
+                      parsed = urlparse(value)
+                      assert parsed.scheme == 'https' and parsed.netloc, (
+                          f"{source['id']} has invalid HTTPS URL in {key}: {value}"
+                      )
+
           print(
               f"validated {len(game_rows)} starter games, {len(ps1_rows)} PS1 stress fixtures, "
-              f"{len(runtime_ids)} runtimes, {len(transport_ids)} transports"
+              f"{len(runtime_ids)} runtimes, {len(transport_ids)} transports, "
+              f"{len(source_rows)} trusted sources"
           )
 
       - name: Reject accidentally tracked game/firmware/save artifacts
@@ -83,7 +104,7 @@ jobs:
           }
           tracked = subprocess.check_output(['git', 'ls-files'], text=True).splitlines()
           bad = [p for p in tracked if Path(p).suffix.lower() in blocked]
-          assert not bad, 'restricted/local binary artifacts are tracked: ' + ', '.join(bad)
+          assert not bad, 'local binary artifacts are tracked: ' + ', '.join(bad)
 
   powershell-helper:
     runs-on: windows-latest
@@ -97,6 +118,7 @@ jobs:
         run: |
           ./nostalgia.ps1 games
           ./nostalgia.ps1 runtimes
+          ./nostalgia.ps1 sources
           ./nostalgia.ps1 ps1
           ./nostalgia.ps1 ps1-plan twisted-metal-2-ps1
           ./nostalgia.ps1 ps1-plan crash-bash-ps1
