@@ -103,6 +103,42 @@ Baseline:
 
 Parsec gamepad guide: https://support.parsec.app/hc/en-us/articles/32381705301908-Setup-Gamepad
 
+### PS1 latency escalation
+
+For PlayStation games, treat the transport as a measured choice rather than a permanent dependency.
+
+Start with **DuckStation + Parsec** because it has the smallest setup surface: one authoritative emulator, one game instance, and remote controller/video transport. If the complete play test feels good, stop there.
+
+If the session is playable but streaming transport appears to be the weak layer, try **Sunshine + Moonlight** as an alternate remote-couch transport. This preserves the same topology -- one DuckStation host -- while replacing the video/input streaming layer.
+
+If remote-couch latency remains unacceptable and the game warrants a more involved setup, test **Mednafen native netplay**. In that topology both players run matching PS1 emulation/content locally and connect through Mednafen's netplay server, so each player renders their own game rather than receiving a video stream. Mednafen uses save states as part of synchronization; isolate or back up important memory-card state before testing.
+
+Official references:
+
+- Mednafen netplay: https://mednafen.github.io/documentation/netplay.html
+- Mednafen PS1 notes: https://mednafen.github.io/documentation/psx.html
+- Sunshine: https://docs.lizardbyte.dev/projects/sunshine/master/
+- Moonlight: https://moonlight-stream.org/
+
+Use evidence to choose the path:
+
+```text
+DuckStation + Parsec
+        |
+        +-- feels good ----------------------> keep it
+        |
+        +-- stream/encode/input path weak ---> try Sunshine + Moonlight
+                                                |
+                                                +-- good --> keep it
+                                                |
+                                                +-- still too latent
+                                                       |
+                                                       v
+                                             Mednafen native netplay
+```
+
+Do not escalate merely because a theoretically lower-latency architecture exists. Escalate when measured latency or an actual match shows that the current transport is the limiting layer.
+
 ### First fixtures
 
 - Twisted Metal 2
