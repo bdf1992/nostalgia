@@ -141,8 +141,8 @@ switch ($Command) {
         Write-Host "Emulators: $($catalog.Runtimes.runtimes.Count)"
         Write-Host "Transports: $($catalog.Runtimes.transports.Count)"
 
-        $isWindows = $env:OS -eq 'Windows_NT'
-        if ($isWindows) {
+        $hostIsWindows = $env:OS -eq 'Windows_NT'
+        if ($hostIsWindows) {
             Write-Host 'Windows host: yes'
         } else {
             Write-Warning 'The current helper is Windows-first; catalog/docs are still usable elsewhere.'
