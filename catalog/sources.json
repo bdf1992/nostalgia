@@ -1,10 +1,10 @@
 {
   "schema": "nostalgia.source-registry/0.1",
-  "purpose": "Prefer high-signal sources for emulator installation, networking, content identity, and troubleshooting, and help players recognize risky downloads and stale guidance.",
+  "purpose": "Prefer high-signal sources for emulator installation, networking, content identity, source navigation, and troubleshooting, and help players recognize risky downloads and stale guidance.",
   "trust_levels": {
     "official": "Primary project/vendor source. Prefer for binaries, releases, setup, networking, and project-specific behavior.",
     "reference": "Specialized preservation/identity database. Prefer for hashes, media identity, release metadata, and dump verification.",
-    "community": "Useful community-maintained technical knowledge. Cross-check important or risky claims against official/project sources when possible.",
+    "community": "Useful community-maintained technical knowledge, navigation, or established archive. Cross-check important identity claims against reference data when possible.",
     "secondary": "Helpful supplemental reference, but freshness/completeness can vary. Never prefer over an official upstream source for emulator/tool binaries."
   },
   "sources": [
@@ -88,9 +88,37 @@
       "id": "redump",
       "name": "Redump",
       "trust": "reference",
-      "topics": ["disc", "checksum", "hash", "revision", "region", "bad-dump", "identity"],
+      "topics": ["disc", "checksum", "hash", "revision", "region", "bad-dump", "identity", "PlayStation"],
       "url": "https://redump.org/",
-      "use_for": "Optical-disc identity and checksum comparison: region, revision, track layout, and bad-dump investigation."
+      "use_for": "Optical-disc identity and checksum comparison: region, revision, track layout, and bad-dump investigation. Treat Redump primarily as verification/reference data, not as the source of the game bytes."
+    },
+    {
+      "id": "r-roms-megathread",
+      "name": "r/Roms Megathread",
+      "trust": "community",
+      "topics": ["source-navigation", "PlayStation", "BIOS", "firmware", "Redump", "Internet Archive", "archives"],
+      "url": "https://r-roms.github.io/",
+      "playstation_url": "https://r-roms.github.io/Sony/sony-playstation",
+      "bios_url": "https://r-roms.github.io/Miscellaneous/bios-sets",
+      "repository_url": "https://github.com/r-Roms/r-Roms.github.io",
+      "use_for": "Current community-maintained navigation to preservation-oriented collections and BIOS sets. Prefer named Redump/No-Intro collections and then verify important content against the corresponding reference database."
+    },
+    {
+      "id": "vimms-lair",
+      "name": "Vimm's Lair",
+      "trust": "community",
+      "topics": ["archive", "classic-games", "PlayStation", "source-navigation"],
+      "url": "https://vimm.net/",
+      "status_note": "Long-running community archive. Availability is incomplete because some publishers have requested removal of titles. Confirm the exact vimm.net domain and do not assume similarly named domains are affiliated.",
+      "use_for": "Established classic-game archive/source when a title is still present. Useful reputation signal and generally preferable to random search-result ROM sites; verify disc identity against Redump when it matters. Do not use Vimm-hosted emulator binaries in preference to the emulator project's current official release."
+    },
+    {
+      "id": "internet-archive",
+      "name": "Internet Archive",
+      "trust": "community",
+      "topics": ["archive-host", "preservation", "software", "disc-images", "firmware"],
+      "url": "https://archive.org/",
+      "use_for": "Reputable archival hosting infrastructure used by many preservation collections. Trust is collection-specific: prefer collections identified by Redump/No-Intro/TOSEC metadata or reached through a curated index, and verify bytes when identity matters."
     },
     {
       "id": "no-intro-datomatic",
@@ -135,8 +163,11 @@
   ],
   "rules": [
     "For emulator binaries, prefer the emulator project's official website/repository/release page over mirrors or aggregators.",
+    "Do not require the player to prove provenance before helping with identity, integrity, source reputation, compatibility, configuration, or troubleshooting.",
+    "When a player needs a file, name useful reputable sources or source indexes and explain what each is trustworthy for rather than stopping at 'obtain the file'.",
     "A matching filename is weak evidence; hashes and expected archive/image structure are stronger identity signals.",
     "A clean antivirus result is not proof of safety. Prefer trustworthy source paths plus hashes/signatures when available and sensible file structure.",
+    "Community archives and indexes can be useful without being authoritative. Distinguish source reputation, collection provenance, and byte-level verification.",
     "Community wikis are useful orientation, not authority over an emulator project's current release documentation.",
     "If a page tells the player to disable antivirus, install a browser extension/download manager, or run an unrelated executable to obtain a data image/archive, treat it as high risk."
   ]
