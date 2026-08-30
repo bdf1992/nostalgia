@@ -1,0 +1,227 @@
+{
+  "schema": "nostalgia.game-catalog/0.1",
+  "pack_id": "classics-v0.1",
+  "status": "experimental",
+  "policy": "Catalog entries contain no commercial game data. All player content is user-supplied and must be lawfully possessed/used.",
+  "games": [
+    {
+      "id": "twisted-metal-2-ps1",
+      "title": "Twisted Metal 2",
+      "platform": "PlayStation",
+      "preferred_runtime": "duckstation",
+      "multiplayer_strategy": "parsec-remote-couch",
+      "mode": "local-versus-remoted",
+      "players_hint": "2",
+      "validation": "candidate",
+      "notes": "Start with one authoritative PS1 emulator instance and pass the second player's controller through the remote-couch transport."
+    },
+    {
+      "id": "crash-team-racing-ps1",
+      "title": "Crash Team Racing",
+      "platform": "PlayStation",
+      "preferred_runtime": "duckstation",
+      "multiplayer_strategy": "parsec-remote-couch",
+      "mode": "local-multiplayer-remoted",
+      "players_hint": "2-4 depending on local setup/accessories",
+      "validation": "candidate"
+    },
+    {
+      "id": "tekken-3-ps1",
+      "title": "Tekken 3",
+      "platform": "PlayStation",
+      "preferred_runtime": "duckstation",
+      "multiplayer_strategy": "parsec-remote-couch",
+      "mode": "local-versus-remoted",
+      "players_hint": "2",
+      "validation": "candidate"
+    },
+    {
+      "id": "twisted-metal-black-ps2",
+      "title": "Twisted Metal: Black",
+      "platform": "PlayStation 2",
+      "preferred_runtime": "pcsx2",
+      "multiplayer_strategy": "parsec-remote-couch",
+      "mode": "local-multiplayer-remoted",
+      "players_hint": "2",
+      "validation": "candidate"
+    },
+    {
+      "id": "burnout-3-takedown-ps2",
+      "title": "Burnout 3: Takedown",
+      "platform": "PlayStation 2",
+      "preferred_runtime": "pcsx2",
+      "multiplayer_strategy": "parsec-remote-couch",
+      "mode": "local-multiplayer-remoted",
+      "players_hint": "2",
+      "validation": "candidate"
+    },
+    {
+      "id": "hunter-the-reckoning-gc",
+      "title": "Hunter: The Reckoning",
+      "platform": "GameCube",
+      "preferred_runtime": "dolphin",
+      "multiplayer_strategy": "dolphin-netplay",
+      "mode": "local-coop-via-netplay",
+      "players_hint": "up to 4",
+      "validation": "candidate",
+      "notes": "Use a matching GameCube revision/dump and identical Dolphin builds; validate actual session behavior before promotion."
+    },
+    {
+      "id": "turok-evolution-gc",
+      "title": "Turok: Evolution",
+      "platform": "GameCube",
+      "preferred_runtime": "dolphin",
+      "multiplayer_strategy": "dolphin-netplay",
+      "mode": "local-multiplayer-via-netplay",
+      "players_hint": "up to 4",
+      "validation": "candidate"
+    },
+    {
+      "id": "mario-kart-double-dash-gc",
+      "title": "Mario Kart: Double Dash!!",
+      "platform": "GameCube",
+      "preferred_runtime": "dolphin",
+      "multiplayer_strategy": "dolphin-netplay",
+      "mode": "local-multiplayer-via-netplay",
+      "players_hint": "2-4 for simple v0.1 NetPlay testing",
+      "validation": "candidate"
+    },
+    {
+      "id": "super-smash-bros-melee-gc",
+      "title": "Super Smash Bros. Melee",
+      "platform": "GameCube",
+      "preferred_runtime": "dolphin",
+      "multiplayer_strategy": "dolphin-netplay",
+      "mode": "local-versus-via-netplay",
+      "players_hint": "2-4",
+      "validation": "candidate",
+      "notes": "Keep v0.1 on standard Dolphin NetPlay; specialized competitive tooling can be a later recipe."
+    },
+    {
+      "id": "mario-party-4-gc",
+      "title": "Mario Party 4",
+      "platform": "GameCube",
+      "preferred_runtime": "dolphin",
+      "multiplayer_strategy": "dolphin-netplay",
+      "mode": "local-party-via-netplay",
+      "players_hint": "2-4",
+      "validation": "candidate"
+    },
+    {
+      "id": "gauntlet-dark-legacy-gc",
+      "title": "Gauntlet: Dark Legacy",
+      "platform": "GameCube",
+      "preferred_runtime": "dolphin",
+      "multiplayer_strategy": "dolphin-netplay",
+      "mode": "local-coop-via-netplay",
+      "players_hint": "2-4",
+      "validation": "candidate"
+    },
+    {
+      "id": "mario-kart-wii-wii",
+      "title": "Mario Kart Wii",
+      "platform": "Wii",
+      "preferred_runtime": "dolphin",
+      "multiplayer_strategy": "dolphin-netplay",
+      "mode": "local-multiplayer-via-netplay",
+      "players_hint": "2-4",
+      "validation": "candidate",
+      "notes": "Dolphin documents Wii NetPlay as more temperamental than GameCube NetPlay; treat this fixture as advanced/experimental."
+    },
+    {
+      "id": "halo-combat-evolved-xbox",
+      "title": "Halo: Combat Evolved",
+      "platform": "Xbox",
+      "preferred_runtime": "xemu",
+      "multiplayer_strategy": "xlink-kai-system-link",
+      "alternate_strategy": "xemu-udp-tunnel",
+      "mode": "system-link-versus",
+      "players_hint": "up to 16 total; up to 4 per console",
+      "validation": "candidate",
+      "evidence": ["https://www.teamxlink.co.uk/wiki/Xbox", "https://xemu.app/docs/networking/"]
+    },
+    {
+      "id": "halo-2-xbox",
+      "title": "Halo 2",
+      "platform": "Xbox",
+      "preferred_runtime": "xemu",
+      "multiplayer_strategy": "xlink-kai-system-link",
+      "alternate_strategy": "xemu-udp-tunnel",
+      "mode": "system-link-versus",
+      "players_hint": "up to 16 total; up to 4 per console",
+      "validation": "candidate",
+      "evidence": ["https://www.teamxlink.co.uk/wiki/Xbox", "https://www.teamxlink.co.uk/wiki/Xemu_XLink_Kai_Setup"]
+    },
+    {
+      "id": "star-wars-battlefront-ii-xbox",
+      "title": "Star Wars: Battlefront II",
+      "platform": "Xbox",
+      "preferred_runtime": "xemu",
+      "multiplayer_strategy": "xlink-kai-system-link",
+      "alternate_strategy": "xemu-udp-tunnel",
+      "mode": "system-link-versus",
+      "players_hint": "up to 32 total; up to 4 per console",
+      "validation": "candidate",
+      "evidence": ["https://www.teamxlink.co.uk/wiki/Xbox"]
+    },
+    {
+      "id": "timesplitters-future-perfect-xbox",
+      "title": "TimeSplitters: Future Perfect",
+      "platform": "Xbox",
+      "preferred_runtime": "xemu",
+      "multiplayer_strategy": "xlink-kai-system-link",
+      "alternate_strategy": "xemu-udp-tunnel",
+      "mode": "system-link-versus",
+      "players_hint": "up to 16 total; up to 4 per console",
+      "validation": "candidate",
+      "evidence": ["https://www.teamxlink.co.uk/wiki/Xbox"]
+    },
+    {
+      "id": "splinter-cell-chaos-theory-xbox",
+      "title": "Tom Clancy's Splinter Cell: Chaos Theory",
+      "platform": "Xbox",
+      "preferred_runtime": "xemu",
+      "multiplayer_strategy": "xlink-kai-system-link",
+      "alternate_strategy": "xemu-udp-tunnel",
+      "mode": "system-link-coop-or-versus",
+      "players_hint": "2-player co-op or up to 4 versus",
+      "validation": "candidate",
+      "evidence": ["https://www.teamxlink.co.uk/wiki/Xbox"]
+    },
+    {
+      "id": "crimson-skies-xbox",
+      "title": "Crimson Skies: High Road to Revenge",
+      "platform": "Xbox",
+      "preferred_runtime": "xemu",
+      "multiplayer_strategy": "xlink-kai-system-link",
+      "alternate_strategy": "xemu-udp-tunnel",
+      "mode": "system-link-versus",
+      "players_hint": "up to 16 total; up to 2 per console",
+      "validation": "candidate",
+      "evidence": ["https://www.teamxlink.co.uk/wiki/Xbox"]
+    },
+    {
+      "id": "goldeneye-007-n64",
+      "title": "GoldenEye 007",
+      "platform": "Nintendo 64",
+      "preferred_runtime": "retroarch",
+      "multiplayer_strategy": "parsec-remote-couch",
+      "mode": "local-splitscreen-remoted",
+      "players_hint": "2-4",
+      "validation": "candidate",
+      "notes": "Remote couch is the conservative v0.1 default; RetroArch native netplay can be evaluated later per deterministic core/content combination."
+    },
+    {
+      "id": "power-stone-2-dreamcast",
+      "title": "Power Stone 2",
+      "platform": "Dreamcast",
+      "preferred_runtime": "flycast-dojo",
+      "multiplayer_strategy": "flycast-dojo-match-code",
+      "mode": "local-versus-via-netplay",
+      "players_hint": "2-4",
+      "validation": "candidate",
+      "evidence": ["https://github.com/blueminder/flycast-dojo"],
+      "notes": "Flycast Dojo documents P2P Match Codes and requires players to use matching content for netplay."
+    }
+  ]
+}
