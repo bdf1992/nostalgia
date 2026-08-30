@@ -1,0 +1,43 @@
+{
+  "schema": "nostalgia.game-recipe/0.1",
+  "id": "example-game-platform-region",
+  "title": "Example Game",
+  "platform": "Example Platform",
+  "region": "unknown",
+  "revision": "unknown",
+  "validation": "stub",
+  "players": {
+    "minimum": 2,
+    "maximum": 2,
+    "mode": "local-versus"
+  },
+  "content": {
+    "user_supplied": true,
+    "required": ["game"],
+    "known_hashes": [],
+    "notes": "Do not put commercial download locations here."
+  },
+  "runtime": {
+    "preferred": "runtime-id-from-catalog",
+    "version": "unvalidated",
+    "required_settings": {}
+  },
+  "multiplayer": {
+    "preferred_strategy": "transport-or-runtime-strategy-id",
+    "alternate_strategies": [],
+    "host_steps": [],
+    "join_steps": [],
+    "known_network_requirements": []
+  },
+  "controllers": {
+    "required_slots": 2,
+    "known_profiles": []
+  },
+  "state": {
+    "save_policy": "backup-before-change",
+    "identity_notes": []
+  },
+  "known_issues": [],
+  "evidence": [],
+  "test_notes": []
+}
