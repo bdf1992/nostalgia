@@ -2,6 +2,16 @@
 
 Nostalgia treats multiplayer as a strategy selected per game, not as one universal emulator feature.
 
+Recommendation labels describe *why* a route is suggested:
+
+- **latency-first** — lowest expected end-to-end delay among credible routes;
+- **balanced** — good expected latency without disproportionate setup complexity;
+- **easy-first** — fastest path to a playable session;
+- **fallback** — useful when the preferred route fails;
+- **candidate-until-measured** — promising topology that still needs a real session before it is called proven.
+
+For remote multiplayer, Nostalgia defaults to **latency-first** unless the player explicitly values setup simplicity more.
+
 ## 1. Dolphin NetPlay
 
 Best first choice for GameCube local-multiplayer games in this pack.
@@ -73,22 +83,61 @@ XLink verified Xbox list: https://www.teamxlink.co.uk/wiki/Xbox
 
 ---
 
-## 3. Remote Couch
+## 3. PlayStation multiplayer
 
-Use this when the game already has local multiplayer and one authoritative emulator instance is simpler than synchronized emulation.
+PS1 local-multiplayer games can be transported over the Internet in more than one way. Nostalgia now keeps three recommendation profiles instead of pretending one route is universally best.
+
+### Latency-first — Mednafen native netplay
+
+**Recommendation:** `latency-first`, `candidate-until-measured`
+
+Both players run matching PS1 emulation/content locally and connect through Mednafen's netplay system. Each player renders locally, so the control loop does not include remote video capture, encode, transmission, decode, and display.
+
+This is the primary PS1 candidate when the goal is the lowest practical latency, but it is not called "proven fastest" until an actual match supports that claim.
+
+Before testing:
+
+1. Both players prove the same game boots locally.
+2. Match emulator versions and game revision/content.
+3. Back up or isolate important memory-card state; Mednafen uses save states during synchronization.
+4. Establish the netplay server/session.
+5. Map each player to the intended controller slot.
+6. Play a real match and record latency/stability observations.
+
+Official references:
+
+- Mednafen netplay: https://mednafen.github.io/documentation/netplay.html
+- Mednafen PS1 notes: https://mednafen.github.io/documentation/psx.html
+
+### Balanced — DuckStation + Sunshine/Moonlight
+
+**Recommendation:** `balanced`, `candidate-until-measured`
+
+One authoritative DuckStation host runs the game. Sunshine streams it and Moonlight receives the stream/controller path.
+
+This preserves DuckStation's simple one-emulator topology while targeting a lower-latency streaming stack than the easiest baseline. On Windows, use Sunshine's documented virtual-input setup for guest controllers.
+
+Official references:
+
+- Sunshine: https://docs.lizardbyte.dev/projects/sunshine/master/
+- Moonlight: https://moonlight-stream.org/
+
+### Easy-first — DuckStation + Parsec
+
+**Recommendation:** `easy-first`, `fallback`
+
+Use this when the quickest route to a working remote couch matters more than minimizing every millisecond.
 
 The host runs:
 
 ```text
-GAME + EMULATOR
+GAME + DUCKSTATION
      ^
      | virtual controllers
 REMOTE PLAYER INPUT
      |
      + video/audio stream back to guests
 ```
-
-The v0.1 transport is Parsec.
 
 Baseline:
 
@@ -97,58 +146,51 @@ Baseline:
 3. Guest installs Parsec and confirms their gamepad is recognized.
 4. Guest connects to host.
 5. Guest presses a controller button so Parsec exposes the virtual controller to the host.
-6. Host verifies Windows/emulator sees a second controller.
+6. Host verifies Windows/DuckStation sees a second controller.
 7. Map that controller to player slot 2, not player slot 1.
 8. Start the game's local multiplayer mode.
 
 Parsec gamepad guide: https://support.parsec.app/hc/en-us/articles/32381705301908-Setup-Gamepad
 
-### PS1 latency escalation
+### PS1 comparison rule
 
-For PlayStation games, treat the transport as a measured choice rather than a permanent dependency.
+If latency matters, do not wait for Parsec to fail before acknowledging alternatives. Start from the recommendation profile the player values.
 
-Start with **DuckStation + Parsec** because it has the smallest setup surface: one authoritative emulator, one game instance, and remote controller/video transport. If the complete play test feels good, stop there.
-
-If the session is playable but streaming transport appears to be the weak layer, try **Sunshine + Moonlight** as an alternate remote-couch transport. This preserves the same topology -- one DuckStation host -- while replacing the video/input streaming layer.
-
-If remote-couch latency remains unacceptable and the game warrants a more involved setup, test **Mednafen native netplay**. In that topology both players run matching PS1 emulation/content locally and connect through Mednafen's netplay server, so each player renders their own game rather than receiving a video stream. Mednafen uses save states as part of synchronization; isolate or back up important memory-card state before testing.
-
-Official references:
-
-- Mednafen netplay: https://mednafen.github.io/documentation/netplay.html
-- Mednafen PS1 notes: https://mednafen.github.io/documentation/psx.html
-- Sunshine: https://docs.lizardbyte.dev/projects/sunshine/master/
-- Moonlight: https://moonlight-stream.org/
-
-Use evidence to choose the path:
+For a latency-focused test campaign:
 
 ```text
+Mednafen native netplay
+        |
+        +-- measure real match latency/stability
+        |
+        +-- good ----------------------------> promote for this game/setup
+        |
+        +-- unstable / incompatible
+               |
+               v
+DuckStation + Sunshine/Moonlight
+        |
+        +-- measure again
+        |
+        +-- good ----------------------------> keep it
+        |
+        +-- setup burden too high / failure
+               |
+               v
 DuckStation + Parsec
         |
-        +-- feels good ----------------------> keep it
-        |
-        +-- stream/encode/input path weak ---> try Sunshine + Moonlight
-                                                |
-                                                +-- good --> keep it
-                                                |
-                                                +-- still too latent
-                                                       |
-                                                       v
-                                             Mednafen native netplay
+        +-- easiest baseline / fallback
 ```
 
-Do not escalate merely because a theoretically lower-latency architecture exists. Escalate when measured latency or an actual match shows that the current transport is the limiting layer.
+The opposite campaign is also valid: if the player asks for the easiest setup, begin with Parsec. Recommendation labels make the tradeoff explicit instead of hiding it.
 
-### First fixtures
+### First PS1 fixtures
 
 - Twisted Metal 2
-- Twisted Metal: Black
 - Crash Team Racing
 - Tekken 3
-- Burnout 3: Takedown
-- GoldenEye 007
 
-This approach deliberately avoids pretending the original game has Internet multiplayer. The game still believes everyone is sitting on the same couch.
+Other remote-couch fixtures in the classic pack include Twisted Metal: Black, Burnout 3: Takedown, and GoldenEye 007, but their best latency-first paths still need game/system-specific validation.
 
 ---
 
@@ -188,6 +230,18 @@ Do not randomly reinstall everything. Walk the stack:
 10. EMULATED MACHINE IDENTITY
 11. SAVE / PROFILE STATE
 12. LATENCY / BUFFERING
+```
+
+When comparing latency paths, separate the control loop where possible:
+
+```text
+controller/input
+-> network
+-> emulation/synchronization
+-> encode
+-> transport
+-> decode
+-> display
 ```
 
 At each step answer:
