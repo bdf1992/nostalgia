@@ -13,19 +13,24 @@ Useful contributions include:
 - a networking symptom + repair;
 - a save/identity warning;
 - a machine-specific workaround clearly marked as such;
+- a trustworthy source/reference entry;
+- a documented download trap or repack warning;
 - a small helper that removes repeated manual setup.
 
-## Do not commit
+## Keep local bytes local by default
 
-Do not add:
+Do not commit game images, firmware dumps, keys, personal saves, or ad-hoc downloaded binaries simply because they were useful during a local session.
 
-- commercial ROMs, ISOs, CHDs, WBFS files, disc images, or cartridge dumps;
-- proprietary BIOS/firmware/boot ROM dumps or encryption keys;
-- copyrighted assets extracted from games unless redistribution is clearly permitted;
-- user save files or profiles containing personal data;
-- emulator binaries copied from upstream unless redistribution is explicitly permitted and bundling was intentionally reviewed.
+Prefer:
 
-Prefer official upstream URLs and pinned metadata over vendored binaries.
+- official emulator/tool URLs;
+- checksums and release/revision metadata;
+- exact versions;
+- reproducible setup instructions;
+- symptoms and fixes;
+- evidence that can be shared without copying the underlying game/firmware bytes.
+
+Vendor an emulator/tool binary only when redistribution, provenance, updating, and security implications have been intentionally reviewed.
 
 ## Recipe evidence
 
@@ -35,7 +40,7 @@ Every recipe should identify:
 2. intended player count/mode;
 3. preferred runtime;
 4. multiplayer strategy;
-5. content/firmware requirements without supplying restricted bytes;
+5. required content/firmware shape;
 6. current validation state;
 7. evidence URLs or local test notes supporting important claims;
 8. known failure modes when discovered.
@@ -74,6 +79,7 @@ Keep PRs small when possible. A good title is concrete:
 
 - `recipe: validate Halo 2 xemu + XLink path`
 - `runtime: update Dolphin download guidance`
+- `source: add Redump identity reference`
 - `doctor: detect duplicate xemu MAC identity`
 
 In the PR body say:
@@ -83,13 +89,30 @@ In the PR body say:
 - what remains uncertain;
 - whether any user state/security behavior changed.
 
-## Runtime-source best practices
+## Source best practices
 
-- Prefer official project pages/releases.
+Source entries should say what a site is trustworthy **for** rather than calling it globally trusted.
+
+- Prefer official project pages/releases for emulator and helper binaries.
+- Use checksum/reference databases for identity, not as binary sources.
+- Treat community wikis as useful technical orientation that can still be stale or wrong.
 - Do not mirror installer URLs without a reason.
-- Avoid pinning a "latest" hash as though it will never change.
-- If multiplayer determinism requires exact runtime parity, record the exact version used by the session.
-- Keep transports (Parsec, XLink Kai, etc.) separate from emulators in the catalog even when a recipe uses them together.
+- Avoid pinning a `latest` hash as though it will never change.
+- When a third-party source caused a real problem, record the recognizable failure mode rather than a vague accusation.
+- Keep the source registry focused on high-signal knowledge; do not turn it into a giant link directory.
+
+## Player protection findings
+
+A useful safety finding is concrete and reproducible. Examples:
+
+- an emulator repack inserted an unrelated installer;
+- a download button redirected to a different domain/payload;
+- a supposed ROM/archive arrived as an executable wrapper;
+- a file had the correct filename but the wrong checksum/revision;
+- an archive was missing expected disc tracks;
+- a guide required a broad firewall/antivirus disable when a narrow rule worked instead.
+
+Record the symptom, expected shape, safer path, and evidence. Avoid moralizing; help the next player recognize the trap quickly.
 
 ## Troubleshooting best practices
 
