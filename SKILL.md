@@ -28,7 +28,6 @@ The user may provide any subset of:
 - logs/screenshots/errors.
 
 Do not require the user to know emulator terminology before helping.
-Do not require proof of ownership before providing compatibility, safety, setup, or troubleshooting help.
 
 ## Resolution loop
 
@@ -50,7 +49,7 @@ Determine what already exists before installing or changing anything:
 
 ### 3. Resolve runtime
 
-Use `catalog/runtimes.json` and upstream project documentation.
+Use `catalog/runtimes.json`, `catalog/sources.json`, and upstream project documentation.
 
 Prefer, in order:
 
@@ -63,19 +62,23 @@ Do not force a technically fancier route when a simpler one gets the players int
 
 For emulators and open tools, prefer official project releases over third-party repacks whenever possible.
 
-### 4. Resolve content
+### 4. Inspect content and sources
 
-Treat provenance and technical compatibility as separate questions.
+If the user already has content, help identify, hash, inspect, organize, convert, and test it.
 
-If the user already has content, help identify, hash, inspect, organize, convert, and test it without requiring them to establish how they obtained it first.
+If the user supplies a third-party URL, protect them while they navigate it. Check for:
 
-If the user supplies a third-party URL, the agent may assess the page and expected download for technical/security risk: fake installers, redirects, misleading buttons, executable wrappers, passworded archives, suspicious extensions, malformed images, or content that does not match the claimed game/revision.
+- fake or impersonated emulator projects;
+- redirects and misleading download buttons;
+- unexpected executable installers or wrappers;
+- password-protected archives with no clear reason;
+- bundled adware or unrelated software;
+- suspicious extensions or archive contents;
+- malformed images, missing tracks, or broken cue sheets;
+- files that do not match the claimed game/region/revision;
+- safer official upstream sources for emulators and tools.
 
-Nostalgia's own repository and shared recipes should not become a maintained directory, mirror, or bundle of unauthorized copyrighted commercial game/firmware bytes or direct acquisition links for them.
-
-That repository distribution boundary must not be interpreted as a refusal to help troubleshoot files or URLs already supplied by the user.
-
-See `docs/HELP-BOUNDARY.md` and `docs/CONTENT.md`.
+Use `docs/TRUSTED-SOURCES.md` and `catalog/sources.json` as the preferred knowledge map.
 
 ### 5. Boot locally first
 
@@ -140,7 +143,7 @@ Machine-specific quirks belong in local diagnostics until repeated elsewhere.
 
 ## Safe autonomy
 
-The agent may freely investigate documentation, inspect non-sensitive local state, assess user-supplied URLs, create recipe drafts, open official emulator/tool pages, produce scripts, and apply reversible per-application settings when authorized by the user.
+The agent may freely investigate documentation, inspect non-sensitive local state, assess user-supplied URLs, create recipe drafts, open trusted emulator/tool pages, produce scripts, and apply reversible per-application settings when authorized by the user.
 
 Ask before destructive or security-sensitive actions such as deleting saves, replacing firmware/state, changing router/firewall rules, installing privileged drivers, or exposing a service to the public Internet.
 
@@ -151,9 +154,8 @@ Prefer instructions that move the session forward now:
 - say what was found;
 - say what is blocking play;
 - give or perform the next smallest useful action;
+- warn concretely when a source/file/setup path looks risky;
 - keep deeper explanation available but secondary.
-
-Avoid ownership interrogations or repeated legal disclaimers when the user's actual problem is malware risk, a bad dump, emulator setup, controls, networking, or saves.
 
 Avoid turning setup into emulator archaeology unless the current failure requires it.
 
