@@ -6,9 +6,9 @@ The v0.1 goal is deliberately modest:
 
 > Pick a game, get a trustworthy emulator, identify the game/firmware files involved, choose the simplest multiplayer strategy, and keep troubleshooting until both players are in a playable session.
 
-Nostalgia does **not** host or bundle commercial game images, proprietary BIOS/firmware, encryption keys, or similar restricted console data. It distributes recipes, runtime metadata, trustworthy upstream links, networking guidance, diagnostics, and safe state-management practices.
+Nostalgia distributes recipes, runtime metadata, trustworthy upstream links, networking guidance, diagnostics, and safe state-management practices. Local game libraries, firmware, saves, and one-off downloaded binaries stay local by default.
 
-The agent is intentionally more permissive than the repository's distribution policy: it does **not** require players to prove ownership before receiving setup, compatibility, malware-risk, bad-dump, controller, save, or networking help. If you already have a file or URL, Nostalgia can help inspect it and keep moving. See `docs/HELP-BOUNDARY.md`.
+The agent's job is practical: if you already have a file, emulator build, installation, or URL, it should help inspect it, avoid obvious traps, and keep moving toward a playable session.
 
 ## Trusted knowledge center
 
@@ -38,7 +38,7 @@ On Windows PowerShell:
 ./nostalgia.ps1 open dolphin
 ```
 
-The helper is intentionally non-magical in v0.1. `open <runtime>` opens the runtime's documented upstream source; it does not silently install software or acquire commercial game data.
+The helper is intentionally non-magical in v0.1. `open <runtime>` opens the runtime's documented upstream source; it does not silently install software.
 
 ## Classic Pack v0.1
 
@@ -60,8 +60,7 @@ CONTRIBUTING.md            recipe and evidence contribution rules
 catalog/games.json         20-game starter catalog
 catalog/runtimes.json      emulator + networking/runtime catalog
 catalog/sources.json       trusted source registry
-docs/CONTENT.md            repository content/source boundary
-docs/HELP-BOUNDARY.md      permissive technical-help policy
+docs/CONTENT.md            local byte handling + file hygiene
 docs/TRUSTED-SOURCES.md    knowledge center + download trap guide
 docs/MULTIPLAYER.md        multiplayer strategies + troubleshooting
 recipes/game.example.json  recipe shape for per-game refinement
