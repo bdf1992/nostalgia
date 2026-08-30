@@ -28,12 +28,22 @@
       "documentation": "https://github.com/stenzek/duckstation",
       "multiplayer_capabilities": ["local-multiplayer", "ps1-multitap-up-to-8"],
       "default_transport": "parsec-remote-couch",
+      "alternate_transports": ["sunshine-moonlight-remote-couch"],
       "controller_topology": {
         "direct_ports": 2,
         "multitap_supported": true,
         "emulated_devices_max": 8
       },
-      "notes": "Preferred PS1 runtime. DuckStation supports digital/analog controllers, per-game controller configuration, memory-card tooling, and Multitap controllers up to eight devices. Nostalgia uses one authoritative DuckStation host plus remote-couch transport rather than trying to synchronize separate PS1 emulator instances."
+      "notes": "Preferred PS1 runtime. Start with one authoritative DuckStation host plus Parsec because it minimizes setup. If measured or observed streaming latency is the limiting layer, Sunshine + Moonlight is an alternate remote-couch transport. If remote-couch remains unacceptable, evaluate Mednafen native netplay as a separate two-emulator topology."
+    },
+    {
+      "id": "mednafen",
+      "kind": "emulator",
+      "platforms": ["PlayStation", "multiple"],
+      "official_download": "https://mednafen.github.io/releases/",
+      "documentation": "https://mednafen.github.io/documentation/netplay.html",
+      "multiplayer_capabilities": ["native-netplay", "local-rendering-per-player"],
+      "notes": "Advanced PS1 latency fallback, not the default. Both players run matching local emulation/content and connect through a Mednafen netplay server. Mednafen uses save states for synchronization; important memory-card state should be backed up or isolated before netplay testing."
     },
     {
       "id": "pcsx2",
@@ -71,7 +81,15 @@
       "kind": "remote-input-streaming",
       "official_download": "https://parsec.app/downloads",
       "documentation": "https://support.parsec.app/hc/en-us/articles/32381705301908-Setup-Gamepad",
-      "notes": "One player hosts the emulator. Remote gamepads are exposed to the host as virtual controllers. Ensure each player maps to a distinct emulator controller slot. Guest controllers are created when guests press buttons; controller order can require host-side repair after reconnects."
+      "notes": "Default remote-couch transport. One player hosts the emulator. Remote gamepads are exposed to the host as virtual controllers. Ensure each player maps to a distinct emulator controller slot. Guest controllers are created when guests press buttons; controller order can require host-side repair after reconnects."
+    },
+    {
+      "id": "sunshine-moonlight-remote-couch",
+      "kind": "remote-input-streaming",
+      "official_download": "https://docs.lizardbyte.dev/projects/sunshine/master/md_docs_2getting__started.html",
+      "documentation": "https://docs.lizardbyte.dev/projects/sunshine/master/",
+      "client": "https://moonlight-stream.org/",
+      "notes": "Alternate remote-couch transport when Parsec's streaming path is suspected to be the latency bottleneck. Sunshine is the host and Moonlight is the client. On Windows, full virtual gamepad support requires the virtual-input setup documented by Sunshine."
     },
     {
       "id": "xlink-kai-system-link",
@@ -99,8 +117,8 @@
     },
     {
       "id": "ps1-stress",
-      "members": ["duckstation", "parsec-remote-couch"],
-      "use_for": "PS1 campaign from two-player baseline through Multitap, odd/shared-controller topology, persistence, and recovery tests"
+      "members": ["duckstation", "parsec-remote-couch", "sunshine-moonlight-remote-couch", "mednafen"],
+      "use_for": "PS1 campaign: begin with DuckStation + Parsec, test alternate streaming only when latency evidence warrants it, and escalate to Mednafen native netplay when local rendering on both players is worth the added setup"
     },
     {
       "id": "dreamcast-versus",
