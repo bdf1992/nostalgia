@@ -1,0 +1,100 @@
+{
+  "schema": "nostalgia.runtime-catalog/0.1",
+  "status": "experimental",
+  "runtimes": [
+    {
+      "id": "dolphin",
+      "kind": "emulator",
+      "platforms": ["GameCube", "Wii"],
+      "official_download": "https://dolphin-emu.org/download/",
+      "documentation": "https://dolphin-emu.org/docs/guides/netplay-guide/",
+      "multiplayer_capabilities": ["dolphin-netplay"],
+      "notes": "Desktop NetPlay supports local-multiplayer GameCube/Wii titles. Matching Dolphin versions and matching game region/revision are important; identical dumps are strongly recommended. Wii NetPlay is documented as more temperamental than GameCube NetPlay."
+    },
+    {
+      "id": "xemu",
+      "kind": "emulator",
+      "platforms": ["Xbox"],
+      "official_download": "https://xemu.app/docs/download/",
+      "documentation": "https://xemu.app/docs/networking/",
+      "multiplayer_capabilities": ["xemu-udp-tunnel", "xlink-kai-system-link", "local-system-link"],
+      "notes": "xemu supports NAT, UDP Tunnel, and Bridged Adapter networking. UDP Tunnel is intended for xemu-to-xemu Internet play; Bridged Adapter is useful with real Xbox hardware and XLink Kai. Virtual Xbox MAC addresses must be unique."
+    },
+    {
+      "id": "duckstation",
+      "kind": "emulator",
+      "platforms": ["PlayStation"],
+      "official_download": "https://github.com/stenzek/duckstation/releases/tag/latest",
+      "documentation": "https://github.com/stenzek/duckstation",
+      "multiplayer_capabilities": ["local-multiplayer"],
+      "default_transport": "parsec-remote-couch",
+      "notes": "Use the official DuckStation release. Nostalgia v0.1 treats remote couch as the conservative Internet multiplayer strategy for local PS1 multiplayer."
+    },
+    {
+      "id": "pcsx2",
+      "kind": "emulator",
+      "platforms": ["PlayStation 2"],
+      "official_download": "https://pcsx2.net/downloads/",
+      "documentation": "https://pcsx2.net/",
+      "multiplayer_capabilities": ["local-multiplayer"],
+      "default_transport": "parsec-remote-couch",
+      "notes": "Nostalgia v0.1 does not assume a universal PCSX2 netplay layer. For local multiplayer titles, remote couch is the default starter path unless a game-specific network recipe is validated."
+    },
+    {
+      "id": "retroarch",
+      "kind": "emulator-frontend",
+      "platforms": ["multiple"],
+      "official_download": "https://www.retroarch.com/?page=platforms",
+      "documentation": "https://docs.libretro.com/guides/netplay-faq/",
+      "multiplayer_capabilities": ["retroarch-netplay", "local-multiplayer"],
+      "notes": "RetroArch netplay requires deterministic behavior and matching cores/content. Nostalgia may prefer remote couch for cores where serialization/determinism is uncertain."
+    },
+    {
+      "id": "flycast-dojo",
+      "kind": "emulator",
+      "platforms": ["Dreamcast", "Naomi", "Atomiswave"],
+      "official_download": "https://github.com/blueminder/flycast-dojo/releases",
+      "documentation": "https://github.com/blueminder/flycast-dojo",
+      "multiplayer_capabilities": ["flycast-dojo-match-code", "direct-ip", "virtual-lan"],
+      "notes": "Flycast Dojo focuses on netplay/replay and documents P2P Match Codes, direct-IP play, and virtual-LAN options. Matching game files are required for netplay."
+    }
+  ],
+  "transports": [
+    {
+      "id": "parsec-remote-couch",
+      "kind": "remote-input-streaming",
+      "official_download": "https://parsec.app/downloads",
+      "documentation": "https://support.parsec.app/hc/en-us/articles/32381705301908-Setup-Gamepad",
+      "notes": "One player hosts the emulator. Remote gamepads are exposed to the host as virtual controllers. Ensure each player maps to a distinct emulator controller slot."
+    },
+    {
+      "id": "xlink-kai-system-link",
+      "kind": "lan-system-link-tunnel",
+      "official_download": "https://www.teamxlink.co.uk/",
+      "documentation": "https://www.teamxlink.co.uk/wiki/Xemu_XLink_Kai_Setup",
+      "notes": "Used with games whose original console LAN/System-Link mode is verified by XLink Kai. With xemu, use the bridged-network path described by xemu/XLink documentation."
+    }
+  ],
+  "packs": [
+    {
+      "id": "dolphin-party",
+      "members": ["dolphin"],
+      "use_for": "GameCube/Wii local multiplayer transported through Dolphin NetPlay"
+    },
+    {
+      "id": "xbox-system-link",
+      "members": ["xemu", "xlink-kai-system-link"],
+      "use_for": "Original Xbox System Link over Internet or mixed emulator/real-hardware sessions"
+    },
+    {
+      "id": "remote-couch-classics",
+      "members": ["duckstation", "pcsx2", "retroarch", "parsec-remote-couch"],
+      "use_for": "Local multiplayer games where one authoritative emulator host is simplest"
+    },
+    {
+      "id": "dreamcast-versus",
+      "members": ["flycast-dojo"],
+      "use_for": "Dreamcast-era P2P/match-code netplay experiments"
+    }
+  ]
+}
