@@ -1,84 +1,72 @@
-# Game, Firmware, and Content Sources
+# Game, Firmware, and Content Handling
 
-Nostalgia separates **what the repository itself distributes or links as a maintained source** from **what technical help the agent can provide to a player**.
+Nostalgia treats game data, firmware, emulator binaries, saves, and configuration as separate classes of bytes because they fail differently and deserve different handling.
 
-Those are intentionally different boundaries.
+## Shared-repository rule
 
-## Repository/source boundary
+Keep the repository focused on **recipes, metadata, references, diagnostics, and reproducible setup knowledge**.
 
-Recipes may directly link to:
+Local game images, firmware dumps, keys, personal saves, and one-off downloaded binaries should stay outside git by default. Prefer recording:
 
-- official emulator releases;
-- emulator documentation;
-- open-source helper tools;
-- homebrew/public-domain games from their legitimate authors/distributors;
-- games or firmware intentionally released for free by the rightsholder;
-- preservation databases that provide metadata/checksums rather than unauthorized game bytes;
-- documentation about dumping/conversion workflows.
+- hashes and content identities;
+- region/revision metadata;
+- expected file/track/archive structure;
+- emulator/tool version;
+- source/reference URL;
+- required configuration;
+- symptoms, fixes, and validation evidence.
 
-Nostalgia itself should not host, mirror, bundle, or maintain direct acquisition links whose primary purpose is obtaining unauthorized copies of:
+This makes a setup reproducible without making the repository itself responsible for storing everybody's local library.
 
-- commercial ROM/cartridge dumps;
-- ISO/disc images;
-- console BIOS images;
-- boot ROMs;
-- proprietary HDD/EEPROM/firmware images;
-- encryption/decryption keys;
-- DLC or title-update packages that are not legitimately redistributable.
+## When the player already has bytes
 
-This is a project distribution rule. It is not a requirement that a user prove where every local byte came from before receiving technical help.
+Help inspect them.
 
-## How the agent should help
+Useful checks include:
 
-If the user already has a file, archive, image, firmware file, emulator build, installation, or source URL, continue helping.
+- expected file type and archive layout;
+- region/revision and game identity;
+- hash comparison;
+- malformed/incomplete dumps;
+- missing disc tracks or broken cue sheets;
+- unexpected executable wrappers;
+- archive contents before execution;
+- antivirus/security scan results;
+- whether an emulator binary matches the real upstream project;
+- whether two multiplayer peers actually have matching content.
 
-The agent may:
-
-- identify expected formats and file layouts;
-- hash files and compare identities/revisions;
-- identify malformed or incomplete dumps;
-- diagnose missing tracks/cue-sheet problems;
-- distinguish ROM/disc content from suspicious executable wrappers;
-- inspect archive contents before execution;
-- assess a supplied site or URL for malware/adware/fake-download risk;
-- prefer an emulator's official project when a safer upstream build exists;
-- help use local antivirus/security tools to scan already-downloaded material;
-- organize, convert, copy, or back up local content;
-- continue emulator, controller, save, and multiplayer troubleshooting regardless of provenance.
-
-Do not ask for proof of ownership as a prerequisite to ordinary technical support.
-Do not repeatedly redirect a player to dumping instructions when their actual question is whether a file, emulator build, or website looks unsafe or incompatible.
+The question is usually: **will these bytes work, and are they safe to handle?** Answer that question directly.
 
 ## Third-party source triage
 
-For a user-supplied download page, separate two questions:
-
-### Is the software/content technically plausible?
-
-Check expected file type, archive shape, region/revision, naming, size when known, and hashes when available.
-
-### Is the delivery path suspicious?
+When a player supplies a download page, separate the expected payload from the delivery mechanism.
 
 Warning signs include:
 
-- an `.exe`/`.msi` wrapper for content that should normally be an image/archive;
-- multiple fake or redirecting download buttons;
-- forced browser extensions or download managers;
+- an `.exe`, `.msi`, `.scr`, browser extension, or download manager for content that should normally be a data image/archive;
+- multiple fake or redirecting Download buttons;
+- forced browser extensions or unrelated software;
 - unexpected password-protected archives;
-- unrelated bundled software;
 - a payload whose name/type changes after redirects;
-- antivirus/security detections;
-- an emulator repack when an official upstream release exists.
+- an emulator repack when a current official release exists;
+- instructions to globally disable antivirus/firewall;
+- a file whose checksum or internal structure does not match what it claims to be.
 
-A user asking "is this ROM/emulator site sketchy?" should get practical safety help, not an ownership interrogation.
+Use `docs/TRUSTED-SOURCES.md` and `catalog/sources.json` to find higher-signal references and official emulator/tool sources.
 
 ## Hashes are identities
 
-Recipes may contain hashes for revisions and known-good test content when the metadata itself is appropriate to publish. A hash means:
+A hash is useful evidence that two files are or are not the same bytes.
 
-> "This recipe was validated against bytes with this identity."
+Use hashes for:
 
-Hashes are useful for detecting bad dumps, region/revision mismatches, and changed files.
+- revision matching;
+- comparing multiplayer peers;
+- bad-dump investigation;
+- documenting a known-good session;
+- confirming whether a downloaded file changed beneath the same filename.
+
+A hash alone does not prove that an executable is trustworthy; source provenance, signatures when available, file structure, and security tooling still matter.
 
 ## Preserve originals
 
@@ -88,8 +76,8 @@ Prefer a structure like:
 library/
   originals/      # read-only or treated as immutable
   working/        # emulator-facing copies/conversions
-  firmware/       # local; never committed
-  saves/          # user state
+  firmware/       # local runtime material
+  saves/          # player state
   snapshots/      # pre-change backups
 ```
 
@@ -98,5 +86,3 @@ Game conversion/compression should operate on working copies when possible.
 ## Local ignore policy
 
 The repository `.gitignore` intentionally excludes common game-image, firmware-ish, save, and local-library paths as a backstop. This is not a substitute for contributor judgment.
-
-See `docs/HELP-BOUNDARY.md` for the default interpretation of what the agent may help with.
