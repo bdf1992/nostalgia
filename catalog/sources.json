@@ -1,17 +1,28 @@
 {
-  "schema": "nostalgia.source-registry/0.1",
-  "purpose": "Prefer high-signal sources for emulator installation, networking, content identity, source navigation, and troubleshooting, and help players recognize risky downloads and stale guidance.",
+  "schema": "nostalgia.source-registry/0.2",
+  "purpose": "Prefer high-signal optional subject-matter sources for emulator installation, networking, content identity, source navigation, collection management, and troubleshooting. Sources advise; no single source is mandatory.",
   "trust_levels": {
     "official": "Primary project/vendor source. Prefer for binaries, releases, setup, networking, and project-specific behavior.",
     "reference": "Specialized preservation/identity database. Prefer for hashes, media identity, release metadata, and dump verification.",
     "community": "Useful community-maintained technical knowledge, navigation, or established archive. Cross-check important identity claims against reference data when possible.",
     "secondary": "Helpful supplemental reference, but freshness/completeness can vary. Never prefer over an official upstream source for emulator/tool binaries."
   },
+  "expert_roles": {
+    "runtime-authority": "Authoritative source for an emulator/tool's current release and behavior.",
+    "source-navigator": "Helps locate established collections or useful source paths.",
+    "content-archive": "Established archive that may directly carry classic-game content.",
+    "firmware-specialist": "Tracks BIOS/firmware requirements, files, hashes, and emulator expectations.",
+    "identity-verifier": "Verifies content identity, region, revision, tracks, and hashes.",
+    "collection-manager": "Organizes, identifies, filters, patches, or reports on a local game collection.",
+    "community-knowledge": "Broad technical orientation and troubleshooting.",
+    "transport-authority": "Authoritative source for multiplayer transport/network behavior."
+  },
   "sources": [
     {
       "id": "duckstation-official",
       "name": "DuckStation",
       "trust": "official",
+      "expert_roles": ["runtime-authority"],
       "topics": ["PlayStation", "emulator", "releases", "controller", "multitap", "compatibility"],
       "url": "https://github.com/stenzek/duckstation",
       "release_url": "https://github.com/stenzek/duckstation/releases/tag/latest",
@@ -21,6 +32,7 @@
       "id": "pcsx2-official",
       "name": "PCSX2",
       "trust": "official",
+      "expert_roles": ["runtime-authority"],
       "topics": ["PlayStation 2", "emulator", "releases", "setup"],
       "url": "https://pcsx2.net/",
       "documentation_url": "https://pcsx2.net/docs/setup/running/",
@@ -30,6 +42,7 @@
       "id": "dolphin-official",
       "name": "Dolphin Emulator",
       "trust": "official",
+      "expert_roles": ["runtime-authority", "transport-authority"],
       "topics": ["GameCube", "Wii", "emulator", "netplay", "controllers", "dumping", "performance"],
       "url": "https://dolphin-emu.org/",
       "download_url": "https://dolphin-emu.org/download/",
@@ -41,6 +54,7 @@
       "id": "xemu-official",
       "name": "xemu",
       "trust": "official",
+      "expert_roles": ["runtime-authority", "transport-authority"],
       "topics": ["Xbox", "emulator", "networking", "system-link", "udp-tunnel", "bridged-network"],
       "url": "https://xemu.app/",
       "download_url": "https://xemu.app/docs/download/",
@@ -51,6 +65,7 @@
       "id": "libretro-docs",
       "name": "Libretro Documentation",
       "trust": "official",
+      "expert_roles": ["runtime-authority"],
       "topics": ["RetroArch", "cores", "netplay", "controllers", "frontend"],
       "url": "https://docs.libretro.com/",
       "netplay_url": "https://docs.libretro.com/guides/netplay-faq/",
@@ -60,6 +75,7 @@
       "id": "flycast-dojo-official",
       "name": "Flycast Dojo",
       "trust": "official",
+      "expert_roles": ["runtime-authority", "transport-authority"],
       "topics": ["Dreamcast", "Naomi", "Atomiswave", "netplay", "match-code", "checksums"],
       "url": "https://github.com/blueminder/flycast-dojo",
       "release_url": "https://github.com/blueminder/flycast-dojo/releases",
@@ -69,15 +85,17 @@
       "id": "parsec-official",
       "name": "Parsec Support",
       "trust": "official",
-      "topics": ["remote-couch", "streaming", "controller", "gamepad", "guest-input"],
+      "expert_roles": ["transport-authority"],
+      "topics": ["remote-couch", "streaming", "controller", "gamepad", "guest-input", "latency"],
       "url": "https://parsec.app/",
       "gamepad_url": "https://support.parsec.app/hc/en-us/articles/32381705301908-Setup-Gamepad",
-      "use_for": "Remote-couch controller passthrough and guest gamepad troubleshooting."
+      "use_for": "Remote-couch controller passthrough, streaming, and guest gamepad troubleshooting."
     },
     {
       "id": "xlink-kai-official",
       "name": "XLink Kai",
       "trust": "official",
+      "expert_roles": ["transport-authority"],
       "topics": ["system-link", "lan-tunnel", "Xbox", "PlayStation 2", "GameCube", "PSP"],
       "url": "https://www.teamxlink.co.uk/",
       "wiki_url": "https://www.teamxlink.co.uk/wiki/Main_Page",
@@ -88,6 +106,7 @@
       "id": "redump",
       "name": "Redump",
       "trust": "reference",
+      "expert_roles": ["identity-verifier"],
       "topics": ["disc", "checksum", "hash", "revision", "region", "bad-dump", "identity", "PlayStation"],
       "url": "https://redump.org/",
       "use_for": "Optical-disc identity and checksum comparison: region, revision, track layout, and bad-dump investigation. Treat Redump primarily as verification/reference data, not as the source of the game bytes."
@@ -96,26 +115,40 @@
       "id": "r-roms-megathread",
       "name": "r/Roms Megathread",
       "trust": "community",
+      "expert_roles": ["source-navigator"],
       "topics": ["source-navigation", "PlayStation", "BIOS", "firmware", "Redump", "Internet Archive", "archives"],
       "url": "https://r-roms.github.io/",
       "playstation_url": "https://r-roms.github.io/Sony/sony-playstation",
       "bios_url": "https://r-roms.github.io/Miscellaneous/bios-sets",
-      "repository_url": "https://github.com/r-Roms/r-Roms.github.io",
-      "use_for": "Current community-maintained navigation to preservation-oriented collections and BIOS sets. Prefer named Redump/No-Intro collections and then verify important content against the corresponding reference database."
+      "repository_url": "https://github.com/r-Roms/r-Roms-Megathread",
+      "use_for": "Community-maintained navigation to preservation-oriented collections and BIOS sets. Prefer named Redump/No-Intro collections and verify important content against the corresponding reference database."
+    },
+    {
+      "id": "retrobios",
+      "name": "RetroBIOS",
+      "trust": "community",
+      "expert_roles": ["firmware-specialist"],
+      "topics": ["BIOS", "firmware", "PlayStation", "hashes", "emulator-requirements", "verification"],
+      "url": "https://github.com/Abdess/retrobios",
+      "playstation_url": "https://github.com/Abdess/retrobios/tree/main/bios/Sony/PlayStation",
+      "documentation_url": "https://abdess.github.io/retrobios/",
+      "use_for": "BIOS/firmware discovery and emulator-oriented verification. The project derives file requirements from emulator/platform source and records multiple fingerprints. Use it as a firmware specialist; do not treat its firmware hashes as a substitute for game-disc identity databases."
     },
     {
       "id": "vimms-lair",
       "name": "Vimm's Lair",
       "trust": "community",
+      "expert_roles": ["content-archive", "source-navigator"],
       "topics": ["archive", "classic-games", "PlayStation", "source-navigation"],
       "url": "https://vimm.net/",
       "status_note": "Long-running community archive. Availability is incomplete because some publishers have requested removal of titles. Confirm the exact vimm.net domain and do not assume similarly named domains are affiliated.",
-      "use_for": "Established classic-game archive/source when a title is still present. Useful reputation signal and generally preferable to random search-result ROM sites; verify disc identity against Redump when it matters. Do not use Vimm-hosted emulator binaries in preference to the emulator project's current official release."
+      "use_for": "Established classic-game archive/source when a title is still present. Generally preferable to random search-result ROM sites; verify disc identity against Redump when it matters. Do not use Vimm-hosted emulator binaries in preference to the emulator project's current official release."
     },
     {
       "id": "internet-archive",
       "name": "Internet Archive",
       "trust": "community",
+      "expert_roles": ["content-archive"],
       "topics": ["archive-host", "preservation", "software", "disc-images", "firmware"],
       "url": "https://archive.org/",
       "use_for": "Reputable archival hosting infrastructure used by many preservation collections. Trust is collection-specific: prefer collections identified by Redump/No-Intro/TOSEC metadata or reached through a curated index, and verify bytes when identity matters."
@@ -124,14 +157,26 @@
       "id": "no-intro-datomatic",
       "name": "No-Intro DAT-o-MATIC",
       "trust": "reference",
+      "expert_roles": ["identity-verifier"],
       "topics": ["cartridge", "checksum", "hash", "revision", "region", "identity"],
       "url": "https://datomatic.no-intro.org/",
       "use_for": "Cartridge-oriented release identity and checksum metadata."
     },
     {
+      "id": "igir",
+      "name": "Igir",
+      "trust": "community",
+      "expert_roles": ["collection-manager"],
+      "topics": ["ROM-management", "DAT", "hashing", "sorting", "filtering", "patching", "playlists", "reporting"],
+      "url": "https://github.com/emmercm/igir",
+      "documentation_url": "https://igir.io/",
+      "use_for": "Manage a local ROM/disc-image collection: scan against DATs, identify and rename files, filter duplicates/regions, patch, create playlists, and report missing or unknown content. It manages player-owned/local bytes; it is not a content source."
+    },
+    {
       "id": "consolemods-wiki",
       "name": "ConsoleMods Wiki",
       "trust": "community",
+      "expert_roles": ["community-knowledge"],
       "topics": ["console-hardware", "repair", "modding", "dumping", "firmware", "legacy-console-knowledge"],
       "url": "https://consolemods.org/wiki/Main_Page/en",
       "use_for": "Community-maintained console hardware, repair, preservation, and dumping knowledge. Cross-check risky hardware/modification steps and heed page warnings."
@@ -140,6 +185,7 @@
       "id": "emulation-general-wiki",
       "name": "Emulation General Wiki",
       "trust": "community",
+      "expert_roles": ["community-knowledge"],
       "topics": ["emulator-comparison", "system-overview", "compatibility", "recommended-emulators"],
       "url": "https://emulation.gametechwiki.com/index.php/Main_Page",
       "use_for": "Broad community orientation and emulator comparisons. Follow through to the emulator's own upstream site before downloading binaries."
@@ -148,6 +194,7 @@
       "id": "pcgamingwiki-emulation",
       "name": "PCGamingWiki - Emulation",
       "trust": "secondary",
+      "expert_roles": ["community-knowledge"],
       "topics": ["pc-compatibility", "save-paths", "configuration", "emulation-overview"],
       "url": "https://www.pcgamingwiki.com/wiki/Emulation",
       "use_for": "Supplemental PC-side troubleshooting and configuration context. Verify freshness against current upstream documentation."
@@ -156,12 +203,14 @@
       "id": "powershell-get-filehash",
       "name": "Microsoft PowerShell Get-FileHash",
       "trust": "official",
+      "expert_roles": ["identity-verifier"],
       "topics": ["security", "hash", "sha256", "file-identity", "Windows"],
       "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/get-filehash",
       "use_for": "Compute local file hashes before comparing a download, emulator binary, archive, or game image against a trusted published identity."
     }
   ],
   "rules": [
+    "Sources are optional subject-matter experts, not mandatory dependencies. Consult the smallest relevant set for the current question.",
     "For emulator binaries, prefer the emulator project's official website/repository/release page over mirrors or aggregators.",
     "Do not require the player to prove provenance before helping with identity, integrity, source reputation, compatibility, configuration, or troubleshooting.",
     "When a player needs a file, name useful reputable sources or source indexes and explain what each is trustworthy for rather than stopping at 'obtain the file'.",
