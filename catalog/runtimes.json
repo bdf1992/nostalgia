@@ -26,9 +26,14 @@
       "platforms": ["PlayStation"],
       "official_download": "https://github.com/stenzek/duckstation/releases/tag/latest",
       "documentation": "https://github.com/stenzek/duckstation",
-      "multiplayer_capabilities": ["local-multiplayer"],
+      "multiplayer_capabilities": ["local-multiplayer", "ps1-multitap-up-to-8"],
       "default_transport": "parsec-remote-couch",
-      "notes": "Use the official DuckStation release. Nostalgia v0.1 treats remote couch as the conservative Internet multiplayer strategy for local PS1 multiplayer."
+      "controller_topology": {
+        "direct_ports": 2,
+        "multitap_supported": true,
+        "emulated_devices_max": 8
+      },
+      "notes": "Preferred PS1 runtime. DuckStation supports digital/analog controllers, per-game controller configuration, memory-card tooling, and Multitap controllers up to eight devices. Nostalgia uses one authoritative DuckStation host plus remote-couch transport rather than trying to synchronize separate PS1 emulator instances."
     },
     {
       "id": "pcsx2",
@@ -47,7 +52,8 @@
       "official_download": "https://www.retroarch.com/?page=platforms",
       "documentation": "https://docs.libretro.com/guides/netplay-faq/",
       "multiplayer_capabilities": ["retroarch-netplay", "local-multiplayer"],
-      "notes": "RetroArch netplay requires deterministic behavior and matching cores/content. Nostalgia may prefer remote couch for cores where serialization/determinism is uncertain."
+      "netplay_exclusions": ["PlayStation", "Nintendo 64", "Dreamcast", "GameCube", "Wii", "Nintendo 3DS"],
+      "notes": "RetroArch netplay requires matching RetroArch/core/content and a deterministic, sufficiently performant core. Current Libretro FAQ explicitly says the netplay model is unsuitable for PSX/N64/Dreamcast/GameCube/Wii/3DS-class systems; do not use RetroArch netplay as a PS1 fallback."
     },
     {
       "id": "flycast-dojo",
@@ -65,7 +71,7 @@
       "kind": "remote-input-streaming",
       "official_download": "https://parsec.app/downloads",
       "documentation": "https://support.parsec.app/hc/en-us/articles/32381705301908-Setup-Gamepad",
-      "notes": "One player hosts the emulator. Remote gamepads are exposed to the host as virtual controllers. Ensure each player maps to a distinct emulator controller slot."
+      "notes": "One player hosts the emulator. Remote gamepads are exposed to the host as virtual controllers. Ensure each player maps to a distinct emulator controller slot. Guest controllers are created when guests press buttons; controller order can require host-side repair after reconnects."
     },
     {
       "id": "xlink-kai-system-link",
@@ -90,6 +96,11 @@
       "id": "remote-couch-classics",
       "members": ["duckstation", "pcsx2", "retroarch", "parsec-remote-couch"],
       "use_for": "Local multiplayer games where one authoritative emulator host is simplest"
+    },
+    {
+      "id": "ps1-stress",
+      "members": ["duckstation", "parsec-remote-couch"],
+      "use_for": "PS1 campaign from two-player baseline through Multitap, odd/shared-controller topology, persistence, and recovery tests"
     },
     {
       "id": "dreamcast-versus",
