@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
-    [ValidateSet('games', 'runtimes', 'doctor', 'show', 'open', 'ps1', 'ps1-plan')]
+    [ValidateSet('games', 'runtimes', 'sources', 'doctor', 'show', 'open', 'ps1', 'ps1-plan')]
     [string]$Command = 'games',
 
     [Parameter(Position = 1)]
@@ -12,6 +12,7 @@ $ErrorActionPreference = 'Stop'
 $Root = $PSScriptRoot
 $GamesPath = Join-Path $Root 'catalog/games.json'
 $RuntimesPath = Join-Path $Root 'catalog/runtimes.json'
+$SourcesPath = Join-Path $Root 'catalog/sources.json'
 $PS1Path = Join-Path $Root 'catalog/ps1-stress.json'
 
 function Read-JsonFile([string]$Path) {
@@ -25,6 +26,7 @@ function Get-Catalogs {
     @{
         Games = Read-JsonFile $GamesPath
         Runtimes = Read-JsonFile $RuntimesPath
+        Sources = Read-JsonFile $SourcesPath
         PS1 = Read-JsonFile $PS1Path
     }
 }
@@ -67,6 +69,19 @@ switch ($Command) {
         $catalog.Runtimes.packs |
             Select-Object id, @{N='members';E={$_.members -join ', '}}, use_for |
             Format-Table -AutoSize -Wrap
+    }
+
+    'sources' {
+        Write-Heading 'Trusted Sources'
+        $catalog.Sources.sources |
+            Sort-Object trust, name |
+            Select-Object id, name, trust, url, use_for |
+            Format-Table -AutoSize -Wrap
+
+        Write-Host ''
+        Write-Host 'Trust order: official -> reference -> community -> secondary'
+        Write-Host 'For emulator binaries, always prefer the official project/release source.'
+        Write-Host 'For commercial game content, Nostalgia uses metadata/knowledge sources rather than download indexes.'
     }
 
     'show' {
@@ -120,7 +135,7 @@ switch ($Command) {
 
         Write-Heading 'Session order'
         Write-Host '1. Back up relevant DuckStation memory-card/config state.'
-        Write-Host '2. Boot the player-owned game locally in DuckStation.'
+        Write-Host '2. Boot the local game image in DuckStation.'
         Write-Host '3. Prove each required local controller/device maps to a distinct PS1 slot.'
         Write-Host '4. If required by this game, enable and verify the intended Multitap topology.'
         Write-Host '5. Start Parsec; guest presses a gamepad button so the host receives the virtual controller.'
@@ -140,6 +155,7 @@ switch ($Command) {
         Write-Host "PS1 stress fixtures: $($catalog.PS1.cases.Count)"
         Write-Host "Emulators: $($catalog.Runtimes.runtimes.Count)"
         Write-Host "Transports: $($catalog.Runtimes.transports.Count)"
+        Write-Host "Trusted sources: $($catalog.Sources.sources.Count)"
 
         $hostIsWindows = $env:OS -eq 'Windows_NT'
         if ($hostIsWindows) {
@@ -150,6 +166,7 @@ switch ($Command) {
 
         Write-Host ''
         Write-Host 'v0.1 doctor does not change the machine.'
+        Write-Host 'Knowledge center: ./nostalgia.ps1 sources'
         Write-Host 'PS1 next step: ./nostalgia.ps1 ps1-plan twisted-metal-2-ps1'
         Write-Host 'Future diagnostics: installed-runtime discovery, controller enumeration, content hashing, and network probes.'
     }

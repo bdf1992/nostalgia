@@ -1,0 +1,143 @@
+{
+  "schema": "nostalgia.source-registry/0.1",
+  "purpose": "Prefer high-signal sources for emulator installation, networking, content identity, and troubleshooting, and help players recognize risky downloads and stale guidance.",
+  "trust_levels": {
+    "official": "Primary project/vendor source. Prefer for binaries, releases, setup, networking, and project-specific behavior.",
+    "reference": "Specialized preservation/identity database. Prefer for hashes, media identity, release metadata, and dump verification.",
+    "community": "Useful community-maintained technical knowledge. Cross-check important or risky claims against official/project sources when possible.",
+    "secondary": "Helpful supplemental reference, but freshness/completeness can vary. Never prefer over an official upstream source for emulator/tool binaries."
+  },
+  "sources": [
+    {
+      "id": "duckstation-official",
+      "name": "DuckStation",
+      "trust": "official",
+      "topics": ["PlayStation", "emulator", "releases", "controller", "multitap", "compatibility"],
+      "url": "https://github.com/stenzek/duckstation",
+      "release_url": "https://github.com/stenzek/duckstation/releases/tag/latest",
+      "use_for": "PS1 emulator downloads and authoritative DuckStation behavior. Prefer this over third-party DuckStation installers or repacks."
+    },
+    {
+      "id": "pcsx2-official",
+      "name": "PCSX2",
+      "trust": "official",
+      "topics": ["PlayStation 2", "emulator", "releases", "setup"],
+      "url": "https://pcsx2.net/",
+      "documentation_url": "https://pcsx2.net/docs/setup/running/",
+      "use_for": "PS2 emulator downloads, stable/nightly guidance, and setup documentation."
+    },
+    {
+      "id": "dolphin-official",
+      "name": "Dolphin Emulator",
+      "trust": "official",
+      "topics": ["GameCube", "Wii", "emulator", "netplay", "controllers", "dumping", "performance"],
+      "url": "https://dolphin-emu.org/",
+      "download_url": "https://dolphin-emu.org/download/",
+      "guides_url": "https://dolphin-emu.org/docs/guides/",
+      "netplay_url": "https://dolphin-emu.org/docs/guides/netplay-guide/",
+      "use_for": "GameCube/Wii emulator downloads, controller configuration, ripping/dumping documentation, and NetPlay requirements."
+    },
+    {
+      "id": "xemu-official",
+      "name": "xemu",
+      "trust": "official",
+      "topics": ["Xbox", "emulator", "networking", "system-link", "udp-tunnel", "bridged-network"],
+      "url": "https://xemu.app/",
+      "download_url": "https://xemu.app/docs/download/",
+      "networking_url": "https://xemu.app/docs/networking/",
+      "use_for": "Original Xbox emulator downloads and authoritative xemu networking/System Link behavior."
+    },
+    {
+      "id": "libretro-docs",
+      "name": "Libretro Documentation",
+      "trust": "official",
+      "topics": ["RetroArch", "cores", "netplay", "controllers", "frontend"],
+      "url": "https://docs.libretro.com/",
+      "netplay_url": "https://docs.libretro.com/guides/netplay-faq/",
+      "use_for": "RetroArch/core documentation and constraints. Use project/core-specific documentation before assuming every system supports reliable netplay."
+    },
+    {
+      "id": "flycast-dojo-official",
+      "name": "Flycast Dojo",
+      "trust": "official",
+      "topics": ["Dreamcast", "Naomi", "Atomiswave", "netplay", "match-code", "checksums"],
+      "url": "https://github.com/blueminder/flycast-dojo",
+      "release_url": "https://github.com/blueminder/flycast-dojo/releases",
+      "use_for": "Flycast Dojo releases, match-code/P2P setup, file parity, and Dojo-specific troubleshooting."
+    },
+    {
+      "id": "parsec-official",
+      "name": "Parsec Support",
+      "trust": "official",
+      "topics": ["remote-couch", "streaming", "controller", "gamepad", "guest-input"],
+      "url": "https://parsec.app/",
+      "gamepad_url": "https://support.parsec.app/hc/en-us/articles/32381705301908-Setup-Gamepad",
+      "use_for": "Remote-couch controller passthrough and guest gamepad troubleshooting."
+    },
+    {
+      "id": "xlink-kai-official",
+      "name": "XLink Kai",
+      "trust": "official",
+      "topics": ["system-link", "lan-tunnel", "Xbox", "PlayStation 2", "GameCube", "PSP"],
+      "url": "https://www.teamxlink.co.uk/",
+      "wiki_url": "https://www.teamxlink.co.uk/wiki/Main_Page",
+      "xemu_url": "https://www.teamxlink.co.uk/wiki/Xemu_XLink_Kai_Setup",
+      "use_for": "Supported System Link/LAN titles, Kai setup, and xemu integration."
+    },
+    {
+      "id": "redump",
+      "name": "Redump",
+      "trust": "reference",
+      "topics": ["disc", "checksum", "hash", "revision", "region", "bad-dump", "identity"],
+      "url": "https://redump.org/",
+      "use_for": "Optical-disc identity and checksum comparison: region, revision, track layout, and bad-dump investigation."
+    },
+    {
+      "id": "no-intro-datomatic",
+      "name": "No-Intro DAT-o-MATIC",
+      "trust": "reference",
+      "topics": ["cartridge", "checksum", "hash", "revision", "region", "identity"],
+      "url": "https://datomatic.no-intro.org/",
+      "use_for": "Cartridge-oriented release identity and checksum metadata."
+    },
+    {
+      "id": "consolemods-wiki",
+      "name": "ConsoleMods Wiki",
+      "trust": "community",
+      "topics": ["console-hardware", "repair", "modding", "dumping", "firmware", "legacy-console-knowledge"],
+      "url": "https://consolemods.org/wiki/Main_Page/en",
+      "use_for": "Community-maintained console hardware, repair, preservation, and dumping knowledge. Cross-check risky hardware/modification steps and heed page warnings."
+    },
+    {
+      "id": "emulation-general-wiki",
+      "name": "Emulation General Wiki",
+      "trust": "community",
+      "topics": ["emulator-comparison", "system-overview", "compatibility", "recommended-emulators"],
+      "url": "https://emulation.gametechwiki.com/index.php/Main_Page",
+      "use_for": "Broad community orientation and emulator comparisons. Follow through to the emulator's own upstream site before downloading binaries."
+    },
+    {
+      "id": "pcgamingwiki-emulation",
+      "name": "PCGamingWiki - Emulation",
+      "trust": "secondary",
+      "topics": ["pc-compatibility", "save-paths", "configuration", "emulation-overview"],
+      "url": "https://www.pcgamingwiki.com/wiki/Emulation",
+      "use_for": "Supplemental PC-side troubleshooting and configuration context. Verify freshness against current upstream documentation."
+    },
+    {
+      "id": "powershell-get-filehash",
+      "name": "Microsoft PowerShell Get-FileHash",
+      "trust": "official",
+      "topics": ["security", "hash", "sha256", "file-identity", "Windows"],
+      "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/get-filehash",
+      "use_for": "Compute local file hashes before comparing a download, emulator binary, archive, or game image against a trusted published identity."
+    }
+  ],
+  "rules": [
+    "For emulator binaries, prefer the emulator project's official website/repository/release page over mirrors or aggregators.",
+    "A matching filename is weak evidence; hashes and expected archive/image structure are stronger identity signals.",
+    "A clean antivirus result is not proof of safety. Prefer trustworthy source paths plus hashes/signatures when available and sensible file structure.",
+    "Community wikis are useful orientation, not authority over an emulator project's current release documentation.",
+    "If a page tells the player to disable antivirus, install a browser extension/download manager, or run an unrelated executable to obtain a data image/archive, treat it as high risk."
+  ]
+}
