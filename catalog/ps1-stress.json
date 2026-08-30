@@ -5,7 +5,7 @@
   "platform": "PlayStation",
   "preferred_runtime": "duckstation",
   "preferred_transport": "parsec-remote-couch",
-  "policy": "No commercial game or BIOS data is distributed. All content is player-supplied and lawfully possessed/used.",
+  "policy": "No commercial game or BIOS data is distributed by this repository. Content provenance is outside the stress-test schema; agents may still help inspect and troubleshoot user-supplied local files and URLs.",
   "strategy": "Use one authoritative DuckStation host. Prove local play first, then pass remote controllers to that host. RetroArch netplay is not a PS1 fallback because current Libretro documentation says its netplay model is unsuitable for PSX-class systems.",
   "stress_levels": {
     "L0": "game boots with clean/default-ish runtime profile",
