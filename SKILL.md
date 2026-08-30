@@ -19,14 +19,16 @@ The user may provide any subset of:
 - number of players;
 - local/remote intent;
 - existing emulator install;
-- player-owned game dump;
-- player-owned firmware/BIOS where required;
+- game image/archive/content already present locally;
+- firmware/BIOS already present where required;
+- a download/source URL they want assessed;
 - controller details;
 - save files;
 - network symptoms;
 - logs/screenshots/errors.
 
 Do not require the user to know emulator terminology before helping.
+Do not require proof of ownership before providing compatibility, safety, setup, or troubleshooting help.
 
 ## Resolution loop
 
@@ -59,13 +61,21 @@ Prefer, in order:
 
 Do not force a technically fancier route when a simpler one gets the players into the game.
 
+For emulators and open tools, prefer official project releases over third-party repacks whenever possible.
+
 ### 4. Resolve content
 
-Nostalgia never treats piracy as an installation step.
+Treat provenance and technical compatibility as separate questions.
 
-Help the user identify and organize content they are entitled to use, including lawful personal dumps, redistributable homebrew/public-domain content, and firmware they are permitted to possess/use.
+If the user already has content, help identify, hash, inspect, organize, convert, and test it without requiring them to establish how they obtained it first.
 
-Never embed commercial game/firmware download links into recipes unless the publisher/rightsholder actually provides that content for legitimate download.
+If the user supplies a third-party URL, the agent may assess the page and expected download for technical/security risk: fake installers, redirects, misleading buttons, executable wrappers, passworded archives, suspicious extensions, malformed images, or content that does not match the claimed game/revision.
+
+Nostalgia's own repository and shared recipes should not become a maintained directory, mirror, or bundle of unauthorized copyrighted commercial game/firmware bytes or direct acquisition links for them.
+
+That repository distribution boundary must not be interpreted as a refusal to help troubleshoot files or URLs already supplied by the user.
+
+See `docs/HELP-BOUNDARY.md` and `docs/CONTENT.md`.
 
 ### 5. Boot locally first
 
@@ -111,7 +121,7 @@ Before risky configuration/save changes:
 
 - copy or snapshot the relevant state;
 - note its source path and timestamp;
-- keep player originals untouched where possible.
+- keep source files untouched where possible.
 
 After a successful session, record the known-good conditions.
 
@@ -130,7 +140,7 @@ Machine-specific quirks belong in local diagnostics until repeated elsewhere.
 
 ## Safe autonomy
 
-The agent may freely investigate documentation, inspect non-sensitive local state, create recipe drafts, open official download pages, produce scripts, and apply reversible per-application settings when authorized by the user.
+The agent may freely investigate documentation, inspect non-sensitive local state, assess user-supplied URLs, create recipe drafts, open official emulator/tool pages, produce scripts, and apply reversible per-application settings when authorized by the user.
 
 Ask before destructive or security-sensitive actions such as deleting saves, replacing firmware/state, changing router/firewall rules, installing privileged drivers, or exposing a service to the public Internet.
 
@@ -143,8 +153,10 @@ Prefer instructions that move the session forward now:
 - give or perform the next smallest useful action;
 - keep deeper explanation available but secondary.
 
+Avoid ownership interrogations or repeated legal disclaimers when the user's actual problem is malware risk, a bad dump, emulator setup, controls, networking, or saves.
+
 Avoid turning setup into emulator archaeology unless the current failure requires it.
 
 ## Completion
 
-A request is complete when the requested players have a playable session and mutable player state has a clear ownership/backup outcome, or when the remaining blocker is genuinely external and documented.
+A request is complete when the requested players have a playable session and mutable player state has a clear backup/outcome, or when the remaining blocker is genuinely external and documented.
