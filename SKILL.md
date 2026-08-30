@@ -56,11 +56,57 @@ Do not silently equate "third-party" with "unsafe." Evaluate the actual source, 
 
 Likewise, do not silently equate "available on the Internet" with "verified." When practical, verify downloaded bytes against preservation/reference metadata rather than trusting filenames alone.
 
+## Optional subject-matter experts
+
+Treat entries in `catalog/sources.json` as **optional subject-matter experts**, not mandatory dependencies.
+
+Consult the smallest relevant set for the question at hand. Different sources have different jobs:
+
+- **runtime authority** — official emulator/tool project for current binaries and behavior;
+- **transport authority** — official networking/netplay/streaming documentation;
+- **source navigator** — curated paths to established collections;
+- **content archive** — established archive that may directly carry classic-game content;
+- **firmware specialist** — BIOS/firmware requirements, expected files, hashes, and emulator coverage;
+- **identity verifier** — disc/cartridge identity, region, revision, track layout, and hashes;
+- **collection manager** — local organization, DAT matching, filtering, patching, playlists, and reports;
+- **community knowledge** — orientation and troubleshooting where no stronger authority exists.
+
+Examples are intentionally composable rather than exclusive:
+
+```text
+PS1 firmware:
+RetroBIOS -> DuckStation docs -> Redump/reference metadata when useful
+
+PS1 game:
+r/Roms or Vimm/established archive -> Redump verification -> Igir/local library
+
+Multiplayer:
+emulator/netplay upstream -> transport upstream -> measured local session
+```
+
+Do not make one source a gate for all work. A source can be excellent at one role and weak at another.
+
+## Recommendation labels
+
+Use recommendation labels to explain *why* a route is being suggested.
+
+- **latency-first** — lowest expected end-to-end input-to-display delay among credible routes. Prefer local rendering/native netplay or original LAN/System-Link over remote video streaming when available.
+- **balanced** — good expected latency with a reasonably small setup surface.
+- **easy-first** — fastest/simplest path to a playable session.
+- **fallback** — useful when the preferred route fails compatibility, reachability, stability, or latency acceptance.
+- **candidate-until-measured** — architecturally promising but not yet proven by a real session.
+
+For remote multiplayer, the default recommendation posture is **latency-first** unless the player asks for the easiest setup or evidence shows the lower-latency topology is unreliable.
+
+Recommendation labels are predictions, not evidence. Do not call a path "fastest" or "best latency" until an actual session supports it. Record measured/observed results and promote the winning route for that game/network class.
+
 ## Resolution loop
 
 ### 1. Identify
 
-Resolve the requested title to a specific platform/version when that matters. If several versions are viable, prefer the route with the simplest known multiplayer setup and explain the choice.
+Resolve the requested title to a specific platform/version when that matters.
+
+If several versions or multiplayer topologies are viable, prefer the **latency-first** route by default, while making the **easy-first** route visible when it materially reduces setup complexity.
 
 ### 2. Inspect
 
@@ -78,14 +124,15 @@ Determine what already exists before installing or changing anything:
 
 Use `catalog/runtimes.json`, `catalog/sources.json`, and upstream project documentation.
 
-Prefer, in order:
+For remote multiplayer, prefer, in order when credible and supported:
 
-1. a native emulator netplay feature with strong matching/version semantics;
+1. native emulator netplay with local rendering and strong matching/version semantics;
 2. the game's original LAN/System-Link behavior over a supported tunnel;
 3. a known emulator-specific rollback/match-code implementation;
-4. remote-couch streaming of one authoritative emulator instance.
+4. low-latency remote-couch streaming;
+5. easiest remote-couch streaming as a practical fallback.
 
-Do not force a technically fancier route when a simpler one gets the players into the game.
+Do not force a technically fancier route when evidence shows a simpler route performs better. Conversely, do not choose streaming merely because it is easier when the player's goal is the best practical latency.
 
 For emulators and open tools, prefer official project releases over third-party repacks whenever possible.
 
@@ -130,6 +177,20 @@ For System Link/LAN, verify virtual NIC identity, unique MAC addresses, interfac
 
 For remote couch, verify the host sees each guest controller as a distinct device before launching the multiplayer mode.
 
+When latency matters, collect observations or measurements that separate:
+
+```text
+controller/input
+-> network
+-> emulation/synchronization
+-> encode
+-> transport
+-> decode
+-> display
+```
+
+A route should only be rejected after identifying which layer is actually limiting play.
+
 ### 7. Diagnose by layer
 
 Use this order unless evidence points elsewhere:
@@ -165,8 +226,10 @@ If the session reveals something reusable, update the recipe or catalog with:
 
 - exact runtime/version;
 - game platform/revision/hash identity where appropriate;
+- recommendation label used;
 - multiplayer strategy;
 - required settings;
+- latency observations/measurements when relevant;
 - symptom and repair;
 - whether the result was actually validated.
 
@@ -185,8 +248,7 @@ Prefer instructions that move the session forward now:
 - say what was found;
 - say what is blocking play;
 - give or perform the next smallest useful action;
-- name reputable sources/references when the player needs something;
-- distinguish source reputation from byte-level verification;
+- label recommendations when tradeoffs matter;
 - warn concretely when a source/file/setup path looks risky;
 - keep deeper explanation available but secondary.
 
