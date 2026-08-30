@@ -1,26 +1,61 @@
 {
-  "schema": "nostalgia.game-catalog/0.1",
+  "schema": "nostalgia.game-catalog/0.2",
   "pack_id": "classics-v0.1",
   "status": "experimental",
   "policy": "Catalog entries contain no commercial game data. Content acquisition provenance is outside this compatibility catalog; agents may still help inspect and troubleshoot user-supplied local files and URLs.",
+  "recommendation_default": "latency-first",
   "games": [
     {
       "id": "twisted-metal-2-ps1",
       "title": "Twisted Metal 2",
       "platform": "PlayStation",
-      "preferred_runtime": "duckstation",
-      "multiplayer_strategy": "parsec-remote-couch",
+      "preferred_runtime_by_profile": {
+        "latency-first": "mednafen",
+        "balanced": "duckstation",
+        "easy-first": "duckstation"
+      },
+      "multiplayer_recommendations": {
+        "latency-first": {
+          "strategy": "mednafen-native-netplay",
+          "status": "candidate-until-measured"
+        },
+        "balanced": {
+          "strategy": "sunshine-moonlight-remote-couch",
+          "status": "candidate-until-measured"
+        },
+        "easy-first": {
+          "strategy": "parsec-remote-couch",
+          "status": "baseline"
+        }
+      },
       "mode": "local-versus-remoted",
       "players_hint": "2",
       "validation": "candidate",
-      "notes": "Start with one authoritative PS1 emulator instance and pass the second player's controller through the remote-couch transport."
+      "notes": "Latency-first recommendation is Mednafen native netplay so both players render locally. DuckStation remote-couch paths remain useful baselines and fallbacks; promote whichever route wins real latency/stability testing."
     },
     {
       "id": "crash-team-racing-ps1",
       "title": "Crash Team Racing",
       "platform": "PlayStation",
-      "preferred_runtime": "duckstation",
-      "multiplayer_strategy": "parsec-remote-couch",
+      "preferred_runtime_by_profile": {
+        "latency-first": "mednafen",
+        "balanced": "duckstation",
+        "easy-first": "duckstation"
+      },
+      "multiplayer_recommendations": {
+        "latency-first": {
+          "strategy": "mednafen-native-netplay",
+          "status": "candidate-until-measured"
+        },
+        "balanced": {
+          "strategy": "sunshine-moonlight-remote-couch",
+          "status": "candidate-until-measured"
+        },
+        "easy-first": {
+          "strategy": "parsec-remote-couch",
+          "status": "baseline"
+        }
+      },
       "mode": "local-multiplayer-remoted",
       "players_hint": "2-4 depending on local setup/accessories",
       "validation": "candidate"
@@ -29,8 +64,25 @@
       "id": "tekken-3-ps1",
       "title": "Tekken 3",
       "platform": "PlayStation",
-      "preferred_runtime": "duckstation",
-      "multiplayer_strategy": "parsec-remote-couch",
+      "preferred_runtime_by_profile": {
+        "latency-first": "mednafen",
+        "balanced": "duckstation",
+        "easy-first": "duckstation"
+      },
+      "multiplayer_recommendations": {
+        "latency-first": {
+          "strategy": "mednafen-native-netplay",
+          "status": "candidate-until-measured"
+        },
+        "balanced": {
+          "strategy": "sunshine-moonlight-remote-couch",
+          "status": "candidate-until-measured"
+        },
+        "easy-first": {
+          "strategy": "parsec-remote-couch",
+          "status": "baseline"
+        }
+      },
       "mode": "local-versus-remoted",
       "players_hint": "2",
       "validation": "candidate"
@@ -209,7 +261,7 @@
       "mode": "local-splitscreen-remoted",
       "players_hint": "2-4",
       "validation": "candidate",
-      "notes": "Remote couch is the conservative v0.1 default; RetroArch native netplay can be evaluated later per deterministic core/content combination."
+      "notes": "Remote couch is the conservative v0.1 default; evaluate lower-latency system-specific options before promotion if latency is a priority."
     },
     {
       "id": "power-stone-2-dreamcast",
