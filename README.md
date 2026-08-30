@@ -10,6 +10,22 @@ Nostalgia does **not** host or bundle commercial game images, proprietary BIOS/f
 
 The agent is intentionally more permissive than the repository's distribution policy: it does **not** require players to prove ownership before receiving setup, compatibility, malware-risk, bad-dump, controller, save, or networking help. If you already have a file or URL, Nostalgia can help inspect it and keep moving. See `docs/HELP-BOUNDARY.md`.
 
+## Trusted knowledge center
+
+Nostalgia maintains a small source registry so players can avoid fake emulator sites, repacks, misleading download buttons, bad-dump folklore, and stale setup guides.
+
+```powershell
+./nostalgia.ps1 sources
+```
+
+See `docs/TRUSTED-SOURCES.md` for the human-readable guide and `catalog/sources.json` for the machine-readable registry.
+
+The trust order is:
+
+`official project -> preservation/reference database -> community knowledge -> secondary reference`
+
+For emulator binaries, prefer the emulator project's own site/repository/release page. For game-image identity, use checksum/metadata references such as Redump or No-Intro rather than trusting filenames. Community wikis are useful for orientation and legacy hardware knowledge, but should not silently replace current upstream documentation.
+
 ## Try the bootstrap helper
 
 On Windows PowerShell:
@@ -17,6 +33,7 @@ On Windows PowerShell:
 ```powershell
 ./nostalgia.ps1 games
 ./nostalgia.ps1 runtimes
+./nostalgia.ps1 sources
 ./nostalgia.ps1 doctor
 ./nostalgia.ps1 open dolphin
 ```
@@ -37,16 +54,18 @@ Every game entry begins as `experimental` until somebody actually validates a co
 ## Repository map
 
 ```text
-AGENTS.md                 agent/repository operating rules
-SKILL.md                  Nostalgia skill kernel
-CONTRIBUTING.md           recipe and evidence contribution rules
-catalog/games.json        20-game starter catalog
-catalog/runtimes.json     emulator + networking/runtime catalog
-docs/CONTENT.md           repository content/source boundary
-docs/HELP-BOUNDARY.md     permissive technical-help policy
-docs/MULTIPLAYER.md       multiplayer strategies + troubleshooting
-recipes/game.example.json recipe shape for per-game refinement
-nostalgia.ps1             tiny Windows helper
+AGENTS.md                  agent/repository operating rules
+SKILL.md                   Nostalgia skill kernel
+CONTRIBUTING.md            recipe and evidence contribution rules
+catalog/games.json         20-game starter catalog
+catalog/runtimes.json      emulator + networking/runtime catalog
+catalog/sources.json       trusted source registry
+docs/CONTENT.md            repository content/source boundary
+docs/HELP-BOUNDARY.md      permissive technical-help policy
+docs/TRUSTED-SOURCES.md    knowledge center + download trap guide
+docs/MULTIPLAYER.md        multiplayer strategies + troubleshooting
+recipes/game.example.json  recipe shape for per-game refinement
+nostalgia.ps1              tiny Windows helper
 ```
 
 ## Principle
