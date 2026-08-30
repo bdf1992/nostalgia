@@ -17,6 +17,7 @@ jobs:
 
           games = json.loads(Path('catalog/games.json').read_text(encoding='utf-8'))
           runtimes = json.loads(Path('catalog/runtimes.json').read_text(encoding='utf-8'))
+          ps1 = json.loads(Path('catalog/ps1-stress.json').read_text(encoding='utf-8'))
           json.loads(Path('recipes/game.example.json').read_text(encoding='utf-8'))
 
           game_rows = games['games']
@@ -41,7 +42,32 @@ jobs:
                   f"{game['id']} references unknown strategy {game['multiplayer_strategy']}"
               )
 
-          print(f"validated {len(game_rows)} games, {len(runtime_ids)} runtimes, {len(transport_ids)} transports")
+          ps1_rows = ps1['cases']
+          assert len(ps1_rows) == 20, f"expected 20 PS1 stress fixtures, got {len(ps1_rows)}"
+          ps1_ids = [g['id'] for g in ps1_rows]
+          assert len(ps1_ids) == len(set(ps1_ids)), 'duplicate PS1 stress ids'
+          assert ps1['preferred_runtime'] in runtime_ids, 'PS1 stress pack references unknown runtime'
+          assert ps1['preferred_transport'] in transport_ids, 'PS1 stress pack references unknown transport'
+
+          required_stress_levels = {'L0', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6'}
+          assert set(ps1['stress_levels']) == required_stress_levels, 'PS1 stress levels must be L0-L6'
+
+          for case in ps1_rows:
+              assert case['expected_max_players'] >= 2, f"{case['id']} is not a multiplayer stress fixture"
+              assert case['validation'] in {'stub', 'candidate', 'validated', 'known-good', 'broken'}
+              assert case['stress'], f"{case['id']} has no stress dimensions"
+              assert case['input_topology'], f"{case['id']} has no input topology"
+
+          max_players = max(g['expected_max_players'] for g in ps1_rows)
+          assert max_players >= 8, 'PS1 pack must contain an eight-player saturation fixture'
+          assert any(g['expected_max_players'] == 5 for g in ps1_rows), 'PS1 pack must contain an odd five-player fixture'
+          assert any('shared-controller' in g['stress'] for g in ps1_rows), 'PS1 pack must test shared-controller semantics'
+          assert any('save-heavy' in g['stress'] for g in ps1_rows), 'PS1 pack must test save-heavy persistence'
+
+          print(
+              f"validated {len(game_rows)} starter games, {len(ps1_rows)} PS1 stress fixtures, "
+              f"{len(runtime_ids)} runtimes, {len(transport_ids)} transports"
+          )
 
       - name: Reject accidentally tracked game/firmware/save artifacts
         shell: python
@@ -71,3 +97,7 @@ jobs:
         run: |
           ./nostalgia.ps1 games
           ./nostalgia.ps1 runtimes
+          ./nostalgia.ps1 ps1
+          ./nostalgia.ps1 ps1-plan twisted-metal-2-ps1
+          ./nostalgia.ps1 ps1-plan crash-bash-ps1
+          ./nostalgia.ps1 ps1-plan micro-maniacs-ps1
