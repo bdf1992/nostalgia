@@ -1,0 +1,243 @@
+{
+  "schema": "nostalgia.ps1-stress/0.1",
+  "pack_id": "ps1-stress-v0.1",
+  "status": "candidate",
+  "platform": "PlayStation",
+  "preferred_runtime": "duckstation",
+  "preferred_transport": "parsec-remote-couch",
+  "policy": "No commercial game or BIOS data is distributed. All content is player-supplied and lawfully possessed/used.",
+  "strategy": "Use one authoritative DuckStation host. Prove local play first, then pass remote controllers to that host. RetroArch netplay is not a PS1 fallback because current Libretro documentation says its netplay model is unsuitable for PSX-class systems.",
+  "stress_levels": {
+    "L0": "game boots with clean/default-ish runtime profile",
+    "L1": "two local controllers are independently addressable",
+    "L2": "two-player remote-couch session is playable",
+    "L3": "Multitap topology works with three or four players",
+    "L4": "five-to-eight-player or shared-controller topology behaves correctly",
+    "L5": "save/memory-card state survives session close/reopen",
+    "L6": "controller disconnect/reconnect and player-order recovery succeeds"
+  },
+  "cases": [
+    {
+      "id": "twisted-metal-2-ps1",
+      "title": "Twisted Metal 2",
+      "expected_max_players": 2,
+      "input_topology": "two-direct-controllers",
+      "multitap": "none",
+      "stress": ["baseline-2p", "split-screen", "latency", "controller-order"],
+      "priority": 1,
+      "validation": "candidate",
+      "notes": "First buddy test. Establish the boring two-player remote-couch baseline before enabling Multitap cases."
+    },
+    {
+      "id": "tekken-3-ps1",
+      "title": "Tekken 3",
+      "expected_max_players": 2,
+      "input_topology": "two-direct-controllers",
+      "multitap": "none",
+      "stress": ["latency-sensitive", "rapid-input", "controller-order"],
+      "priority": 1,
+      "validation": "candidate"
+    },
+    {
+      "id": "street-fighter-alpha-3-ps1",
+      "title": "Street Fighter Alpha 3",
+      "expected_max_players": 2,
+      "input_topology": "two-direct-controllers",
+      "multitap": "none",
+      "stress": ["latency-sensitive", "rapid-input", "2d-timing"],
+      "priority": 2,
+      "validation": "candidate"
+    },
+    {
+      "id": "diablo-ps1",
+      "title": "Diablo",
+      "expected_max_players": 2,
+      "input_topology": "two-direct-controllers",
+      "multitap": "none",
+      "stress": ["coop", "save-heavy", "memory-card", "long-session"],
+      "priority": 2,
+      "validation": "candidate",
+      "notes": "Use as the persistence fixture: create/continue characters, close the session, reopen, and verify memory-card state before and after remote play."
+    },
+    {
+      "id": "tony-hawks-pro-skater-2-ps1",
+      "title": "Tony Hawk's Pro Skater 2",
+      "expected_max_players": 2,
+      "input_topology": "two-direct-controllers",
+      "multitap": "none",
+      "stress": ["split-screen", "analog", "rapid-input", "frame-pacing"],
+      "priority": 2,
+      "validation": "candidate"
+    },
+    {
+      "id": "crash-team-racing-ps1",
+      "title": "Crash Team Racing",
+      "expected_max_players": 4,
+      "input_topology": "multitap-up-to-4",
+      "multitap": "required-for-3-4",
+      "stress": ["multitap-4", "split-screen", "analog", "controller-order"],
+      "priority": 1,
+      "validation": "candidate"
+    },
+    {
+      "id": "crash-bash-ps1",
+      "title": "Crash Bash",
+      "expected_max_players": 4,
+      "input_topology": "multitap-up-to-4",
+      "multitap": "required-for-3-4",
+      "stress": ["multitap-4", "party", "mode-dependent-player-count", "controller-order"],
+      "priority": 1,
+      "validation": "candidate",
+      "notes": "Adventure is a different player-count shape from Battle/Tournament; validate the intended multiplayer mode, not merely boot success.",
+      "evidence": ["https://www.mobygames.com/game/9515/crash-bash/specs/"]
+    },
+    {
+      "id": "twisted-metal-3-ps1",
+      "title": "Twisted Metal III",
+      "expected_max_players": 4,
+      "input_topology": "multitap-up-to-4",
+      "multitap": "required-for-3-4",
+      "stress": ["multitap-4", "split-screen", "vehicular-combat", "frame-pacing"],
+      "priority": 2,
+      "validation": "candidate",
+      "evidence": ["https://gamefaqs.gamespot.com/ps/199136-twisted-metal-iii/data"]
+    },
+    {
+      "id": "twisted-metal-4-ps1",
+      "title": "Twisted Metal 4",
+      "expected_max_players": 4,
+      "input_topology": "multitap-up-to-4",
+      "multitap": "required-for-3-4",
+      "stress": ["multitap-4", "split-screen", "vehicular-combat", "frame-pacing"],
+      "priority": 1,
+      "validation": "candidate",
+      "evidence": ["https://www.mobygames.com/game/11863/twisted-metal-4/specs/"]
+    },
+    {
+      "id": "team-buddies-ps1",
+      "title": "Team Buddies",
+      "expected_max_players": 4,
+      "input_topology": "multitap-up-to-4",
+      "multitap": "required-for-3-4",
+      "stress": ["multitap-4", "split-screen", "complex-action", "controller-order"],
+      "priority": 1,
+      "validation": "candidate",
+      "evidence": ["https://www.mobygames.com/game/10984/team-buddies/specs/"]
+    },
+    {
+      "id": "wu-tang-shaolin-style-ps1",
+      "title": "Wu-Tang: Shaolin Style",
+      "expected_max_players": 4,
+      "input_topology": "multitap-up-to-4",
+      "multitap": "required-for-3-4",
+      "stress": ["multitap-4", "latency-sensitive", "four-player-fighter", "rapid-input"],
+      "priority": 2,
+      "validation": "candidate",
+      "evidence": ["https://www.mobygames.com/game/25600/wu-tang-shaolin-style/specs/"]
+    },
+    {
+      "id": "quake-ii-ps1",
+      "title": "Quake II",
+      "expected_max_players": 4,
+      "input_topology": "multitap-up-to-4",
+      "multitap": "ps1-multitap-for-3-4",
+      "stress": ["multitap-4", "fps", "split-screen", "frame-pacing", "rapid-input"],
+      "priority": 2,
+      "validation": "candidate",
+      "notes": "Keep PS1 and PS2 Multitap behavior distinct during troubleshooting; this fixture is specifically the original PlayStation release."
+    },
+    {
+      "id": "hogs-of-war-ps1",
+      "title": "Hogs of War",
+      "expected_max_players": 4,
+      "input_topology": "multitap-up-to-4",
+      "multitap": "supported",
+      "stress": ["multitap-4", "turn-based", "low-latency-sensitivity", "memory-card"],
+      "priority": 3,
+      "validation": "candidate",
+      "evidence": ["https://www.mobygames.com/game/3443/hogs-of-war/specs/"]
+    },
+    {
+      "id": "wwf-smackdown-2-ps1",
+      "title": "WWF SmackDown! 2: Know Your Role",
+      "expected_max_players": 4,
+      "input_topology": "multitap-up-to-4",
+      "multitap": "expected-for-3-4",
+      "stress": ["multitap-4", "four-player-action", "controller-order", "memory-card"],
+      "priority": 3,
+      "validation": "candidate",
+      "notes": "Player-count and Multitap behavior remain a research assertion until validated in the campaign."
+    },
+    {
+      "id": "poy-poy-ps1",
+      "title": "Poy Poy",
+      "expected_max_players": 4,
+      "input_topology": "multitap-up-to-4",
+      "multitap": "required-for-3-4",
+      "stress": ["multitap-4", "party", "simultaneous-input", "controller-order"],
+      "priority": 2,
+      "validation": "candidate",
+      "evidence": ["https://www.mobygames.com/game/32780/poy-poy/specs/"]
+    },
+    {
+      "id": "bomberman-world-ps1",
+      "title": "Bomberman World",
+      "expected_max_players": 5,
+      "input_topology": "multitap-plus-direct-controller",
+      "multitap": "required-for-5",
+      "stress": ["five-player", "odd-topology", "party", "controller-order", "digital-only-gameplay"],
+      "priority": 1,
+      "validation": "candidate",
+      "notes": "This is the first non-power-of-two topology fixture and should expose assumptions that every local multiplayer setup is 2 or 4 players.",
+      "evidence": ["https://www.mobygames.com/game/4212/bomberman-world/specs/"]
+    },
+    {
+      "id": "worms-armageddon-ps1",
+      "title": "Worms Armageddon",
+      "expected_max_players": 4,
+      "input_topology": "shared-controller-possible",
+      "multitap": "not-required-for-pass-the-pad",
+      "stress": ["shared-controller", "turn-based", "player-handoff", "save-state", "controller-policy"],
+      "priority": 2,
+      "validation": "candidate",
+      "notes": "Use this to prove Nostalgia does not equate number of players with number of physical/virtual controllers. Multiple players can share a controller in turn-based play.",
+      "evidence": ["https://www.gamespot.com/reviews/worms-armageddon-review/1900-2550232/"]
+    },
+    {
+      "id": "bishi-bashi-special-ps1",
+      "title": "Bishi Bashi Special",
+      "expected_max_players": 8,
+      "input_topology": "shared-controller-party",
+      "multitap": "game-specific-shared-device-semantics",
+      "stress": ["eight-player-logical", "shared-controller", "rapid-input", "party", "topology-vs-player-count"],
+      "priority": 3,
+      "validation": "candidate",
+      "notes": "Treat logical players and attached controller devices as separate quantities; published descriptions report up to eight people while the game can use shared/simple control patterns.",
+      "evidence": ["https://www.mobygames.com/game/43049/bishi-bashi-special/"]
+    },
+    {
+      "id": "micro-maniacs-ps1",
+      "title": "Micro Maniacs",
+      "expected_max_players": 8,
+      "input_topology": "up-to-8-with-multitap-and-shared-controller-options",
+      "multitap": "supported-up-to-8",
+      "stress": ["eight-player", "multitap-saturation", "shared-controller-option", "simultaneous-input", "frame-pacing"],
+      "priority": 1,
+      "validation": "candidate",
+      "notes": "High-value saturation fixture because it combines high logical player count with unusual half-controller/shared-controller options.",
+      "evidence": ["https://gamefaqs.gamespot.com/ps/197920-foxkidscom-micro-maniacs-racing/data"]
+    },
+    {
+      "id": "nhl-2001-ps1",
+      "title": "NHL 2001",
+      "expected_max_players": 8,
+      "input_topology": "two-multitaps-up-to-8",
+      "multitap": "supported-up-to-8",
+      "stress": ["eight-controller", "two-multitap", "simultaneous-input", "analog", "memory-card", "maximum-device-saturation"],
+      "priority": 1,
+      "validation": "candidate",
+      "notes": "Primary physical/virtual controller saturation fixture: verify eight distinct emulated controller identities rather than merely eight logical players.",
+      "evidence": ["https://www.mobygames.com/game/2483/nhl-2001/specs/playstation/"]
+    }
+  ]
+}
