@@ -1,0 +1,47 @@
+# Local Nostalgia working state
+library/
+state/
+downloads/
+backups/
+
+# Commercial game/disc image shapes - keep out of the repository
+*.iso
+*.xiso
+*.chd
+*.cso
+*.gcz
+*.rvz
+*.wbfs
+*.gdi
+*.cdi
+*.cue
+*.rom
+*.nes
+*.sfc
+*.smc
+*.n64
+*.z64
+*.v64
+*.gb
+*.gbc
+*.gba
+*.nds
+*.3ds
+
+# Generic firmware / track binaries are intentionally ignored in this repo
+*.bin
+
+# Common emulator save/memory-card state
+*.sav
+*.srm
+*.mcd
+*.ps2
+*.raw
+*.state
+*.state[0-9]*
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
