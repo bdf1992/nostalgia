@@ -1,12 +1,14 @@
 # Nostalgia
 
-**Nostalgia** is a small, agent-assisted compatibility and multiplayer helper for playing classic games you legally possess.
+**Nostalgia** is a small, agent-assisted compatibility and multiplayer helper for classic games.
 
 The v0.1 goal is deliberately modest:
 
-> Pick a game, get the right emulator from its official project, identify the player-owned game/firmware files it needs, choose the simplest multiplayer strategy, and keep troubleshooting until both players are in a playable session.
+> Pick a game, get a trustworthy emulator, identify the game/firmware files involved, choose the simplest multiplayer strategy, and keep troubleshooting until both players are in a playable session.
 
-Nostalgia does **not** distribute commercial game images, proprietary BIOS/firmware, encryption keys, or other copyrighted console data. It distributes recipes, runtime metadata, official-source links, networking guidance, diagnostics, and safe state-management practices.
+Nostalgia does **not** host or bundle commercial game images, proprietary BIOS/firmware, encryption keys, or similar restricted console data. It distributes recipes, runtime metadata, trustworthy upstream links, networking guidance, diagnostics, and safe state-management practices.
+
+The agent is intentionally more permissive than the repository's distribution policy: it does **not** require players to prove ownership before receiving setup, compatibility, malware-risk, bad-dump, controller, save, or networking help. If you already have a file or URL, Nostalgia can help inspect it and keep moving. See `docs/HELP-BOUNDARY.md`.
 
 ## Try the bootstrap helper
 
@@ -19,7 +21,7 @@ On Windows PowerShell:
 ./nostalgia.ps1 open dolphin
 ```
 
-The helper is intentionally non-magical in v0.1. `open <runtime>` opens the runtime's documented upstream source; it does not silently install software or acquire game data.
+The helper is intentionally non-magical in v0.1. `open <runtime>` opens the runtime's documented upstream source; it does not silently install software or acquire commercial game data.
 
 ## Classic Pack v0.1
 
@@ -40,7 +42,8 @@ SKILL.md                  Nostalgia skill kernel
 CONTRIBUTING.md           recipe and evidence contribution rules
 catalog/games.json        20-game starter catalog
 catalog/runtimes.json     emulator + networking/runtime catalog
-docs/CONTENT.md           game/firmware acquisition boundary
+docs/CONTENT.md           repository content/source boundary
+docs/HELP-BOUNDARY.md     permissive technical-help policy
 docs/MULTIPLAYER.md       multiplayer strategies + troubleshooting
 recipes/game.example.json recipe shape for per-game refinement
 nostalgia.ps1             tiny Windows helper
@@ -50,7 +53,7 @@ nostalgia.ps1             tiny Windows helper
 
 **The game is not the package. The reproducible play recipe is the package.**
 
-Given player-owned content, Nostalgia should eventually be able to reproduce a known-good play environment without overwriting originals or pretending uncertainty is compatibility.
+Given local content, Nostalgia should eventually be able to reproduce a known-good play environment without overwriting originals or pretending uncertainty is compatibility.
 
 ## Status
 
