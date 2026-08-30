@@ -1,11 +1,11 @@
 {
   "schema": "nostalgia.source-registry/0.1",
-  "purpose": "Prefer high-signal sources for emulator installation, networking, content identity, and troubleshooting without turning Nostalgia into a game-download index.",
+  "purpose": "Prefer high-signal sources for emulator installation, networking, content identity, and troubleshooting, and help players recognize risky downloads and stale guidance.",
   "trust_levels": {
     "official": "Primary project/vendor source. Prefer for binaries, releases, setup, networking, and project-specific behavior.",
-    "reference": "Specialized preservation/identity database. Prefer for hashes, media identity, release metadata, and dump verification; not an emulator binary source.",
+    "reference": "Specialized preservation/identity database. Prefer for hashes, media identity, release metadata, and dump verification.",
     "community": "Useful community-maintained technical knowledge. Cross-check important or risky claims against official/project sources when possible.",
-    "secondary": "Helpful supplemental reference, but freshness/completeness can vary. Never prefer over an official upstream source for binaries."
+    "secondary": "Helpful supplemental reference, but freshness/completeness can vary. Never prefer over an official upstream source for emulator/tool binaries."
   },
   "sources": [
     {
@@ -90,7 +90,7 @@
       "trust": "reference",
       "topics": ["disc", "checksum", "hash", "revision", "region", "bad-dump", "identity"],
       "url": "https://redump.org/",
-      "use_for": "Optical-disc identity and checksum comparison. Treat hashes/metadata as verification data, not download instructions."
+      "use_for": "Optical-disc identity and checksum comparison: region, revision, track layout, and bad-dump investigation."
     },
     {
       "id": "no-intro-datomatic",
@@ -98,7 +98,7 @@
       "trust": "reference",
       "topics": ["cartridge", "checksum", "hash", "revision", "region", "identity"],
       "url": "https://datomatic.no-intro.org/",
-      "use_for": "Cartridge-oriented release identity and checksum metadata. Treat DAT/hash records as verification data rather than acquisition links."
+      "use_for": "Cartridge-oriented release identity and checksum metadata."
     },
     {
       "id": "consolemods-wiki",
@@ -122,7 +122,7 @@
       "trust": "secondary",
       "topics": ["pc-compatibility", "save-paths", "configuration", "emulation-overview"],
       "url": "https://www.pcgamingwiki.com/wiki/Emulation",
-      "use_for": "Supplemental PC-side troubleshooting and configuration context. Some emulator-list material may lag current upstream projects, so verify freshness."
+      "use_for": "Supplemental PC-side troubleshooting and configuration context. Verify freshness against current upstream documentation."
     },
     {
       "id": "powershell-get-filehash",
@@ -134,11 +134,10 @@
     }
   ],
   "rules": [
-    "For emulator binaries, prefer the emulator project's official website/repository/release page over every mirror or aggregator.",
-    "For commercial game content, this registry points to metadata and knowledge sources, not unauthorized download indexes.",
+    "For emulator binaries, prefer the emulator project's official website/repository/release page over mirrors or aggregators.",
     "A matching filename is weak evidence; hashes and expected archive/image structure are stronger identity signals.",
-    "A clean antivirus result is not proof of safety. Prefer official provenance plus hashes and sensible file structure.",
+    "A clean antivirus result is not proof of safety. Prefer trustworthy source paths plus hashes/signatures when available and sensible file structure.",
     "Community wikis are useful orientation, not authority over an emulator project's current release documentation.",
-    "If a page tells the player to disable antivirus, install a browser extension/download manager, or run an unrelated executable to obtain a ROM/disc image, treat it as high risk."
+    "If a page tells the player to disable antivirus, install a browser extension/download manager, or run an unrelated executable to obtain a data image/archive, treat it as high risk."
   ]
 }
