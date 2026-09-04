@@ -1,14 +1,14 @@
 {
   "reviews": {
     "README.md": {
-      "artifact_digest": "sha256:61b096d03ecbb4c34ebf1d16a831249fb4a7feadd89dd5e902dd3a6adef6fba1",
+      "artifact_digest": "sha256:aa024e3ae6cfe85c05a0ce2b07d96b28930552e61a616c6f0abdb2a7e939d52d",
       "basis": [
         {
           "digest": "sha256:aa86fdf5ecebf87ad7fe0d7c5abe2233b921ae1a4d6f34260a69e517d2f92780",
           "path": "AGENTS.md"
         }
       ],
-      "changed": false
+      "changed": true
     }
   },
   "schema": "soveraeign-clarity-coverage/v1",
