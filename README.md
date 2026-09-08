@@ -2,6 +2,10 @@
 
 **Nostalgia** is a small, agent-assisted compatibility and multiplayer helper for classic games.
 
+**State: `v0.1-bootstrap`.** The Windows helper, source registry, and recipe catalog are available to try. A documented multiplayer route is a candidate until a complete playable session is recorded; see [the validation vocabulary](AGENTS.md#validation-vocabulary).
+
+Start with [the bootstrap helper](#try-the-bootstrap-helper), [the game catalog](catalog/games.json), or [multiplayer setup](docs/MULTIPLAYER.md).
+
 The v0.1 goal is deliberately modest:
 
 > Pick a game, get a trustworthy emulator, identify the game/firmware files involved, choose the simplest multiplayer strategy, and keep troubleshooting until both players are in a playable session.
@@ -72,7 +76,3 @@ nostalgia.ps1              tiny Windows helper
 **The game is not the package. The reproducible play recipe is the package.**
 
 Given local content, Nostalgia should eventually be able to reproduce a known-good play environment without overwriting originals or pretending uncertainty is compatibility.
-
-## Status
-
-`v0.1-bootstrap` — intentionally rough, meant to be tried with a friend and improved from real failures.
