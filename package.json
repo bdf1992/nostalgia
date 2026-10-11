@@ -12,6 +12,7 @@
     "test": "npm run build && node --test tests/*.test.mjs",
     "check": "tsc -p tsconfig.json --noEmit",
     "evaluate:baseline": "npm run build && node scripts/evaluate-baseline.mjs",
+    "rehearse:studio": "npm run build && node scripts/rehearse-studio.mjs",
     "provision:browser": "node scripts/provision-browser.mjs",
     "play:fixture": "npm run build && node scripts/play-fixture.mjs",
     "nostalgia": "node dist/cli.js"

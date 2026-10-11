@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "platform": "windows-x64",
+  "recorded_on": "2026-10-11",
+  "purpose": "Additional Souls providers; does not replace the ten-provider general toolchain",
+  "tools": [
+    {
+      "provider": "me3",
+      "version": "0.13.0",
+      "release_url": "https://github.com/garyttierney/me3/releases/tag/v0.13.0",
+      "archive_url": "https://github.com/garyttierney/me3/releases/download/v0.13.0/me3-windows-amd64.zip",
+      "archive_bytes": 7402971,
+      "archive_sha256": "a8b693c574106f20532ab1e8b58b2452f37370679b938a884fe75f87f9b68c2b",
+      "publisher_digest": "sha256:a8b693c574106f20532ab1e8b58b2452f37370679b938a884fe75f87f9b68c2b",
+      "executables": [
+        {
+          "relative_path": "bin/me3_mod_host.dll",
+          "sha256": "e08af3dd9d7be2655e2f245fa2bfc316aa8c6af74a3f2dc7cb0598f96c769317"
+        },
+        {
+          "relative_path": "bin/me3-launcher.exe",
+          "sha256": "4195535ac8448d20e620bc911772a18fc75462e4c36668968164842d787d0011"
+        },
+        {
+          "relative_path": "bin/me3.exe",
+          "sha256": "203a726ab40ecac6ee9deaba1aa96f741d87e12def549cdeb48f99e5fe16d52d"
+        }
+      ],
+      "verified_scope": "availability-verified",
+      "limitations": [
+        "No game process launch or profile application tested.",
+        "No package hot reload, asset replacement or game compatibility tested."
+      ]
+    },
+    {
+      "provider": "smithbox",
+      "version": "2.2.6",
+      "release_url": "https://github.com/vawser/Smithbox/releases/tag/2.2.6",
+      "archive_url": "https://github.com/vawser/Smithbox/releases/download/2.2.6/Smithbox_2_2_6_2026_09_20_b.zip",
+      "archive_bytes": 296403683,
+      "archive_sha256": "9a147c319dccad4b6dd2a5adcc6f2ba3a5c11c40b079520c05260cb19994b3d7",
+      "publisher_digest": "sha256:9a147c319dccad4b6dd2a5adcc6f2ba3a5c11c40b079520c05260cb19994b3d7",
+      "executables": [
+        {
+          "relative_path": "Smithbox.OpenGL.exe",
+          "sha256": "74c140f3c0bda8e115bbd4df222269515ee12f90dfbc17552ee11f88d01e6812"
+        },
+        {
+          "relative_path": "Smithbox.Updater.exe",
+          "sha256": "461717cdf462cf9de29ece06ce76f2c2817129116cc30f7780d9a04bc4e3c5ab"
+        },
+        {
+          "relative_path": "Smithbox.Vulkan.exe",
+          "sha256": "99197a44c35f386b0eec13f18a85991e7ca07965a85d4c764b6d144c9f2a3deb"
+        }
+      ],
+      "verified_scope": "installed-untested",
+      "limitations": [
+        "GUI not launched; installed binary identity is not rendering/runtime health.",
+        "Included framework manifests declare .NETCore.App and ASP.NETCore.App10.0.12; no external runtime installation performed.",
+        "Real project, regulations, map/model editing and game compatibility untested."
+      ]
+    },
+    {
+      "provider": "witchybnd",
+      "version": "3.0.1.0",
+      "release_url": "https://github.com/ividyon/WitchyBND/releases/tag/3.0.1.0",
+      "archive_url": "https://github.com/ividyon/WitchyBND/releases/download/3.0.1.0/WitchyBND-3.0.1.0-win-x64.zip",
+      "archive_bytes": 48308252,
+      "archive_sha256": "a3e6b2a0f7eac13f5e83b6602a1149322439c0662baa140ecdd84be28af50364",
+      "publisher_digest": "sha256:a3e6b2a0f7eac13f5e83b6602a1149322439c0662baa140ecdd84be28af50364",
+      "executables": [
+        {
+          "relative_path": "WitchyBND.exe",
+          "sha256": "00aa5b321d5af0179d3c9154a48d2ab3bb55772eaf624a439cc5f6ad4e21982b"
+        }
+      ],
+      "verified_scope": "operation-verified",
+      "limitations": [
+        "Only original uncompressed BND4 tested; real Elden Ring regulation, PARAM semantics, encrypted archives and Oodle/DCX compression untested.",
+        "CLI help/version returned success without redirected output; help text not captured.",
+        "Upstream startup may read installed-game metadata; no measured read audit performed.",
+        "No GUI or shell integration registration; no game launch/save/file changes."
+      ]
+    }
+  ]
+}
