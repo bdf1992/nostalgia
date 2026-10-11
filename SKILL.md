@@ -13,12 +13,15 @@ or a catalog of supported titles.
 ## Current capability
 
 This repository supplies compatibility catalogs, recipes, a PowerShell helper,
-and game-table inspection/comparison through CLI and MCP. Generation, game-data
+game-table inspection/comparison, toolchain inspection, and read-only REA-SON
+checkpoint design-context queries through CLI and MCP. Generation, game-data
 mutation, archive extraction, and live-change adapters are not implemented. Use tools actually available in the session;
 state missing capabilities precisely. Instructions are not implementation proof.
 
 For studying and creating games, read [the game-study guide](docs/GAME-STUDY.md).
 For extracted mechanics tables, read [the CLI/MCP tool guide](docs/GAME-TABLES.md).
+For design questions using retained SON study, read
+[design-context retrieval and discussion](docs/DESIGN-CONTEXT.md).
 For compatibility and multiplayer work, read
 [the existing compatibility guidance](docs/COMPATIBILITY-SKILL.md). Paths in that
 guidance are relative to the repository root. Use only the relevant guidance.
@@ -52,6 +55,15 @@ Use normal source tools for source repositories. Do not duplicate analysis engin
 or run setup merely because a game-study request mentions reverse engineering.
 
 ### Design the requested differences
+
+For speculative requests, retrieve relevant named systems, design principles,
+evidence, and open questions through `query_design_context` when a SON checkpoint
+is available. Its matching is literal and its graph boundary is finite; follow
+relevant neighboring identities and distinguish missing coverage from absence.
+Supplied evidence labels and checksums do not authenticate claims or establish
+their freshness. Discuss alternatives and consequences, recommend a design with
+reasons, and propose a playable comparison before turning the idea into code.
+Retain creative decisions separately from source behavior and inferred intent.
 
 Mark relevant source behavior as preserve, adapt, replace, or newly create.
 Trace dependencies before altering it: controls can affect animation, targeting,

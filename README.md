@@ -4,7 +4,7 @@
 
 The operating principles are in [SKILL.md](SKILL.md), with the [game-study guide](docs/GAME-STUDY.md) translating REA's investigation practices into game study, design, production, and evaluation. Bdo's ARPG is the first personal project: a take on Diablo II with possible influences from later Diablo games and Path of Exile. Its destination engine and specific mechanics remain undecided.
 
-**Implementation status:** shared CLI/MCP operations inspect and compare extracted game tables and inspect provisioned tool identities. They return file identities, exact table values, differences, and tool drift; they do not establish gameplay effects or change a running game. Generation and live-change adapters remain development targets. The proposed evaluation suite comprises ten creative projects of increasing scope, rather than ten supported games.
+**Implementation status:** shared CLI/MCP operations inspect and compare extracted game tables, inspect provisioned tool identities, and query retained design context from REA-SON checkpoints. They return file identities, exact table values, differences, tool drift, and connected study records; they do not establish gameplay effects or change a running game. Generation and live-change adapters remain development targets. The proposed evaluation suite comprises ten creative projects of increasing scope, rather than ten supported games.
 
 The [REA-SON acceptance journey](docs/REA-SON-JOURNEY.md) defines the first
 combat study, playable reconstruction, and deliberate change for Bdo's ARPG.
@@ -19,13 +19,18 @@ npm run build
 node dist/cli.js --help
 node dist/cli.js inspect-game-table request.json
 node dist/cli.js compare-game-tables comparison.json
+node dist/cli.js query-design-context design-request.json
 node dist/cli.js mcp
 ```
 
 See [game-table inputs and evidence](docs/GAME-TABLES.md). The MCP server exposes
-`inspect_game_table`, `compare_game_tables`, and `inspect_toolchain` using the same operations as the
+`inspect_game_table`, `compare_game_tables`, `inspect_toolchain`, and
+`query_design_context` using the same operations as the
 CLI. It reads caller-selected local inputs and artifacts and writes protocol results to
 stdout. This repository revision does not install itself into an agent's settings.
+
+See [design-context queries and studio discussion](docs/DESIGN-CONTEXT.md) for
+the SON handoff, retrieval limits, and evidence requirements.
 
 The [first ten providers](docs/TOOLCHAIN.md) are selected from researched upstream
 capabilities. Their [registry](catalog/toolchain.json) records reasons and alternatives.

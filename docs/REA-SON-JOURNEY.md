@@ -189,9 +189,11 @@ unexplained differences, interruption to play, and recovery failures. Report eac
 measure with its scenario and build. These measures evaluate this interaction;
 they do not establish support for a whole franchise or the ten-project suite.
 
-Current Nostalgia operations inspect tables and tool identities. Missing work for
-this journey includes retained graph storage and queries for MCP design
-discussion, source gameplay observation, reset/input adapters, trace comparison,
+Current Nostalgia operations inspect tables and tool identities and
+[query retained SON design context](DESIGN-CONTEXT.md). The query is a read-only
+snapshot consumer; source observation and design discussion remain agent work.
+Missing work for this journey includes broader retained graph indexing and
+retrieval, source gameplay observation, reset/input adapters, trace comparison,
 semantic animation decoding where needed, and scene production.
 The first priority is a repeatable source interaction and its measurement path;
 without that evidence, a reconstruction cannot pass the behavioral acceptance.
