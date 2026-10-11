@@ -43,7 +43,7 @@ test('compiled CLI and real stdio MCP inspect and compare the same identified da
   const data = await fixtures(t);
   const client = await connect(t);
   const catalog = await client.listTools();
-  assert.deepEqual(catalog.tools.map(tool => tool.name).sort(), ['compare_game_tables', 'inspect_game_table']);
+  assert.deepEqual(catalog.tools.map(tool => tool.name).sort(), ['compare_game_tables', 'inspect_game_table', 'inspect_toolchain', 'query_design_context']);
   for (const tool of catalog.tools) {
     assert.equal(tool.annotations.readOnlyHint, true);
     assert.ok(tool.outputSchema);
