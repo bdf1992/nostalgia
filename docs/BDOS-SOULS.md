@@ -127,9 +127,12 @@ offline profile; networked mod testing requires an explicitly supported route
 and participating peers. A mod launcher is not an OS sandbox, and a backup does
 not redirect future writes.
 
-Nostalgia currently has a browser provider. Its native launch, focus, input,
-observation and shutdown adapter remains work. Do not pass a native executable
-to the HTML provider or treat its browser checks as native admission evidence.
+Nostalgia has a browser provider and a Windows native adapter for Elden Ring.
+The native adapter exposes launch, focus, discrete input, rendered observations
+and verified shutdown through the shared commands. See
+[native gameplay](NATIVE-GAMEPLAY.md) for setup and current evidence limits.
+Do not pass a native executable to the HTML provider or treat its browser
+checks as native admission evidence.
 
 Capture and reproduce selected baseline cases before studying or changing the
 selected implementation: launch/character identity, controlled movement and

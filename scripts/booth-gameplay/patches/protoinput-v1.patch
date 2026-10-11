@@ -1,0 +1,1283 @@
+diff --git a/lib/Blackbone/src/BlackBone/Process/ProcessModules.cpp b/lib/Blackbone/src/BlackBone/Process/ProcessModules.cpp
+index f4683e9..6b38a79 100644
+--- a/lib/Blackbone/src/BlackBone/Process/ProcessModules.cpp
++++ b/lib/Blackbone/src/BlackBone/Process/ProcessModules.cpp
+@@ -418,7 +418,7 @@ call_result_t<ModuleDataPtr> ProcessModules::Inject( const std::wstring& path, T
+     // Write dll name into target process
+     auto fillDllName = [&modName, &path]( auto& ustr )
+     {
+-        ustr.Buffer = modName->ptr<std::decay_t<decltype(ustr)>::type>() + sizeof( ustr );
++        ustr.Buffer = modName->ptr<typename std::decay_t<decltype(ustr)>::type>() + sizeof( ustr );
+         ustr.MaximumLength = ustr.Length = static_cast<USHORT>(path.size() * sizeof( wchar_t ));
+ 
+         modName->Write( 0, ustr );
+diff --git a/lib/EasyHook/EasyHookDll/EasyHookDll.vcxproj b/lib/EasyHook/EasyHookDll/EasyHookDll.vcxproj
+index 9cc661a..9f6d6f0 100644
+--- a/lib/EasyHook/EasyHookDll/EasyHookDll.vcxproj
++++ b/lib/EasyHook/EasyHookDll/EasyHookDll.vcxproj
+@@ -705,10 +705,12 @@ ml.exe /D_WIN32 /c /Cx "%(FullPath)"
+     <ProjectReference Include="..\EasyHookSvc\EasyHookSvc.csproj">
+       <Project>{b9a68e47-237f-4045-a371-d5cceb896f7f}</Project>
+       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
++      <BuildReference>false</BuildReference>
+     </ProjectReference>
+     <ProjectReference Include="..\EasyHook\EasyHook.csproj">
+       <Project>{ab53862b-3b5c-4efc-9787-1f01199ebfbf}</Project>
+       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
++      <BuildReference>false</BuildReference>
+     </ProjectReference>
+   </ItemGroup>
+   <ItemGroup Condition="'$(Platform)'=='Win32'">
+@@ -721,4 +723,4 @@ ml.exe /D_WIN32 /c /Cx "%(FullPath)"
+   <ImportGroup Label="ExtensionTargets">
+     <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
+   </ImportGroup>
+-</Project>
+\ No newline at end of file
++</Project>
+diff --git a/lib/EasyHook/Public/easyhook.h b/lib/EasyHook/Public/easyhook.h
+index d71838f..25c80b8 100644
+--- a/lib/EasyHook/Public/easyhook.h
++++ b/lib/EasyHook/Public/easyhook.h
+@@ -42,8 +42,12 @@
+ 	// #define NTDDI_VERSION           NTDDI_WIN2KSP4
+     // #define _WIN32_WINNT            0x500
+ 
+-	#define NTDDI_VERSION           _NTDDI_WIN10
+-	#define _WIN32_WINNT            _WIN32_WINNT_WIN10 
++	#ifndef NTDDI_VERSION
++#define NTDDI_VERSION 0x0A000000
++#endif
++	#ifndef _WIN32_WINNT
++#define _WIN32_WINNT 0x0A00
++#endif
+ 
+ 
+ 
+diff --git a/src/ProtoInput/ProtoInput.sln b/src/ProtoInput/ProtoInput.sln
+index 768ce89..3912245 100644
+--- a/src/ProtoInput/ProtoInput.sln
++++ b/src/ProtoInput/ProtoInput.sln
+@@ -30,6 +30,9 @@ EndProject
+ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BlackBone", "..\..\lib\Blackbone\src\BlackBone\BlackBone.vcxproj", "{A2C53563-46F5-4D87-903F-3F1F2FDB2DEB}"
+ EndProject
+ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtoInputUtilStatic", "ProtoInputUtil\ProtoInputUtil.vcxproj", "{1B052C6A-F9E6-4B73-BE05-B33BB100B975}"
++	ProjectSection(ProjectDependencies) = postProject
++		{A2C53563-46F5-4D87-903F-3F1F2FDB2DEB} = {A2C53563-46F5-4D87-903F-3F1F2FDB2DEB}
++	EndProjectSection
+ EndProject
+ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtoInputUtilDynamic", "ProtoInputUtilDynamic\ProtoInputUtilDynamic.vcxproj", "{C47D024A-B89C-4F08-9E5D-0A07946CF0B1}"
+ 	ProjectSection(ProjectDependencies) = postProject
+@@ -43,6 +46,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtoInputInjector", "Proto
+ 	EndProjectSection
+ EndProject
+ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtoInputInjectorProxy", "ProtoInputInjectorProxy\ProtoInputInjectorProxy.vcxproj", "{218630BD-13D1-4C93-B5C0-DB191018DB41}"
++	ProjectSection(ProjectDependencies) = postProject
++		{D087E484-DBC9-4A2E-8368-C1D0E524994D} = {D087E484-DBC9-4A2E-8368-C1D0E524994D}
++	EndProjectSection
+ EndProject
+ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenXinput", "..\..\lib\openxinput-OpenXinput1_4\OpenXinput.vcxproj", "{7D4180C0-FA00-4ED3-9D09-458942FC45FF}"
+ EndProject
+diff --git a/src/ProtoInput/ProtoInputHooks/FakeMouseKeyboard.cpp b/src/ProtoInput/ProtoInputHooks/FakeMouseKeyboard.cpp
+index 8f2c3df..390c8bd 100644
+--- a/src/ProtoInput/ProtoInputHooks/FakeMouseKeyboard.cpp
++++ b/src/ProtoInput/ProtoInputHooks/FakeMouseKeyboard.cpp
+@@ -7,6 +7,19 @@ namespace Proto
+ 
+ FakeMouseState FakeMouseKeyboard::mouseState{};
+ FakeKeyboardState FakeMouseKeyboard::keyboardState{};
++std::recursive_mutex FakeMouseKeyboard::keyboardMutex;
++
++SHORT FakeMouseKeyboard::PollAsyncKeyState(int vkey)
++{
++ std::lock_guard<std::recursive_mutex> guard(keyboardMutex);
++ const SHORT result = (IsKeyStatePressed(vkey) ? 0x8000 : 0) | (IsAsyncKeyStatePressed(vkey) ? 1 : 0);
++ ClearAsyncKeyState(vkey); return result;
++}
++void FakeMouseKeyboard::ClearAllKeyboardState()
++{
++ std::lock_guard<std::recursive_mutex> guard(keyboardMutex);
++ keyboardState.keysState.reset(); keyboardState.asyncKeysState.reset();
++}
+ 
+ void FakeMouseKeyboard::AddMouseDelta(int dx, int dy)
+ {
+@@ -104,6 +117,7 @@ void FakeMouseKeyboard::SetExtendMouseBounds(bool extend)
+ 
+ void FakeMouseKeyboard::ReceivedKeyPressOrRelease(int vkey, bool pressed)
+ {
++	std::lock_guard<std::recursive_mutex> guard(keyboardMutex);
+ 	static_assert(keyboardState.keysState.size() == keyboardState.asyncKeysState.size());
+ 	
+ 	if (vkey >= 0 && vkey < keyboardState.keysState.size())
+@@ -117,6 +131,7 @@ void FakeMouseKeyboard::ReceivedKeyPressOrRelease(int vkey, bool pressed)
+ 
+ void FakeMouseKeyboard::ClearAsyncKeyState(int vkey)
+ {
++	std::lock_guard<std::recursive_mutex> guard(keyboardMutex);
+ 	if (vkey >= 0 && vkey < keyboardState.asyncKeysState.size())
+ 	{
+ 		keyboardState.asyncKeysState[vkey] = false;
+@@ -125,6 +140,7 @@ void FakeMouseKeyboard::ClearAsyncKeyState(int vkey)
+ 
+ bool FakeMouseKeyboard::IsKeyStatePressed(int vkey)
+ {
++	std::lock_guard<std::recursive_mutex> guard(keyboardMutex);
+ 	if (vkey >= 0 && vkey < keyboardState.keysState.size())
+ 	{
+ 		if (vkey == VK_SHIFT)
+@@ -146,6 +162,7 @@ bool FakeMouseKeyboard::IsKeyStatePressed(int vkey)
+ 
+ bool FakeMouseKeyboard::IsAsyncKeyStatePressed(int vkey)
+ {
++	std::lock_guard<std::recursive_mutex> guard(keyboardMutex);
+ 	if (vkey >= 0 && vkey < keyboardState.asyncKeysState.size())
+ 	{
+ 		if (vkey == VK_SHIFT)
+diff --git a/src/ProtoInput/ProtoInputHooks/FakeMouseKeyboard.h b/src/ProtoInput/ProtoInputHooks/FakeMouseKeyboard.h
+index 4ca9753..8e6f791 100644
+--- a/src/ProtoInput/ProtoInputHooks/FakeMouseKeyboard.h
++++ b/src/ProtoInput/ProtoInputHooks/FakeMouseKeyboard.h
+@@ -1,5 +1,6 @@
+ #pragma once
+ #include <bitset>
++#include <mutex>
+ 
+ namespace Proto
+ {
+@@ -41,6 +42,9 @@ class FakeMouseKeyboard
+ 	static FakeKeyboardState keyboardState;
+ 	
+ public:
++	static std::recursive_mutex keyboardMutex;
++	static SHORT PollAsyncKeyState(int vkey);
++	static void ClearAllKeyboardState();
+ 	static const FakeMouseState& GetMouseState() { return mouseState; }
+ 	static void AddMouseDelta(int dx, int dy);
+ 	static void SetMousePos(int x, int y);
+diff --git a/src/ProtoInput/ProtoInputHooks/FocusHook.cpp b/src/ProtoInput/ProtoInputHooks/FocusHook.cpp
+index 3bc2fea..3e90e5a 100644
+--- a/src/ProtoInput/ProtoInputHooks/FocusHook.cpp
++++ b/src/ProtoInput/ProtoInputHooks/FocusHook.cpp
+@@ -1,4 +1,5 @@
+ #include "FocusHook.h"
++#include "NostalgiaInputDiagnostics.h"
+ #include <imgui.h>
+ #include "HwndSelector.h"
+ 
+@@ -15,7 +16,9 @@ inline HWND GetHwnd()
+ 
+ HWND WINAPI Hook_GetForegroundWindow()
+ {
+-	return GetHwnd();
++ InterlockedIncrement64(&NostalgiaInputDiagnosticData.getForegroundTotal);
++ HWND returned=GetHwnd();RecordForegroundReturn(returned);
++ return returned;
+ }
+ 
+ HWND WINAPI Hook_WindowFromPoint(POINT Point)
+diff --git a/src/ProtoInput/ProtoInputHooks/GetAsyncKeyStateHook.cpp b/src/ProtoInput/ProtoInputHooks/GetAsyncKeyStateHook.cpp
+index d585819..b7fcb44 100644
+--- a/src/ProtoInput/ProtoInputHooks/GetAsyncKeyStateHook.cpp
++++ b/src/ProtoInput/ProtoInputHooks/GetAsyncKeyStateHook.cpp
+@@ -6,9 +6,7 @@ namespace Proto
+ 
+ SHORT WINAPI Hook_GetAsyncKeyState(int vKey)
+ {	
+-	auto ret = (FakeMouseKeyboard::IsKeyStatePressed(vKey) ? 0b1000000000000000 : 0) | (FakeMouseKeyboard::IsAsyncKeyStatePressed(vKey) ? 1 : 0);
+-	FakeMouseKeyboard::ClearAsyncKeyState(vKey);
+-	return ret;
++	return FakeMouseKeyboard::PollAsyncKeyState(vKey);
+ }
+ 
+ void GetAsyncKeyStateHook::InstallImpl()
+diff --git a/src/ProtoInput/ProtoInputHooks/GetKeyboardStateHook.cpp b/src/ProtoInput/ProtoInputHooks/GetKeyboardStateHook.cpp
+index 3e0a122..77e3fd0 100644
+--- a/src/ProtoInput/ProtoInputHooks/GetKeyboardStateHook.cpp
++++ b/src/ProtoInput/ProtoInputHooks/GetKeyboardStateHook.cpp
+@@ -8,6 +8,7 @@ BOOL WINAPI Hook_GetKeyboardState(PBYTE lpKeyState)
+ {
+ 	if (lpKeyState)
+ 	{
++		std::lock_guard<std::recursive_mutex> guard(FakeMouseKeyboard::keyboardMutex);
+ 		memset(lpKeyState, 0, 256);
+ 
+ 		for (int vkey = 0; vkey < 256; ++vkey)
+diff --git a/src/ProtoInput/ProtoInputHooks/Gui.cpp b/src/ProtoInput/ProtoInputHooks/Gui.cpp
+index 98d50ea..0da587e 100644
+--- a/src/ProtoInput/ProtoInputHooks/Gui.cpp
++++ b/src/ProtoInput/ProtoInputHooks/Gui.cpp
+@@ -53,8 +53,8 @@ void HandleSelectableDualList(std::vector<T>& selected, std::vector<T>& deselect
+     std::sort(deselected.begin(), deselected.end());
+ 	
+     std::vector<T> toAddToB{};
+-    std::vector<std::vector<T>::const_iterator> removeA{};
+-    std::vector<std::vector<T>::const_iterator> removeB{};
++    std::vector<typename std::vector<T>::const_iterator> removeA{};
++    std::vector<typename std::vector<T>::const_iterator> removeB{};
+ 
+     for (size_t i = 0; i < selected.size(); ++i)
+     {
+diff --git a/src/ProtoInput/ProtoInputHooks/HookInstaller.cpp b/src/ProtoInput/ProtoInputHooks/HookInstaller.cpp
+index ee9b372..12a2ca8 100644
+--- a/src/ProtoInput/ProtoInputHooks/HookInstaller.cpp
++++ b/src/ProtoInput/ProtoInputHooks/HookInstaller.cpp
+@@ -17,7 +17,8 @@ void RefreshACL()
+ {
+ 	for (auto& hook : trackedHooks)
+ 	{
+-		const auto ACLres = LhSetExclusiveACL(&ACLThreads[0], ACLThreads.size(), &hook);
++		unsigned long emptyAcl = 0;
++		const auto ACLres = LhSetExclusiveACL(ACLThreads.empty() ? &emptyAcl : ACLThreads.data(), ACLThreads.size(), &hook);
+ 
+ 		// FAILED(ACLres) ?
+ 		// 	printf("Error setting ACL, res = 0x%X, error string = %ls\n", ACLres, RtlGetLastErrorString()) :
+@@ -37,10 +38,12 @@ void AddThreadToACL(unsigned long threadID)
+ 	mutex.unlock();
+ }
+ 
+-void AddTrackedHook(HOOK_TRACE_INFO hook)
++NTSTATUS AddTrackedHook(HOOK_TRACE_INFO hook)
+ {
+-	trackedHooks.push_back(hook);
+-	RefreshACL();
++	unsigned long emptyAcl = 0;
++	const auto activation = LhSetExclusiveACL(ACLThreads.empty() ? &emptyAcl : ACLThreads.data(), ACLThreads.size(), &hook);
++	if (!FAILED(activation)) trackedHooks.push_back(hook);
++	return activation;
+ }
+ 
+ void RemoveTrackedHook(HOOK_TRACE_INFO hook)
+@@ -56,7 +59,7 @@ std::tuple<NTSTATUS, HookInfo> InstallHook(void* address, void* callback)
+ 	HOOK_TRACE_INFO hHook = { NULL }; // keep track of our hook
+ 
+ 	// Install the hook
+-	const auto result = LhInstallHook(
++	auto result = LhInstallHook(
+ 		address,
+ 		callback,
+ 		NULL,
+@@ -68,7 +71,8 @@ std::tuple<NTSTATUS, HookInfo> InstallHook(void* address, void* callback)
+ 	}
+ 	else
+ 	{
+-		AddTrackedHook(hHook);
++		const auto activation = AddTrackedHook(hHook);
++		if (FAILED(activation)) { LhUninstallHook(&hHook); result = activation; }
+ 	}
+ 
+ 	return { result, {!(FAILED(result)), hHook} };
+@@ -85,7 +89,7 @@ std::tuple<NTSTATUS, HookInfo> InstallNamedHook(const LPCWSTR moduleHandle, cons
+ 	HOOK_TRACE_INFO hHook = { NULL }; // keep track of our hook
+ 		
+ 	// Install the hook
+-	const auto result = LhInstallHook(
++	auto result = LhInstallHook(
+ 		static_cast<void*>(GetProcAddress(GetModuleHandleW(moduleHandle), proc)),
+ 		callBack,
+ 		NULL,
+@@ -100,7 +104,8 @@ std::tuple<NTSTATUS, HookInfo> InstallNamedHook(const LPCWSTR moduleHandle, cons
+ 	}
+ 	else
+ 	{
+-		AddTrackedHook(hHook);
++		const auto activation = AddTrackedHook(hHook);
++		if (FAILED(activation)) { LhUninstallHook(&hHook); result = activation; }
+ 	}
+ 
+ 	return { result, {!(FAILED(result)), hHook} };
+diff --git a/src/ProtoInput/ProtoInputHooks/HookManager.cpp b/src/ProtoInput/ProtoInputHooks/HookManager.cpp
+index 0303b60..97c79b5 100644
+--- a/src/ProtoInput/ProtoInputHooks/HookManager.cpp
++++ b/src/ProtoInput/ProtoInputHooks/HookManager.cpp
+@@ -54,7 +54,10 @@ void HookManager::InstallHook(ProtoHookIDs hookID)
+ 		std::cerr << "Trying to install hook ID " << hookID << " which is out of range" << std::endl;
+ 	else
+ 	{
+-		hookManagerInstance.hooks[hookID]->Install();
++		#ifdef PROTOINPUT_EARLY_XINPUT
++        if(hookID==ProtoHookIDs::XinputHookID && hookManagerInstance.hooks[hookID]->IsInstalled())return;
++        #endif
++        hookManagerInstance.hooks[hookID]->Install();
+ 	}
+ }
+ 
+diff --git a/src/ProtoInput/ProtoInputHooks/MessageFilterHook.cpp b/src/ProtoInput/ProtoInputHooks/MessageFilterHook.cpp
+index 753fc50..019f020 100644
+--- a/src/ProtoInput/ProtoInputHooks/MessageFilterHook.cpp
++++ b/src/ProtoInput/ProtoInputHooks/MessageFilterHook.cpp
+@@ -186,7 +186,7 @@ void MessageFilterHook::UninstallImpl()
+ 
+ bool MessageFilterHook::IsKeyboardButtonFilterEnabled()
+ {
+-	return IsFilterEnabled<KeyboardButtonFilter>();
++	return *IsFilterEnabled<KeyboardButtonFilter>();
+ }
+ 
+ }
+diff --git a/src/ProtoInput/ProtoInputHooks/PipeCommunication.cpp b/src/ProtoInput/ProtoInputHooks/PipeCommunication.cpp
+index 46411d4..47a3f9d 100644
+--- a/src/ProtoInput/ProtoInputHooks/PipeCommunication.cpp
++++ b/src/ProtoInput/ProtoInputHooks/PipeCommunication.cpp
+@@ -91,7 +91,7 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
+ 				NULL
+ 			);
+ 
+-			if (success == 0)
++			if (success == 0 || numBytesRead != sizeof(ProtoPipe::PipeMessageHeader))
+ 			{
+ 				fprintf(stderr, "Failed to read message header from pipe, last error = 0x%X\n", GetLastError());
+ 				break;
+@@ -113,14 +113,75 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
+ 				NULL
+ 			);
+ 
+-			if (success == 0)
++			if (success == 0 || numBytesRead != msgHeader.messageSize)
+ 			{
+ 				fprintf(stderr, "Failed to read message body from pipe, last error = 0x%X\n", GetLastError());
+ 				break;
+ 			}
+ 
++   unsigned int expectedSize = 0;
++   switch (msgHeader.messageType) {
++   case ProtoPipe::PipeMessageType::SetSyntheticGamepadEnabled: expectedSize=sizeof(ProtoPipe::PipeMessageSyntheticGamepadEnabled);break;
++   case ProtoPipe::PipeMessageType::SyntheticGamepadState: expectedSize=sizeof(ProtoPipe::PipeMessageSyntheticGamepadState);break;
++   case ProtoPipe::PipeMessageType::SetSyntheticKeyboardEnabled: expectedSize = sizeof(ProtoPipe::PipeMessageSyntheticKeyboardEnabled); break;
++   case ProtoPipe::PipeMessageType::SyntheticKeyboardEvent: expectedSize = sizeof(ProtoPipe::PipeMessageSyntheticKeyboardEvent); break;
++   case ProtoPipe::PipeMessageType::SetupHook: expectedSize = sizeof(ProtoPipe::PipeMessageSetupHook); break;
++   case ProtoPipe::PipeMessageType::SetupMessageFilter: expectedSize = sizeof(ProtoPipe::PipeMessageSetupMessageFilter); break;
++   case ProtoPipe::PipeMessageType::SetupMessageBlock: expectedSize = sizeof(ProtoPipe::PipeMessageSetupMessageBlock); break;
++   case ProtoPipe::PipeMessageType::WakeUpProcess: expectedSize = sizeof(ProtoPipe::PipeMessageWakeUpProcess); break;
++   case ProtoPipe::PipeMessageType::UpdateMainWindowHandle: expectedSize = sizeof(ProtoPipe::PipeMesasgeUpdateMainWindowHandle); break;
++   case ProtoPipe::PipeMessageType::StartFocusMessageLoop: expectedSize = sizeof(ProtoPipe::PipeMessageStartFocusMessageLoop); break;
++   case ProtoPipe::PipeMessageType::StopFocusMessageLoop: expectedSize = sizeof(ProtoPipe::PipeMessageStopFocusMessageLoop); break;
++   case ProtoPipe::PipeMessageType::SetupState: expectedSize = sizeof(ProtoPipe::PipeMessageSetupState); break;
++   case ProtoPipe::PipeMessageType::SetupMessagesToSend: expectedSize = sizeof(ProtoPipe::PipeMessageSetupMessagesToSend); break;
++   case ProtoPipe::PipeMessageType::SetDrawFakeCursor: expectedSize = sizeof(ProtoPipe::PipeMessageSetDrawFakeCursor); break;
++   case ProtoPipe::PipeMessageType::SetExternalFreezeFakeInput: expectedSize = sizeof(ProtoPipe::PipeMessageSetExternalFreezeFakeInput); break;
++   case ProtoPipe::PipeMessageType::AddSelectedMouseOrKeyboard: expectedSize = sizeof(ProtoPipe::PipeMesasgeAddSelectedMouseOrKeyboard); break;
++   case ProtoPipe::PipeMessageType::AddHandleToRename: expectedSize = sizeof(ProtoPipe::PipeMessageAddHandleToRename); break;
++   case ProtoPipe::PipeMessageType::SetControllerIndex: expectedSize = sizeof(ProtoPipe::PipeMessageSetControllerIndex); break;
++   case ProtoPipe::PipeMessageType::SetUseDinput: expectedSize = sizeof(ProtoPipe::PipeMessageUseDinput); break;
++   case ProtoPipe::PipeMessageType::SetUseOpenXinput: expectedSize = sizeof(ProtoPipe::PipeMessageSetUseOpenXinput); break;
++   case ProtoPipe::PipeMessageType::SetDinputDeviceGuid: expectedSize = sizeof(ProtoPipe::PipeMessageSetDinputDeviceGuid); break;
++   case ProtoPipe::PipeMessageType::SetDinputHookGetDeviceState: expectedSize = sizeof(ProtoPipe::PipeMessageSetDinputHookGetDeviceState); break;
++   case ProtoPipe::PipeMessageType::SetSetWindowPosSettings: expectedSize = sizeof(ProtoPipe::PipeMessageSetSetWindowPosSettings); break;
++   case ProtoPipe::PipeMessageType::SetCreateSingleHIDName: expectedSize = sizeof(ProtoPipe::PipeMessageSetCreateSingleHIDName); break;
++   case ProtoPipe::PipeMessageType::SetClipCursorHookOptions: expectedSize = sizeof(ProtoPipe::PipeMessageSetClipCursorHookOptions); break;
++   case ProtoPipe::PipeMessageType::SetAllowFakeCursorOutOfBounds: expectedSize = sizeof(ProtoPipe::PipeMessageSetAllowFakeCursorOutOfBounds); break;
++   case ProtoPipe::PipeMessageType::SetToggleCursorVisibilityShortcut: expectedSize = sizeof(ProtoPipe::PipeMessageSetToggleCursorVisibilityShortcut); break;
++   case ProtoPipe::PipeMessageType::SetRawInputBypass: expectedSize = sizeof(ProtoPipe::PipeMessageSetRawInputBypass); break;
++   case ProtoPipe::PipeMessageType::SetShowCursorWhenImageUpdated: expectedSize = sizeof(ProtoPipe::PipeMessageShowCursorWhenImageUpdated); break;
++   default: goto endPipe;
++   }
++   if (msgHeader.messageSize != expectedSize) goto endPipe;
++
+ 			switch(msgHeader.messageType)
+ 			{
++			case ProtoPipe::PipeMessageType::SetSyntheticGamepadEnabled:{
++    const auto body=reinterpret_cast<const ProtoPipe::PipeMessageSyntheticGamepadEnabled*>(messageBuffer);
++    if(body->version!=1||body->enabled>1)goto endPipe;
++    XinputHook::SetSyntheticGamepadEnabled(body->enabled!=0);break;
++   }
++   case ProtoPipe::PipeMessageType::SyntheticGamepadState:{
++    const auto body=reinterpret_cast<const ProtoPipe::PipeMessageSyntheticGamepadState*>(messageBuffer);
++    if(body->version!=1||body->connected>1||body->reserved||!XinputHook::SetSyntheticGamepadState(body->connected!=0,body->buttons,body->leftTrigger,body->rightTrigger,body->leftX,body->leftY,body->rightX,body->rightY,body->leaseMilliseconds))goto endPipe;
++    break;
++   }
++   case ProtoPipe::PipeMessageType::SetSyntheticKeyboardEnabled:
++			{
++				if (msgHeader.messageSize != sizeof(ProtoPipe::PipeMessageSyntheticKeyboardEnabled)) goto endPipe;
++				const auto body = reinterpret_cast<const ProtoPipe::PipeMessageSyntheticKeyboardEnabled*>(messageBuffer);
++				if (body->version != 1 || body->enabled > 1) goto endPipe;
++				RawInput::SetSyntheticKeyboardEnabled(body->enabled != 0); break;
++			}
++			case ProtoPipe::PipeMessageType::SyntheticKeyboardEvent:
++			{
++				if (msgHeader.messageSize != sizeof(ProtoPipe::PipeMessageSyntheticKeyboardEvent)) goto endPipe;
++				const auto body = reinterpret_cast<const ProtoPipe::PipeMessageSyntheticKeyboardEvent*>(messageBuffer);
++				if (body->version != 1 || body->reserved != 0) goto endPipe;
++				RAWKEYBOARD data{}; data.VKey = body->virtualKey; data.MakeCode = body->scanCode; data.Flags = body->flags;
++				data.Message = (data.Flags & RI_KEY_BREAK) ? WM_KEYUP : WM_KEYDOWN;
++				RawInput::ProcessSyntheticKeyboardInput(data, body->leaseMilliseconds); break;
++			}
+ 			case ProtoPipe::PipeMessageType::SetupHook:
+ 				{
+ 					const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetupHook*>(messageBuffer);
+@@ -464,6 +525,8 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
+ 		}
+ 	}
+ 	endPipe:
++	RawInput::SetSyntheticKeyboardEnabled(false);
++ XinputHook::SetSyntheticGamepadEnabled(false);
+ 
+ 	printf("End of pipe thread\n");
+ 	
+diff --git a/src/ProtoInput/ProtoInputHooks/RawInput.cpp b/src/ProtoInput/ProtoInputHooks/RawInput.cpp
+index 4d1a852..c2fbf88 100644
+--- a/src/ProtoInput/ProtoInputHooks/RawInput.cpp
++++ b/src/ProtoInput/ProtoInputHooks/RawInput.cpp
+@@ -15,6 +15,8 @@
+ #include "protoinpututil.h"
+ #include "KeyboardButtonFilter.h"
+ #include "MessageFilterHook.h"
++#include <atomic>
++#include <array>
+ 
+ namespace Proto
+ {
+@@ -26,6 +28,74 @@ bool RawInput::forwardRawInput = true;
+ bool RawInput::lockInputToggleEnabled = false;
+ bool RawInput::rawInputBypass = false;
+ 
++namespace {
++ std::atomic<bool> syntheticKeyboardEnabled{false};
++ std::mutex syntheticLifecycleMutex;
++ HWND syntheticTarget = nullptr;
++ bool syntheticMessages = false;
++ bool syntheticSignature = false;
++ HANDLE syntheticLeaseThread = nullptr;
++ HANDLE syntheticLeaseStop = nullptr;
++ std::array<RAWKEYBOARD, 256> syntheticHeldKeys{};
++ std::array<ULONGLONG, 256> syntheticDeadlines{};
++}
++
++bool RawInput::ProcessSyntheticKeyboardInput(const RAWKEYBOARD& data, unsigned int leaseMilliseconds)
++{
++ std::lock_guard<std::recursive_mutex> guard(FakeMouseKeyboard::keyboardMutex);
++ if (!syntheticKeyboardEnabled || !data.VKey || data.VKey >= 255 || data.VKey == VK_LWIN || data.VKey == VK_RWIN || !data.MakeCode || data.MakeCode > 255 ||
++  (data.Flags & ~(RI_KEY_BREAK | RI_KEY_E0 | RI_KEY_E1)) || ((data.Flags & RI_KEY_E0) && (data.Flags & RI_KEY_E1)) ||
++  ((data.Flags & RI_KEY_BREAK) ? leaseMilliseconds != 0 : leaseMilliseconds < 1 || leaseMilliseconds > 2000)) return false;
++ DWORD windowPid = 0; const HWND target = syntheticTarget;
++ if (!target || !IsWindow(target) || !GetWindowThreadProcessId(target, &windowPid) || windowPid != GetCurrentProcessId()) return false;
++ ProcessKeyboardInput(data, nullptr, true);
++ syntheticHeldKeys[data.VKey] = data;
++ syntheticDeadlines[data.VKey] = (data.Flags & RI_KEY_BREAK) ? 0 : GetTickCount64() + leaseMilliseconds;
++ return true;
++}
++
++void RawInput::SetSyntheticKeyboardEnabled(bool enabled)
++{
++ std::lock_guard<std::mutex> lifecycle(syntheticLifecycleMutex);
++ {
++  std::lock_guard<std::recursive_mutex> guard(FakeMouseKeyboard::keyboardMutex);
++  for (unsigned int key = 1; key < syntheticDeadlines.size(); key++) if (syntheticDeadlines[key]) {
++   auto release = syntheticHeldKeys[key]; release.Flags |= RI_KEY_BREAK; ProcessKeyboardInput(release, nullptr, true); syntheticDeadlines[key] = 0;
++  }
++  FakeMouseKeyboard::ClearAllKeyboardState(); syntheticKeyboardEnabled = false;
++ }
++ if (syntheticLeaseThread) {
++  SetEvent(syntheticLeaseStop);
++  // Normal teardown outside DllMain, with no keyboard lock held. If the join
++  // cannot finish, keep the handles and refuse to restart this service.
++  if (WaitForSingleObject(syntheticLeaseThread, 2000) != WAIT_OBJECT_0) return;
++  CloseHandle(syntheticLeaseThread); CloseHandle(syntheticLeaseStop); syntheticLeaseThread = nullptr; syntheticLeaseStop = nullptr;
++ }
++ if (enabled) {
++  // Freeze the admission target/settings for the lease lifetime. The lease
++  // thread never reads GUI/pipe-owned mutable configuration.
++  { std::lock_guard<std::recursive_mutex> guard(FakeMouseKeyboard::keyboardMutex);
++   syntheticTarget = (HWND)HwndSelector::GetSelectedHwnd();
++   syntheticMessages = rawInputState.sendKeyboardPressMessages;
++   syntheticSignature = MessageFilterHook::IsKeyboardButtonFilterEnabled();
++  }
++  syntheticLeaseStop = CreateEventW(nullptr, TRUE, FALSE, nullptr); if (!syntheticLeaseStop) return;
++  syntheticLeaseThread = CreateThread(nullptr, 0, [](LPVOID stop) -> DWORD {
++   while (WaitForSingleObject(static_cast<HANDLE>(stop), 10) == WAIT_TIMEOUT) {
++    { std::lock_guard<std::recursive_mutex> guard(FakeMouseKeyboard::keyboardMutex);
++     const auto now = GetTickCount64();
++     for (unsigned int key = 1; key < syntheticDeadlines.size(); key++) if (syntheticDeadlines[key] && now >= syntheticDeadlines[key]) {
++      auto release = syntheticHeldKeys[key]; release.Flags |= RI_KEY_BREAK; ProcessKeyboardInput(release, nullptr, true); syntheticDeadlines[key] = 0;
++     }
++    }
++   }
++   return 0;
++  }, syntheticLeaseStop, 0, nullptr);
++  if (syntheticLeaseThread) syntheticKeyboardEnabled = true;
++  else { CloseHandle(syntheticLeaseStop); syntheticLeaseStop = nullptr; }
++ }
++}
++
+ 
+ RAWINPUT RawInput::inputBuffer[RawInputBufferSize]{};
+ std::vector<RAWINPUT> RawInput::rawinputs{};
+@@ -169,18 +239,23 @@ void RawInput::ProcessMouseInput(const RAWMOUSE& data, HANDLE deviceHandle)
+ 	FakeCursor::NotifyUpdatedCursorPosition();
+ }
+ 
+-void RawInput::ProcessKeyboardInput(const RAWKEYBOARD& data, HANDLE deviceHandle)
++void RawInput::ProcessKeyboardInput(const RAWKEYBOARD& data, HANDLE deviceHandle, bool synthetic)
+ {
++	std::lock_guard<std::recursive_mutex> guard(FakeMouseKeyboard::keyboardMutex);
+ 	const bool released = (data.Flags & RI_KEY_BREAK) != 0;
+ 	const bool pressed = !released;
+ 
+-	if (pressed && FakeCursor::GetToggleVisilbityShorcutEnabled() &&  data.VKey == FakeCursor::GetToggleVisibilityVkey())
++	if (!synthetic && pressed && FakeCursor::GetToggleVisilbityShorcutEnabled() &&  data.VKey == FakeCursor::GetToggleVisibilityVkey())
+ 	{
+ 		FakeCursor::SetCursorVisibility(!FakeCursor::GetCursorVisibility());
+ 		return;
+ 	}
+ 	
+-	if (rawInputState.sendKeyboardPressMessages)
++ // Revalidate on every emission, including delayed lease and disable releases.
++ const HWND selected = synthetic ? syntheticTarget : (HWND)HwndSelector::GetSelectedHwnd();
++ DWORD selectedPid = 0;
++ const bool ownedWindow = IsWindow(selected) && GetWindowThreadProcessId(selected, &selectedPid) && selectedPid == GetCurrentProcessId();
++ if ((synthetic ? syntheticMessages : rawInputState.sendKeyboardPressMessages) && ownedWindow)
+ 	{
+ 		if (pressed)
+ 		{
+@@ -188,24 +263,25 @@ void RawInput::ProcessKeyboardInput(const RAWKEYBOARD& data, HANDLE deviceHandle
+ 			
+ 			lparam |= 1; // Repeat bit
+ 			lparam |= (data.MakeCode << 16); // Scan code
++			if (data.Flags & RI_KEY_E0) lparam |= (1 << 24);
+ 			
+ 			if (FakeMouseKeyboard::IsKeyStatePressed(data.VKey))
+ 			{
+ 				lparam |= (1 << 30);
+ 			}
+ 			
+-			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_KEYDOWN, 
+-				MessageFilterHook::IsKeyboardButtonFilterEnabled() ? data.VKey | KeyboardButtonFilter::signature : data.VKey, 
++			PostMessageW(selected, WM_KEYDOWN,
++				(synthetic ? syntheticSignature : MessageFilterHook::IsKeyboardButtonFilterEnabled()) ? data.VKey | KeyboardButtonFilter::signature : data.VKey,
+ 				lparam);
+ 			
+ 			// if (data.VKey == VK_SHIFT || data.VKey == VK_LSHIFT)
+ 			// {
+-			// 	PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_KEYDOWN, VK_SHIFT, lparam);
+-			// 	PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_KEYDOWN, VK_LSHIFT, lparam);
++			// 	PostMessageW(selected, WM_KEYDOWN, VK_SHIFT, lparam);
++			// 	PostMessageW(selected, WM_KEYDOWN, VK_LSHIFT, lparam);
+ 			// }
+ 			// else
+ 			// {
+-			// 	PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_KEYDOWN, data.VKey, lparam);
++			// 	PostMessageW(selected, WM_KEYDOWN, data.VKey, lparam);
+ 			// }
+ 		}
+ 		else if (released)
+@@ -213,21 +289,22 @@ void RawInput::ProcessKeyboardInput(const RAWKEYBOARD& data, HANDLE deviceHandle
+ 			unsigned int lparam = 0;
+ 			lparam |= 1; // Repeat count (always 1 for key up)
+ 			lparam |= (data.MakeCode << 16); // Scan code
++			if (data.Flags & RI_KEY_E0) lparam |= (1 << 24);
+ 			lparam |= (1 << 30); // Previous key state (always 1 for key up)
+ 			lparam |= (1 << 31); // Transition state (always 1 for key up)
+ 
+-			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_KEYUP, 
+-				MessageFilterHook::IsKeyboardButtonFilterEnabled() ? data.VKey | KeyboardButtonFilter::signature : data.VKey,
++			PostMessageW(selected, WM_KEYUP,
++				(synthetic ? syntheticSignature : MessageFilterHook::IsKeyboardButtonFilterEnabled()) ? data.VKey | KeyboardButtonFilter::signature : data.VKey,
+ 				lparam);
+ 			
+ 			// if (data.VKey == VK_SHIFT || data.VKey == VK_LSHIFT)
+ 			// {
+-			// 	PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_KEYUP, VK_SHIFT, lparam);
+-			// 	PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_KEYUP, VK_LSHIFT, lparam);
++			// 	PostMessageW(selected, WM_KEYUP, VK_SHIFT, lparam);
++			// 	PostMessageW(selected, WM_KEYUP, VK_LSHIFT, lparam);
+ 			// }
+ 			// else
+ 			// {
+-			// 	PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_KEYUP, data.VKey, lparam);
++			// 	PostMessageW(selected, WM_KEYUP, data.VKey, lparam);
+ 			// }
+ 			
+ 		}
+@@ -238,6 +315,8 @@ void RawInput::ProcessKeyboardInput(const RAWKEYBOARD& data, HANDLE deviceHandle
+ 
+ void RawInput::ProcessRawInput(HRAWINPUT rawInputHandle, bool inForeground, const MSG& msg)
+ {
++	// Opt-in synthetic instances never route physical owner mouse/keyboard input.
++	if (syntheticKeyboardEnabled.load()) return;
+ 	// if (rawInputBypass)
+ 	// {
+ 	// 	for (const auto& hwnd : forwardingWindows)
+diff --git a/src/ProtoInput/ProtoInputHooks/RawInput.h b/src/ProtoInput/ProtoInputHooks/RawInput.h
+index aa2c4e7..287ee92 100644
+--- a/src/ProtoInput/ProtoInputHooks/RawInput.h
++++ b/src/ProtoInput/ProtoInputHooks/RawInput.h
+@@ -40,9 +40,11 @@ private:
+ 	static const std::vector<USAGE> usageTypesOfInterest;
+ 
+ 	static void ProcessMouseInput(const RAWMOUSE& data, HANDLE deviceHandle);
+-	static void ProcessKeyboardInput(const RAWKEYBOARD& data, HANDLE deviceHandle);
++	static void ProcessKeyboardInput(const RAWKEYBOARD& data, HANDLE deviceHandle, bool synthetic = false);
+ 
+ public:
++	static void SetSyntheticKeyboardEnabled(bool enabled);
++	static bool ProcessSyntheticKeyboardInput(const RAWKEYBOARD& data, unsigned int leaseMilliseconds);
+ 	static RawInputState rawInputState;
+ 	static HWND rawInputHwnd;
+ 	static bool forwardRawInput;
+diff --git a/src/ProtoInput/ProtoInputHooks/XinputHook.cpp b/src/ProtoInput/ProtoInputHooks/XinputHook.cpp
+index 5764340..de28923 100644
+--- a/src/ProtoInput/ProtoInputHooks/XinputHook.cpp
++++ b/src/ProtoInput/ProtoInputHooks/XinputHook.cpp
+@@ -1,15 +1,44 @@
+ #include "XinputHook.h"
++#include "NostalgiaInputDiagnostics.h"
++extern "C" { __declspec(dllexport) NostalgiaInputDiagnosticsV1 NostalgiaInputDiagnosticData{}; }
++SRWLOCK NostalgiaDiagnosticWriteLock=SRWLOCK_INIT;
+ #include <Xinput.h>
+ #include <imgui.h>
+ #include "dinput.h"
+ #include "Gui.h"
+ #include <string>
++#include <mutex>
+ #include "OpenXinputWrapper.h"
+ 
+ 
+ namespace Proto
+ {
+ 
++namespace {
++ std::mutex syntheticGamepadMutex;
++ bool requiredSyntheticHooksReady=false;unsigned successfulSyntheticHooks=0;
++ bool syntheticOwned=false,syntheticEnabled=false,syntheticConnected=false;
++ XINPUT_STATE syntheticState{};
++ ULONGLONG syntheticDeadline=0;
++ void setGamepad(bool connected,const XINPUT_GAMEPAD& state){
++  if(connected!=syntheticConnected||memcmp(&state,&syntheticState.Gamepad,sizeof(state))){syntheticState.dwPacketNumber++;syntheticState.Gamepad=state;syntheticConnected=connected;}
++ }
++ void expireGamepad(){if(syntheticDeadline&&GetTickCount64()>=syntheticDeadline){setGamepad(syntheticConnected,XINPUT_GAMEPAD{});syntheticDeadline=0;}}
++ bool readGamepad(XINPUT_STATE& state,bool& connected){std::lock_guard<std::mutex> lock(syntheticGamepadMutex);if(!syntheticOwned)return false;expireGamepad();state=syntheticState;connected=syntheticConnected;return true;}
++}
++bool XinputHook::IsSyntheticInterceptionReady(){return requiredSyntheticHooksReady;}
++unsigned XinputHook::GetSuccessfulHookCount(){return successfulSyntheticHooks;}
++void XinputHook::SetSyntheticGamepadEnabled(bool enabled){
++ std::lock_guard<std::mutex> lock(syntheticGamepadMutex);
++ if(enabled)syntheticOwned=true;
++ syntheticEnabled=enabled;syntheticDeadline=0;setGamepad(enabled,XINPUT_GAMEPAD{});
++}
++bool XinputHook::SetSyntheticGamepadState(bool connected,unsigned short buttons,unsigned char leftTrigger,unsigned char rightTrigger,short leftX,short leftY,short rightX,short rightY,unsigned int lease){
++ if((buttons&~0xF3FFu)||lease>2000||(connected?lease<1:(buttons||leftTrigger||rightTrigger||leftX||leftY||rightX||rightY||lease)))return false;
++ std::lock_guard<std::mutex> lock(syntheticGamepadMutex);if(!syntheticEnabled)return false;
++ XINPUT_GAMEPAD gamepad{buttons,leftTrigger,rightTrigger,leftX,leftY,rightX,rightY};setGamepad(connected,gamepad);syntheticDeadline=connected?GetTickCount64()+lease:0;return true;
++}
++
+ constexpr LONG DINPUT_RANGE_MAX = 32767;
+ constexpr LONG DINPUT_RANGE_MIN = -32768;
+ bool XinputHook::useDinput = false;
+@@ -74,7 +103,18 @@ inline std::pair<bool, unsigned int> GetTargetControllerIndex(DWORD dwUserIndex)
+ 
+ inline DWORD WINAPI XInputGetState_Inline(DWORD dwUserIndex, XINPUT_STATE* pState, bool extended)
+ {
+-	if (extended)
++	InterlockedIncrement64(&NostalgiaInputDiagnosticData.getStateTotal);
++ if(extended)InterlockedIncrement64(&NostalgiaInputDiagnosticData.getStateExTotal);
++ XINPUT_STATE synthetic{};bool connectedSynthetic=false;
++ if(readGamepad(synthetic,connectedSynthetic)){
++  if(dwUserIndex!=0||!connectedSynthetic)return ERROR_DEVICE_NOT_CONNECTED;
++  if(!pState)return ERROR_BAD_ARGUMENTS;
++  *pState=synthetic;
++  RecordSyntheticXinputReturn(synthetic.Gamepad.wButtons,synthetic.dwPacketNumber);
++  // Ordinal100 follows the pinned OpenXinput16-byte XINPUT_STATE ABI; no extra write.
++  return ERROR_SUCCESS;
++ }
++ if (extended)
+ 		getStateExCounter++;
+ 	else
+ 		getStateCounter++;
+@@ -163,7 +203,12 @@ DWORD WINAPI Hook_XInputGetStateEx(DWORD dwUserIndex, XINPUT_STATE* pState)
+ 
+ DWORD WINAPI Hook_XInputSetState(DWORD dwUserIndex, XINPUT_VIBRATION* pVibration)
+ {
+-	auto [connected, targetControllerIndex] = GetTargetControllerIndex(dwUserIndex);
++	XINPUT_STATE synthetic{};bool connectedSynthetic=false;
++ if(readGamepad(synthetic,connectedSynthetic)){
++  if(dwUserIndex!=0||!connectedSynthetic)return ERROR_DEVICE_NOT_CONNECTED;
++  return pVibration?ERROR_SUCCESS:ERROR_BAD_ARGUMENTS; // Acknowledge/drop, never hardware rumble.
++ }
++ auto [connected, targetControllerIndex] = GetTargetControllerIndex(dwUserIndex);
+ 	
+ 	if (!connected)
+ 		return ERROR_DEVICE_NOT_CONNECTED;
+@@ -181,7 +226,15 @@ DWORD WINAPI Hook_XInputSetState(DWORD dwUserIndex, XINPUT_VIBRATION* pVibration
+ 
+ DWORD WINAPI Hook_XInputGetCapabilities(DWORD dwUserIndex, DWORD dwFlags, XINPUT_CAPABILITIES* pCapabilities)
+ {
+-	auto [connected, targetControllerIndex] = GetTargetControllerIndex(dwUserIndex);
++ InterlockedIncrement64(&NostalgiaInputDiagnosticData.getCapabilitiesTotal);
++	XINPUT_STATE synthetic{};bool connectedSynthetic=false;
++ if(readGamepad(synthetic,connectedSynthetic)){
++  if(dwUserIndex!=0||!connectedSynthetic)return ERROR_DEVICE_NOT_CONNECTED;
++  if(!pCapabilities||(dwFlags!=0&&dwFlags!=XINPUT_FLAG_GAMEPAD))return ERROR_BAD_ARGUMENTS;
++  *pCapabilities={};pCapabilities->Type=XINPUT_DEVTYPE_GAMEPAD;pCapabilities->SubType=XINPUT_DEVSUBTYPE_GAMEPAD;
++  pCapabilities->Gamepad={0xF3FF,255,255,32767,32767,32767,32767};return ERROR_SUCCESS;
++ }
++ auto [connected, targetControllerIndex] = GetTargetControllerIndex(dwUserIndex);
+ 
+ 	if (!connected)
+ 		return ERROR_DEVICE_NOT_CONNECTED;
+@@ -357,15 +410,21 @@ void XinputHook::ShowGuiStatus()
+ 
+ void XinputHook::InstallImpl()
+ {
++#ifndef PROTOINPUT_EARLY_XINPUT
+ 	if (static bool pollDevices = true; pollDevices)
+ 	{
+ 		pollDevices = false;
+ 		PollDinputDevices();
+ 	}
+ 
++#endif
+ 	// Some games (e.g. Terraria) haven't loaded the dlls when we inject hooks. So load all XInput dlls.
+ 	const wchar_t* xinputNames[] = {
+-				L"xinput1_3.dll", L"xinput1_4.dll", L"xinput1_2.dll", L"xinput1_1.dll", L"xinput9_1_0.dll"
++				#ifdef PROTOINPUT_EARLY_XINPUT
++        L"xinput1_4.dll", L"xinput1_3.dll", L"xinput1_2.dll", L"xinput1_1.dll", L"xinput9_1_0.dll"
++        #else
++        L"xinput1_3.dll", L"xinput1_4.dll", L"xinput1_2.dll", L"xinput1_1.dll", L"xinput9_1_0.dll"
++        #endif
+ 	};
+ 	for (const auto xinputName : xinputNames)
+ 	{
+@@ -381,9 +440,12 @@ void XinputHook::InstallImpl()
+ 			continue;
+ 		}
+ 
+-		hookInfos.push_back(std::get<1>(InstallNamedHook(xinputName, "XInputGetState", Hook_XInputGetState)));
+-		hookInfos.push_back(std::get<1>(InstallNamedHook(xinputName, "XInputSetState", Hook_XInputSetState)));
+-		hookInfos.push_back(std::get<1>(InstallNamedHook(xinputName, "XInputGetCapabilities", Hook_XInputGetCapabilities)));
++		auto state=std::get<1>(InstallNamedHook(xinputName,"XInputGetState",Hook_XInputGetState));
++  auto set=std::get<1>(InstallNamedHook(xinputName,"XInputSetState",Hook_XInputSetState));
++  auto caps=std::get<1>(InstallNamedHook(xinputName,"XInputGetCapabilities",Hook_XInputGetCapabilities));
++  hookInfos.push_back(state);hookInfos.push_back(set);hookInfos.push_back(caps);
++  successfulSyntheticHooks+=state.hasHook+set.hasHook+caps.hasHook;
++  if(_wcsicmp(xinputName,L"xinput1_4.dll")==0)requiredSyntheticHooksReady=state.hasHook&&set.hasHook&&caps.hasHook;
+ 	}
+ 	//XinputGetStateEx (hidden call, ordinal 100). Only present in xinput1_4.dll and xinput1_3.dll. Used by EtG and DoS2
+ 	//DWORD as 1st param and similar structure pointer for 2nd param (with an extra DWORD at the end). Can be treated as a normal XINPUT_STATE.
+@@ -400,6 +462,7 @@ void XinputHook::InstallImpl()
+ 		XInputSetStatePtr = t_XInputSetState(GetProcAddress(GetModuleHandleW(L"xinput1_3.dll"), "XInputSetState"));
+ 		XInputGetCapabilitiesPtr = t_XInputGetCapabilities(GetProcAddress(GetModuleHandleW(L"xinput1_3.dll"), "XInputGetCapabilities"));
+ 
++#ifndef PROTOINPUT_EARLY_XINPUT
+ 		if (XInputGetStateExPtr == nullptr)
+ 			MessageBoxA(NULL, "XInputGetStateExPtr is null", "Error", MB_OK);
+ 
+@@ -411,6 +474,7 @@ void XinputHook::InstallImpl()
+ 
+ 		if (XInputGetCapabilitiesPtr == nullptr)
+ 			MessageBoxA(NULL, "XInputGetCapabilitiesPtr is null", "Error", MB_OK);
++#endif
+ 	}
+ }
+ 
+diff --git a/src/ProtoInput/ProtoInputHooks/XinputHook.h b/src/ProtoInput/ProtoInputHooks/XinputHook.h
+index 861a870..16058ff 100644
+--- a/src/ProtoInput/ProtoInputHooks/XinputHook.h
++++ b/src/ProtoInput/ProtoInputHooks/XinputHook.h
+@@ -31,7 +31,11 @@ public:
+ 	void InstallImpl() override;
+ 	void UninstallImpl() override;
+ 
+-	static void SetUseDinput(bool useDinput);
++	static bool IsSyntheticInterceptionReady();
++ static unsigned GetSuccessfulHookCount();
++ static void SetSyntheticGamepadEnabled(bool enabled);
++ static bool SetSyntheticGamepadState(bool connected, unsigned short buttons, unsigned char leftTrigger, unsigned char rightTrigger, short leftX, short leftY, short rightX, short rightY, unsigned int leaseMilliseconds);
++ static void SetUseDinput(bool useDinput);
+ 	static bool GetUseDinput() { return useDinput; }
+ };
+ 
+diff --git a/src/ProtoInput/ProtoInputHooks/dllmain.cpp b/src/ProtoInput/ProtoInputHooks/dllmain.cpp
+index c8350b7..e740363 100644
+--- a/src/ProtoInput/ProtoInputHooks/dllmain.cpp
++++ b/src/ProtoInput/ProtoInputHooks/dllmain.cpp
+@@ -16,8 +16,32 @@
+ #include "FocusMessageLoop.h"
+ #include "Gui.h"
+ #include "FakeCursor.h"
++#include "XinputHook.h"
+ 
++extern "C" BOOL WINAPI OpenXinputDllMain(HINSTANCE,DWORD,LPVOID);
+ HMODULE dll_hModule;
++#ifdef PROTOINPUT_EARLY_XINPUT
++struct alignas(8) EarlyXInputStatus { volatile LONG64 version=1,bytes=80,initializerCalls=0,stage=0,result=0,lateCalls=0,lateStage=0,bootstrapCount=0,dllAttachCount=0,readyHookCount=0; };
++static_assert(sizeof(EarlyXInputStatus)==80 && alignof(EarlyXInputStatus)==8,"Early status ABI");
++extern "C" { __declspec(dllexport) EarlyXInputStatus NostalgiaEarlyXInputStatus{}; }
++static INIT_ONCE earlyOnce=INIT_ONCE_STATIC_INIT,lateOnce=INIT_ONCE_STATIC_INIT;
++static HANDLE lateReady=nullptr;
++static BOOL CALLBACK EarlyOnce(PINIT_ONCE,void*,void**){
++ InterlockedExchange64(&NostalgiaEarlyXInputStatus.stage,1);
++ Proto::XinputHook::SetSyntheticGamepadEnabled(true);
++ Proto::HookManager::InstallHook(XinputHookID);
++ bool ready=Proto::XinputHook::IsSyntheticInterceptionReady();
++ InterlockedExchange64(&NostalgiaEarlyXInputStatus.readyHookCount,Proto::XinputHook::GetSuccessfulHookCount());
++ InterlockedExchange64(&NostalgiaEarlyXInputStatus.result,ready?1:0);
++ InterlockedExchange64(&NostalgiaEarlyXInputStatus.stage,ready?2:-1);
++ return TRUE; // Terminal failure is retained; repeated calls never reinstall/reset.
++}
++extern "C" __declspec(dllexport) bool NostalgiaEarlyXInputInitialize(){
++ InterlockedIncrement64(&NostalgiaEarlyXInputStatus.initializerCalls);
++ if(!InitOnceExecuteOnce(&earlyOnce,EarlyOnce,nullptr,nullptr))return false;
++ return InterlockedCompareExchange64(&NostalgiaEarlyXInputStatus.result,0,0)==1;
++}
++#endif
+ 
+ DWORD WINAPI GuiThread(LPVOID lpParameter)
+ {
+@@ -32,6 +56,7 @@ DWORD WINAPI GuiThread(LPVOID lpParameter)
+ 
+ DWORD WINAPI StartThread(LPVOID lpParameter)
+ {
++#ifndef PROTOINPUT_HEADLESS
+     AllocConsole();
+     FILE* f = new FILE();
+     freopen_s(&f, "CONOUT$", "w", stdout);
+@@ -39,6 +64,7 @@ DWORD WINAPI StartThread(LPVOID lpParameter)
+     // Proto::ConsoleHwnd = (intptr_t)FindWindowW(L"ConsoleWindowClass", NULL);
+     Proto::ConsoleHwnd = (intptr_t)GetConsoleWindow();
+     Proto::SetConsoleVisible(false);
++#endif
+ 
+     std::cout << "Hooks DLL loaded\n";
+ 
+@@ -53,23 +79,50 @@ DWORD WINAPI StartThread(LPVOID lpParameter)
+ 	
+     Proto::AddThreadToACL(GetCurrentThreadId());
+ 	
++#ifndef PROTOINPUT_HEADLESS
+     HANDLE hGuiThread = CreateThread(nullptr, 0,
+                                   (LPTHREAD_START_ROUTINE)GuiThread, dll_hModule, CREATE_SUSPENDED, &Proto::GuiThreadID);
+   
++#endif
+     Proto::RawInput::InitialiseRawInput();
+     	
+     Proto::StartPipeCommunication();
+ 
++#ifndef PROTOINPUT_HEADLESS
+     ResumeThread(hGuiThread);
+ 
+     if (hGuiThread != nullptr)
+         CloseHandle(hGuiThread);
++#endif
+ 		
+     std::cout << "Reached end of startup thread\n";
++#ifdef PROTOINPUT_EARLY_XINPUT
++ InterlockedExchange64(&NostalgiaEarlyXInputStatus.lateStage,2);
++ if(lateReady)SetEvent(lateReady);
++#endif
+     	
+     return 0;
+ }
+ 
++#ifdef PROTOINPUT_EARLY_XINPUT
++static BOOL CALLBACK LateOnce(PINIT_ONCE,void*,void**){
++ InterlockedExchange64(&NostalgiaEarlyXInputStatus.lateStage,1);
++ lateReady=CreateEventW(nullptr,TRUE,FALSE,nullptr);
++ if(!lateReady){InterlockedExchange64(&NostalgiaEarlyXInputStatus.lateStage,-1);return TRUE;}
++ if(!OpenXinputDllMain((HINSTANCE)dll_hModule,DLL_PROCESS_ATTACH,nullptr)){InterlockedExchange64(&NostalgiaEarlyXInputStatus.lateStage,-1);return TRUE;}
++ HANDLE worker=CreateThread(nullptr,0,StartThread,dll_hModule,0,nullptr);
++ if(!worker){InterlockedExchange64(&NostalgiaEarlyXInputStatus.lateStage,-1);return TRUE;}
++ InterlockedIncrement64(&NostalgiaEarlyXInputStatus.bootstrapCount);CloseHandle(worker);
++ return TRUE;
++}
++extern "C" __declspec(dllexport) DWORD WINAPI NostalgiaLateBootstrap(void*){
++ InterlockedIncrement64(&NostalgiaEarlyXInputStatus.lateCalls);
++ if(!InitOnceExecuteOnce(&lateOnce,LateOnce,nullptr,nullptr)||!lateReady)return 0;
++ DWORD wait=WaitForSingleObject(lateReady,5000);
++ return wait==WAIT_OBJECT_0?1:2; //2 uncertain; worker is never terminated.
++}
++#endif
++
+ // EasyHook entry point
+ extern "C" __declspec(dllexport) void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO * inRemoteInfo)
+ {
+@@ -88,7 +141,9 @@ BOOL APIENTRY DllMain( HMODULE hModule,
+ 	// Needed for EasyHook to initialise some stuff
+     EasyHookDllMain(hModule, ul_reason_for_call, lpReserved);
+ 
++    #ifndef PROTOINPUT_EARLY_XINPUT
+     OpenXinputDllMain(hModule, ul_reason_for_call, lpReserved);
++    #endif
+ 	
+     switch (ul_reason_for_call)
+     {
+@@ -96,10 +151,14 @@ BOOL APIENTRY DllMain( HMODULE hModule,
+     {
+         dll_hModule = hModule;
+     		
++#ifdef PROTOINPUT_EARLY_XINPUT
++         InterlockedIncrement64(&NostalgiaEarlyXInputStatus.dllAttachCount);
++#else
+          HANDLE hThread = CreateThread(nullptr, 0,
+                                       (LPTHREAD_START_ROUTINE)StartThread, hModule, 0, 0);
+          if (hThread != nullptr)
+              CloseHandle(hThread);
++#endif
+              		
+         break;
+     }
+diff --git a/src/ProtoInput/ProtoInputHooks/pipeinclude/pipeinclude.h b/src/ProtoInput/ProtoInputHooks/pipeinclude/pipeinclude.h
+index 2acbef8..1f82ac9 100644
+--- a/src/ProtoInput/ProtoInputHooks/pipeinclude/pipeinclude.h
++++ b/src/ProtoInput/ProtoInputHooks/pipeinclude/pipeinclude.h
+@@ -31,7 +31,11 @@ enum class PipeMessageType
+ 	SetAllowFakeCursorOutOfBounds,
+ 	SetToggleCursorVisibilityShortcut,
+ 	SetRawInputBypass,
+-	SetShowCursorWhenImageUpdated
++	SetShowCursorWhenImageUpdated,
++	SetSyntheticKeyboardEnabled,
++	SyntheticKeyboardEvent,
++ SetSyntheticGamepadEnabled,
++ SyntheticGamepadState
+ };
+ 
+ struct PipeMessageHeader
+@@ -40,6 +44,31 @@ struct PipeMessageHeader
+ 	unsigned int messageSize;
+ };
+ 
++struct PipeMessageSyntheticKeyboardEnabled
++{
++ unsigned int version = 1;
++ unsigned int enabled = 0;
++};
++
++struct PipeMessageSyntheticKeyboardEvent
++{
++ unsigned int version = 1;
++ unsigned short virtualKey = 0;
++ unsigned short scanCode = 0;
++ unsigned short flags = 0;
++ unsigned short reserved = 0;
++ unsigned int leaseMilliseconds = 0;
++};
++
++struct PipeMessageSyntheticGamepadEnabled { unsigned int version=1; unsigned int enabled=0; };
++struct PipeMessageSyntheticGamepadState {
++ unsigned int version=1, connected=0;
++ unsigned short buttons=0; unsigned char leftTrigger=0,rightTrigger=0;
++ short leftX=0,leftY=0,rightX=0,rightY=0;
++ unsigned int reserved=0,leaseMilliseconds=0;
++};
++static_assert(sizeof(PipeMessageSyntheticGamepadState)==28, "Gamepad protocol size");
++
+ struct PipeMessageSetupHook
+ {
+ 	ProtoHookIDs hookID;
+@@ -185,4 +214,4 @@ struct PipeMessageShowCursorWhenImageUpdated
+ 	bool ShowCursorWhenImageUpdated;
+ };
+ 
+-}
+\ No newline at end of file
++}
+diff --git a/src/ProtoInput/ProtoInputLoader/Inject.cpp b/src/ProtoInput/ProtoInputLoader/Inject.cpp
+index e97fc7b..addb9c2 100644
+--- a/src/ProtoInput/ProtoInputLoader/Inject.cpp
++++ b/src/ProtoInput/ProtoInputLoader/Inject.cpp
+@@ -12,6 +12,56 @@
+ #include <filesystem>
+ 
+ #include "Loader.h"
++#include <mutex>
++
++namespace {
++
++template<typename T> bool SendSyntheticPacket(Proto::ProtoInstance& instance, ProtoPipe::PipeMessageType type, const T& body)
++{
++ if (!instance.pipeHandle || instance.pipeHandle == INVALID_HANDLE_VALUE || !instance.clientConnected) return false;
++ return ProtoSendPipeMessage(instance.pipeHandle, type, &body);
++}
++}
++
++extern "C" __declspec(dllexport) bool SetSyntheticKeyboardEnabled(ProtoInstanceHandle handle, bool enabled)
++{
++ std::lock_guard<std::recursive_mutex> guard(protoPipeSendMutex);
++ const auto found = Proto::instances.find(handle); if (found == Proto::instances.end()) return false;
++ auto& instance = found->second;
++ // Call an existing setup API to establish the pipe first; this new API never
++ // enters the upstream unbounded ConnectNamedPipe wait.
++ const ProtoPipe::PipeMessageSyntheticKeyboardEnabled body{1, enabled ? 1u : 0u};
++ if (!SendSyntheticPacket(instance, ProtoPipe::PipeMessageType::SetSyntheticKeyboardEnabled, body)) return false;
++ instance.syntheticKeyboardEnabled = enabled; return true;
++}
++
++extern "C" __declspec(dllexport) bool SendSyntheticKeyboardEvent(ProtoInstanceHandle handle, unsigned short virtualKey, unsigned short scanCode, unsigned short flags, unsigned int leaseMilliseconds)
++{
++ if (!virtualKey || virtualKey >= 255 || virtualKey == VK_LWIN || virtualKey == VK_RWIN || !scanCode || scanCode > 255 || (flags & ~(RI_KEY_BREAK | RI_KEY_E0 | RI_KEY_E1)) || ((flags & RI_KEY_E0) && (flags & RI_KEY_E1)) ||
++  ((flags & RI_KEY_BREAK) ? leaseMilliseconds != 0 : leaseMilliseconds < 1 || leaseMilliseconds > 2000)) return false;
++ std::lock_guard<std::recursive_mutex> guard(protoPipeSendMutex);
++ const auto found = Proto::instances.find(handle); if (found == Proto::instances.end() || !found->second.syntheticKeyboardEnabled) return false;
++ const ProtoPipe::PipeMessageSyntheticKeyboardEvent body{1, virtualKey, scanCode, flags, 0, leaseMilliseconds};
++ return SendSyntheticPacket(found->second, ProtoPipe::PipeMessageType::SyntheticKeyboardEvent, body);
++}
++
++extern "C" __declspec(dllexport) bool SetSyntheticGamepadEnabled(ProtoInstanceHandle handle, bool enabled)
++{
++ std::lock_guard<std::recursive_mutex> guard(protoPipeSendMutex);
++ auto found=Proto::instances.find(handle);if(found==Proto::instances.end())return false;
++ const ProtoPipe::PipeMessageSyntheticGamepadEnabled body{1,enabled?1u:0u};
++ if(!SendSyntheticPacket(found->second,ProtoPipe::PipeMessageType::SetSyntheticGamepadEnabled,body))return false;
++ found->second.syntheticGamepadEnabled=enabled;return true;
++}
++extern "C" __declspec(dllexport) bool SendSyntheticGamepadState(ProtoInstanceHandle handle, bool connected, unsigned short buttons, unsigned char leftTrigger, unsigned char rightTrigger, short leftX, short leftY, short rightX, short rightY, unsigned int leaseMilliseconds)
++{
++ if((buttons & ~0xF3FFu)||leaseMilliseconds>2000||
++  (connected?leaseMilliseconds<1:(buttons||leftTrigger||rightTrigger||leftX||leftY||rightX||rightY||leaseMilliseconds)))return false;
++ std::lock_guard<std::recursive_mutex> guard(protoPipeSendMutex);
++ auto found=Proto::instances.find(handle);if(found==Proto::instances.end()||!found->second.syntheticGamepadEnabled)return false;
++ const ProtoPipe::PipeMessageSyntheticGamepadState body{1,connected?1u:0u,buttons,leftTrigger,rightTrigger,leftX,leftY,rightX,rightY,0,leaseMilliseconds};
++ return SendSyntheticPacket(found->second,ProtoPipe::PipeMessageType::SyntheticGamepadState,body);
++}
+ 
+ extern "C" NTSTATUS __declspec(dllexport) __stdcall HookCompleteInjection(void* InInfo)
+ {
+diff --git a/src/ProtoInput/ProtoInputLoader/InstanceHandling.cpp b/src/ProtoInput/ProtoInputLoader/InstanceHandling.cpp
+index d9e2e51..8e524d1 100644
+--- a/src/ProtoInput/ProtoInputLoader/InstanceHandling.cpp
++++ b/src/ProtoInput/ProtoInputLoader/InstanceHandling.cpp
+@@ -51,7 +51,7 @@ void WaitClientConnect(Proto::ProtoInstance& instance)
+ 		while (count < 10)
+ 		{
+ 			//FIXME: This needs a timeout
+-			if (ConnectNamedPipe(instance.pipeHandle, NULL))
++			if (ConnectNamedPipe(instance.pipeHandle, NULL) || GetLastError() == ERROR_PIPE_CONNECTED)
+ 			{
+ 				std::cout << "Connected named pipe to pid " << instance.pid << std::endl;
+ 				instance.clientConnected = true;
+@@ -65,4 +65,4 @@ void WaitClientConnect(Proto::ProtoInstance& instance)
+ 			}
+ 		}
+ 	}
+-}
+\ No newline at end of file
++}
+diff --git a/src/ProtoInput/ProtoInputLoader/Loader.h b/src/ProtoInput/ProtoInputLoader/Loader.h
+index 9b36add..49969f0 100644
+--- a/src/ProtoInput/ProtoInputLoader/Loader.h
++++ b/src/ProtoInput/ProtoInputLoader/Loader.h
+@@ -11,43 +11,15 @@ ProtoInstanceHandle CreateInstanceHandle(unsigned long pid);
+ 
+ void WaitClientConnect(Proto::ProtoInstance& instance);
+ 
++#include <mutex>
++// All legacy and synthetic header/body writes share the same lock.
++inline std::recursive_mutex protoPipeSendMutex;
+ template<typename Body>
+-void ProtoSendPipeMessage(HANDLE pipe, ProtoPipe::PipeMessageType messageType, Body* body)
++bool ProtoSendPipeMessage(HANDLE pipe, ProtoPipe::PipeMessageType messageType, const Body* body)
+ {
+-	ProtoPipe::PipeMessageHeader header
+-	{
+-		messageType,
+-		sizeof(Body)
+-	};
+-
+-	DWORD numBytesWritten = 0;
+-	BOOL write = WriteFile(
+-		pipe,
+-		&header,
+-		sizeof(ProtoPipe::PipeMessageHeader),
+-		&numBytesWritten,
+-		NULL
+-	);
+-
+-	if (write)
+-	{
+-		// std::cout << "Successfully sent message header" << std::endl;
+-	}
+-	else
+-		std::cerr << "Failed to send message header" << std::endl;
+-
+-	write = WriteFile(
+-		pipe,
+-		body,
+-		sizeof(Body),
+-		&numBytesWritten,
+-		NULL
+-	);
+-
+-	if (write)
+-	{
+-		// std::cout << "Successfully sent message body" << std::endl;
+-	}
+-	else
+-		std::cerr << "Failed to send message body" << std::endl;
+-}
+\ No newline at end of file
++ std::lock_guard<std::recursive_mutex> guard(protoPipeSendMutex);
++ const ProtoPipe::PipeMessageHeader header{messageType, sizeof(Body)};
++ DWORD written = 0;
++ return WriteFile(pipe, &header, sizeof(header), &written, nullptr) && written == sizeof(header) &&
++  WriteFile(pipe, body, sizeof(Body), &written, nullptr) && written == sizeof(Body);
++}
+diff --git a/src/ProtoInput/ProtoInputLoader/RemoteLoadLibrary.cpp b/src/ProtoInput/ProtoInputLoader/RemoteLoadLibrary.cpp
+index 475a05c..c3752d2 100644
+--- a/src/ProtoInput/ProtoInputLoader/RemoteLoadLibrary.cpp
++++ b/src/ProtoInput/ProtoInputLoader/RemoteLoadLibrary.cpp
+@@ -5,12 +5,25 @@
+ #include <BlackBone/Process/Process.h>
+ #include <BlackBone/Patterns/PatternSearch.h>
+ #include <filesystem>
++#include <atomic>
++#include <algorithm>
++#include "TrackedInstances.h"
++#ifdef PROTOINPUT_EARLY_XINPUT
++extern "C" { __declspec(dllexport) volatile LONG64 NostalgiaLateBootstrapHostResult=0; }
++static std::atomic<bool> uncertainBootstrap{false};
++#endif
+ #include "BlackBone/Process/RPC/RemoteFunction.hpp"
+ 
+ 
+ extern "C" __declspec(dllexport) ProtoInstanceHandle RemoteLoadLibraryInjectRuntime(unsigned long pid, const wchar_t* dllFolderPath)
+ {
+-	bool is64 = Isx64(pid);
++	#ifdef PROTOINPUT_EARLY_XINPUT
++ if(uncertainBootstrap.load())return 0;
++ #endif
++ bool is64 = Isx64(pid);
++ #ifdef PROTOINPUT_EARLY_XINPUT
++ if(!is64)return 0;
++ #endif
+ 	std::cout << "Target is " << (is64 ? "64-bit" : "32-bit") << std::endl;
+ 
+ 	blackbone::Process proc;
+@@ -18,6 +31,10 @@ extern "C" __declspec(dllexport) ProtoInstanceHandle RemoteLoadLibraryInjectRunt
+ 
+ 	auto dllpath = std::wstring(dllFolderPath);
+ 	dllpath += is64 ? L"ProtoInputHooks64.dll" : L"ProtoInputHooks32.dll";
++ #ifdef PROTOINPUT_EARLY_XINPUT
++ std::replace(dllpath.begin(),dllpath.end(),L'/',L'\\');
++ if(!std::filesystem::path(dllpath).is_absolute())return 0;
++ #endif
+ 	std::wcout << L"Using dll \"" << dllpath << L"\"" << std::endl;
+ 
+ 	// Blackbone LoadLibrary injection method
+@@ -38,7 +55,30 @@ extern "C" __declspec(dllexport) ProtoInstanceHandle RemoteLoadLibraryInjectRunt
+ 		else
+ 		{
+ 			std::cout << "LoadLibrary remote call success\n" << std::endl;
+-			return CreateInstanceHandle(pid);
++			#ifdef PROTOINPUT_EARLY_XINPUT
++            auto module=proc.modules().GetModule((blackbone::module_t)(uintptr_t)callRes.result());
++            auto exported=module?proc.modules().GetExport(module,"NostalgiaLateBootstrap"):blackbone::call_result_t<blackbone::exportData>(STATUS_NOT_FOUND);
++            if(!module||module->baseAddress!=(uintptr_t)callRes.result()||_wcsicmp(module->fullPath.c_str(),dllpath.c_str())||!exported.success()||exported.result().isForwarded||exported.result().procAddress<module->baseAddress||exported.result().procAddress>=module->baseAddress+module->size){std::cerr<<"Nostalgia late module/export admission failed"<<std::endl;return 0;}
++            MEMORY_BASIC_INFORMATION memory{};
++            if(!VirtualQueryEx(proc.core().handle(),(void*)(uintptr_t)exported.result().procAddress,&memory,sizeof(memory))||memory.AllocationBase!=(void*)(uintptr_t)module->baseAddress||memory.State!=MEM_COMMIT||memory.Type!=MEM_IMAGE||(memory.Protect&PAGE_GUARD)||!(memory.Protect&(PAGE_EXECUTE|PAGE_EXECUTE_READ|PAGE_EXECUTE_READWRITE|PAGE_EXECUTE_WRITECOPY))){std::cerr<<"Nostalgia late executable export admission failed"<<std::endl;return 0;}
++            // Reserve the owned pipe before the one-time runtime starts its receiver.
++            ProtoInstanceHandle instance=CreateInstanceHandle(pid);
++            auto found=Proto::instances.find(instance);
++            if(found==Proto::instances.end()||!found->second.pipeHandle||found->second.pipeHandle==INVALID_HANDLE_VALUE){Proto::instances.erase(instance);std::cerr<<"Nostalgia late pipe creation failed"<<std::endl;return 0;}
++            auto closeOwnPipe=[&](){auto owned=Proto::instances.find(instance);if(owned!=Proto::instances.end()){if(owned->second.pipeHandle&&owned->second.pipeHandle!=INVALID_HANDLE_VALUE)CloseHandle(owned->second.pipeHandle);Proto::instances.erase(owned);}};
++            InterlockedExchange64(&NostalgiaLateBootstrapHostResult,1);
++            DWORD threadId=0;
++            HANDLE thread=CreateRemoteThread(proc.core().handle(),nullptr,0,reinterpret_cast<LPTHREAD_START_ROUTINE>((uintptr_t)exported.result().procAddress),nullptr,0,&threadId);
++            if(!thread){closeOwnPipe();InterlockedExchange64(&NostalgiaLateBootstrapHostResult,-1);return 0;}
++            DWORD waited=WaitForSingleObject(thread,7000),exitCode=0;
++            bool completed=waited==WAIT_OBJECT_0&&GetExitCodeThread(thread,&exitCode);
++            CloseHandle(thread); // Never terminate a remote thread or unload its code.
++            if(!completed||exitCode==2){closeOwnPipe();uncertainBootstrap.store(true);InterlockedExchange64(&NostalgiaLateBootstrapHostResult,-2);std::cerr<<"Nostalgia late bootstrap uncertain pid="<<pid<<" thread="<<threadId<<" wait="<<waited<<std::endl;return 0;}
++            if(exitCode!=1){closeOwnPipe();InterlockedExchange64(&NostalgiaLateBootstrapHostResult,-1);return 0;}
++            InterlockedExchange64(&NostalgiaLateBootstrapHostResult,2);return instance;
++            #else
++            return CreateInstanceHandle(pid);
++            #endif
+ 		}
+ 	}
+ 	else
+diff --git a/src/ProtoInput/ProtoInputLoader/TrackedInstances.h b/src/ProtoInput/ProtoInputLoader/TrackedInstances.h
+index 1058519..92ef3de 100644
+--- a/src/ProtoInput/ProtoInputLoader/TrackedInstances.h
++++ b/src/ProtoInput/ProtoInputLoader/TrackedInstances.h
+@@ -11,10 +11,12 @@ class ProtoInstance
+ public:
+ 	HANDLE pipeHandle = nullptr;
+ 	bool clientConnected = false;
++	bool syntheticKeyboardEnabled = false;
++ bool syntheticGamepadEnabled = false;
+ 	unsigned long pid = 0;
+ };
+ 
+ extern std::unordered_map<ProtoInstanceHandle, ProtoInstance> instances;
+ extern ProtoInstanceHandle instanceCounter;
+ 
+-}
+\ No newline at end of file
++}
+diff --git a/src/ProtoInput/ProtoInputLoader/include/protoloader.h b/src/ProtoInput/ProtoInputLoader/include/protoloader.h
+index c039d12..ca7466b 100644
+--- a/src/ProtoInput/ProtoInputLoader/include/protoloader.h
++++ b/src/ProtoInput/ProtoInputLoader/include/protoloader.h
+@@ -4,6 +4,14 @@
+ // 0 means invalid handle
+ using ProtoInstanceHandle = unsigned int;
+ 
++// Local extension: synthetic-only instance input. Successful return means the
++// bounded packet was written, not that the target consumed it. Down events have
++// a 1..2000 ms held-key lease; up requires lease0. No OS SendInput is used.
++extern "C" __declspec(dllexport) bool SetSyntheticGamepadEnabled(ProtoInstanceHandle instanceHandle, bool enabled);
++extern "C" __declspec(dllexport) bool SendSyntheticGamepadState(ProtoInstanceHandle instanceHandle, bool connected, unsigned short buttons, unsigned char leftTrigger, unsigned char rightTrigger, short leftX, short leftY, short rightX, short rightY, unsigned int leaseMilliseconds);
++extern "C" __declspec(dllexport) bool SetSyntheticKeyboardEnabled(ProtoInstanceHandle instanceHandle, bool enabled);
++extern "C" __declspec(dllexport) bool SendSyntheticKeyboardEvent(ProtoInstanceHandle instanceHandle, unsigned short virtualKey, unsigned short scanCode, unsigned short flags, unsigned int leaseMilliseconds);
++
+ enum ProtoHookIDs : unsigned int
+ {
+ 	RegisterRawInputHookID = 0,
+@@ -122,4 +130,4 @@ extern "C" __declspec(dllexport) void SetToggleFakeCursorVisibilityShortcut(Prot
+ 
+ extern "C" __declspec(dllexport) void SetRawInputBypass(ProtoInstanceHandle instanceHandle, bool enabled);
+ 
+-extern "C" __declspec(dllexport) void SetShowCursorWhenImageUpdated(ProtoInstanceHandle instanceHandle, bool enabled);
+\ No newline at end of file
++extern "C" __declspec(dllexport) void SetShowCursorWhenImageUpdated(ProtoInstanceHandle instanceHandle, bool enabled);
+diff --git a/src/ProtoInput/ProtoInputHooks/NostalgiaInputDiagnostics.h b/src/ProtoInput/ProtoInputHooks/NostalgiaInputDiagnostics.h
+new file mode 100644
+--- /dev/null
++++ b/src/ProtoInput/ProtoInputHooks/NostalgiaInputDiagnostics.h
+@@ -0,0 +1,46 @@
++#pragma once
++#include <Windows.h>
++#include <cstddef>
++
++// Read-only consumer ABI. Atomic counters are independent observations.
++// Even, unchanged generation bounds coherent last-value fields, not all counters.
++struct alignas(8) NostalgiaInputDiagnosticsV1 {
++ volatile LONG64 version=1;
++ volatile LONG64 byteSize=96;
++ volatile LONG64 getStateTotal=0;
++ volatile LONG64 getStateExTotal=0;
++ volatile LONG64 syntheticSlot0Success=0;
++ volatile LONG64 syntheticNonzeroButtonsSuccess=0;
++ volatile LONG64 lastSyntheticButtons=0;
++ volatile LONG64 lastSyntheticPacket=0;
++ volatile LONG64 getCapabilitiesTotal=0;
++ volatile LONG64 getForegroundTotal=0;
++ volatile LONG64 lastForegroundHwnd=0;
++ volatile LONG64 generation=0;
++};
++static_assert(alignof(NostalgiaInputDiagnosticsV1)==8,"Diagnostic ABI alignment");
++static_assert(offsetof(NostalgiaInputDiagnosticsV1,lastSyntheticButtons)==48,"Buttons offset");
++static_assert(offsetof(NostalgiaInputDiagnosticsV1,lastSyntheticPacket)==56,"Packet offset");
++static_assert(offsetof(NostalgiaInputDiagnosticsV1,lastForegroundHwnd)==80,"Foreground offset");
++static_assert(sizeof(NostalgiaInputDiagnosticsV1)==96,"Diagnostic ABI size");
++static_assert(offsetof(NostalgiaInputDiagnosticsV1,generation)==88,"Diagnostic ABI offsets");
++extern "C" __declspec(dllexport) NostalgiaInputDiagnosticsV1 NostalgiaInputDiagnosticData;
++extern SRWLOCK NostalgiaDiagnosticWriteLock;
++
++inline void RecordSyntheticXinputReturn(WORD buttons,DWORD packet){
++ InterlockedIncrement64(&NostalgiaInputDiagnosticData.syntheticSlot0Success);
++ if(buttons)InterlockedIncrement64(&NostalgiaInputDiagnosticData.syntheticNonzeroButtonsSuccess);
++ AcquireSRWLockExclusive(&NostalgiaDiagnosticWriteLock);
++ InterlockedIncrement64(&NostalgiaInputDiagnosticData.generation);
++ InterlockedExchange64(&NostalgiaInputDiagnosticData.lastSyntheticButtons,buttons);
++ InterlockedExchange64(&NostalgiaInputDiagnosticData.lastSyntheticPacket,packet);
++ InterlockedIncrement64(&NostalgiaInputDiagnosticData.generation);
++ ReleaseSRWLockExclusive(&NostalgiaDiagnosticWriteLock);
++}
++inline void RecordForegroundReturn(HWND hwnd){
++ AcquireSRWLockExclusive(&NostalgiaDiagnosticWriteLock);
++ InterlockedIncrement64(&NostalgiaInputDiagnosticData.generation);
++ InterlockedExchange64(&NostalgiaInputDiagnosticData.lastForegroundHwnd,static_cast<LONG64>(reinterpret_cast<uintptr_t>(hwnd)));
++ InterlockedIncrement64(&NostalgiaInputDiagnosticData.generation);
++ ReleaseSRWLockExclusive(&NostalgiaDiagnosticWriteLock);
++}

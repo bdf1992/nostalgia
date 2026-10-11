@@ -1,0 +1,4 @@
+# Unified patch bytes contain upstream CRLF/context whitespace. Preserve them.
+patches/*.patch -text -whitespace
+# Retained license digests refer to exact upstream bytes.
+licenses/** -text -whitespace

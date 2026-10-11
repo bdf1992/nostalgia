@@ -2,6 +2,7 @@ import { McpServer } from '@modelcontextprotocol/server';
 import { inspectInput, compareInput, inspectOutput, compareOutput } from './contracts.js';
 import { inspectGameTable, compareGameTables } from './application.js';
 import { diagnostic } from './errors.js';
+import { presentGameplayObservation } from './gameplayMcpPresentation.js';
 import { inspectToolchain, toolchainInput, toolchainOutput } from './toolchain.js';
 import { queryDesignContext, designContextInput, designContextOutput } from './designContext.js';
 import { checkpointInput, verifyCheckpointInput, restoreInput, createCheckpointOutput,
@@ -10,14 +11,21 @@ import { checkpointInput, verifyCheckpointInput, restoreInput, createCheckpointO
 import { startGameplayEnvironment, inspectGameplayEnvironment, actInGameplayEnvironment,
   stopGameplayEnvironment, startEnvironmentInput, startEnvironmentOutput,
   inspectEnvironmentInput, inspectEnvironmentOutput, actEnvironmentInput,
-  actEnvironmentOutput, stopEnvironmentInput, stopEnvironmentOutput } from './gameplayEnvironment.js';
+  actEnvironmentOutput, stopEnvironmentInput, stopEnvironmentOutput, focusOnGameplayEnvironment, focusEnvironmentInput, focusEnvironmentOutput } from './gameplayEnvironment.js';
 
 export function createServer() {
   const server = new McpServer({ name: 'nostalgia', version: '0.2.0' });
   const annotations = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
   const copyAnnotations = { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false };
+  server.registerTool('focus_on_gameplay_environment', {
+    description: 'Select the owned native gameplay target and return its actual frame. Booth selection stays on its hidden desktop; Sky activates the foreground window and may move the cursor. Browser explicit focus is currently unsupported.',
+    inputSchema: focusEnvironmentInput, outputSchema: focusEnvironmentOutput, annotations: { ...copyAnnotations, openWorldHint: true },
+  }, async input => {
+    try { const output = await focusOnGameplayEnvironment(input); return presentGameplayObservation(output); }
+    catch (error) { return { isError: true, content: [{ type: 'text' as const, text: JSON.stringify(diagnostic(error)) }] }; }
+  });
   server.registerTool('start_gameplay_environment', {
-    description: 'Start a managed browser gameplay environment from a verified file checkpoint in a fresh copied workspace and separate browser profile. Audience user/shared opens a visible window; agent runs headless. Declares HTTP/WebSocket allowed origins. Returns session and input/observation paths; running is not proof of gameplay quality. Browser provider only: native games require their own adapter. Creator process must remain alive.',
+    description: 'Start gameplay from a verified checkpoint in a fresh copied workspace. Browser uses a fresh context and declared network policy. Windows-native selects a private Sky or hidden Booth bridge and a fixed offline ME3 Elden Ring profile with separate save filename; shared assets remain referenced. Booth provides virtual gamepad input and viewer audio. Sky uses foreground input. The provider owner must remain alive; running is not a gameplay-quality verdict.',
     inputSchema: startEnvironmentInput, outputSchema: startEnvironmentOutput,
     annotations: { ...copyAnnotations, openWorldHint: true },
   }, async (input, extra) => {
@@ -29,33 +37,31 @@ export function createServer() {
     }
   });
   server.registerTool('inspect_gameplay_environment', {
-    description: 'Observe a managed gameplay session by its private local session path. Returns bounded visible text and a rendered PNG frame for a running browser session, or retained stopped status. Requires the creator process to remain alive; does not authenticate caller-supplied session metadata or judge gameplay quality.',
+    description: 'Observe a managed gameplay session by its private local session path. Returns bounded visible text and an actual frame from the browser, hidden Booth or foreground Sky, or retained stopped status. MCP sends frame bytes once as image content; structured metadata omits them. Oversized frames remain in retained session evidence with an explicit notice. The provider owner must remain alive; caller-supplied session metadata is not authenticated provenance or a gameplay-quality verdict.',
     inputSchema: inspectEnvironmentInput, outputSchema: inspectEnvironmentOutput,
     annotations: { ...copyAnnotations, openWorldHint: true },
   }, async (input) => {
     try {
       const output = await inspectGameplayEnvironment(input);
-      return { content: [{ type: 'text' as const, text: JSON.stringify(output) },
-        ...(output.screenshot_png_base64 ? [{ type: 'image' as const, data: output.screenshot_png_base64, mimeType: 'image/png' }] : [])], structuredContent: output };
+      return presentGameplayObservation(output);
     } catch (error) {
       return { isError: true, content: [{ type: 'text' as const, text: JSON.stringify(diagnostic(error)) }] };
     }
   });
   server.registerTool('act_in_gameplay_environment', {
-    description: 'Send a bounded keypress, viewport click, or wait to a managed browser gameplay session. Retains attempted actions and actual resulting text/frame. Coordinates refer to the 1280x720 viewport. No arbitrary evaluation, shell execution, or native-game controls. Input success does not establish a design or QA verdict.',
+    description: 'Send one bounded action and retain the actual resulting frame. Booth supports leased virtual gamepad state and waits on its owned hidden desktop. Sky supports foreground keys, frame-relative clicks and waits. Browser bounds remain 1280x720. Input success is not a gameplay-quality verdict.',
     inputSchema: actEnvironmentInput, outputSchema: actEnvironmentOutput,
     annotations: { ...copyAnnotations, openWorldHint: true },
   }, async (input) => {
     try {
       const output = await actInGameplayEnvironment(input);
-      return { content: [{ type: 'text' as const, text: JSON.stringify(output) },
-        ...(output.observation.screenshot_png_base64 ? [{ type: 'image' as const, data: output.observation.screenshot_png_base64, mimeType: 'image/png' }] : [])], structuredContent: output };
+      return presentGameplayObservation(output);
     } catch (error) {
       return { isError: true, content: [{ type: 'text' as const, text: JSON.stringify(diagnostic(error)) }] };
     }
   });
   server.registerTool('stop_gameplay_environment', {
-    description: 'Close the browser and servers owned by a managed gameplay session, retaining its workspace and records. Does not signal guessed PIDs, delete game copies, roll back progress, or close unrelated sessions. Stop reports success after owned resources close.',
+    description: 'Stop owned gameplay resources while retaining copies and receipts. Browser closes its own context and servers. Booth quiesces the exact owned game/controller, closes viewer capture, restores audio routing and closes its desktop. Sky sends Alt+F4 only to its exact observed owned window. Both verify shutdown and report incomplete cleanup. Never signals guessed PIDs or closes unrelated windows.',
     inputSchema: stopEnvironmentInput, outputSchema: stopEnvironmentOutput,
     annotations: { ...copyAnnotations, destructiveHint: true, idempotentHint: true },
   }, async (input) => {
