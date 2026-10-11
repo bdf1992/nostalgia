@@ -4,17 +4,22 @@
   "private": true,
   "description": "Study games and player requests through shared CLI and MCP operations.",
   "type": "module",
-  "engines": { "node": ">=24" },
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "npm run build && node --test tests/*.test.mjs",
     "check": "tsc -p tsconfig.json --noEmit",
     "evaluate:baseline": "npm run build && node scripts/evaluate-baseline.mjs",
+    "provision:browser": "node scripts/provision-browser.mjs",
+    "play:fixture": "npm run build && node scripts/play-fixture.mjs",
     "nostalgia": "node dist/cli.js"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "2.3.1",
     "csv-parse": "7.0.3",
+    "playwright": "1.64.0",
     "zod": "4.6.5"
   },
   "devDependencies": {

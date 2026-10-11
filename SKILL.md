@@ -18,6 +18,11 @@ checkpoint design-context queries through CLI and MCP. Generation, game-data
 mutation, archive extraction, and live-change adapters are not implemented. Use tools actually available in the session;
 state missing capabilities precisely. Instructions are not implementation proof.
 
+Declared-file capture, verification and restore are shared CLI/MCP operations.
+Managed browser gameplay environments supply start, inspect, input and stop;
+native-game environment adapters remain unimplemented. Read
+[gameplay environments](docs/GAMEPLAY-ENVIRONMENTS.md) for actual capabilities.
+
 For studying and creating games, read [the game-study guide](docs/GAME-STUDY.md).
 For extracted mechanics tables, read [the CLI/MCP tool guide](docs/GAME-TABLES.md).
 For design questions using retained SON study, read
@@ -89,6 +94,19 @@ or destination engine before its need is established. Record design choices
 separately from facts about the source games.
 
 ### Produce with explicit state and recovery
+
+Every Nostalgia agent needing to play, demonstrate, contribute to, or test a game
+should use `start_gameplay_environment` (CLI `start-gameplay-environment`) with
+an admitted checkpoint and a fresh workspace. Select user, agent or shared
+audience and declare isolated or networked request access. Inspect the returned
+session and use its supported input/observation commands before claiming a
+working gameplay environment. Keep its creator process alive and stop owned
+sessions after work. Preserve the session identity and actual QA observations.
+
+Check provider support before launch. The current provider accepts captured HTML
+games; native games need a different adapter with measured profile, save, runtime,
+network and control boundaries. A copied install cannot establish isolation.
+When unsupported, continue work on the missing adapter and report the exact gap.
 
 Keep source material separate from working changes. Identify which provider owns
 each read, write, generated artifact, build, and running session. Record artifact
