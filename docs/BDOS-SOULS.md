@@ -54,7 +54,34 @@ providers; they do not replace that manifest or its inspection schema.
 | [ME3](https://github.com/garyttierney/me3) | Launch mod profiles and instrument supported games | Mod Engine 2 is an older alternative. Smithbox recommends ME3 for modern games; pin and test the chosen game build before admitting a profile. |
 | [WitchyBND](https://github.com/ividyon/WitchyBND) | Unpack/repack supported binders and serialize game formats | Yabber is its predecessor. Documented CLI and format support make it a candidate for repeatable authored archive tests. Top-level game archive access is a separate concern. |
 
-Tool archives, dependencies, executable hashes and operation receipts stay local.
+Tool archives, extracted dependencies and operation receipts stay local.
+The [Windows Souls lock](../catalog/souls.windows.lock.json) records the selected
+release URLs, publisher archive digests and executable identities without local
+paths. All three downloaded archives matched their publisher digests. ME3's CLI
+and the two authored profiles parsed successfully; Smithbox is installed but its
+GUI has not been launched. No external runtime installation was needed.
+
+WitchyBND passed an original, uncompressed BND4 pack/unpack/repack test with two
+members. A separate reviewer repeated the operation with Unicode names, all 256
+byte values and an empty member, checking actual binder headers, member IDs,
+flags, names and payload hashes. This tests an asset container operation before
+commercial assets are involved.
+
+The retained local recipe is `state/elden-tools-roundtrip.py`, with provisioning
+receipts in `state/elden-tools-{me3,smithbox,witchybnd}.json`. It is a local test
+carrier, not an installer or general MCP operation. Use a fresh owned run directory
+when repeating it. Its sequence is `--passive --bnd --repack <authored-folder>`,
+then `--unpack --location <first-unpack> <original.bnd>`, then repack the unpacked
+folder and unpack that result into another directory. Before repacking, remove
+the generated XML `sourcePath` and assign a different `filename`, so the original
+container remains available for comparison. Require successful subprocesses and
+identical member IDs, flags, full names and payload hashes; record container byte
+equality separately. None compression is the only compression tested.
+
+Witchy created its own new roaming configuration directory during initialization.
+Its upstream startup may discover installed-game compression libraries; no Oodle
+library copy was observed. The test is not evidence of process isolation.
+
 Observed hashes are identities, not signatures. A passing synthetic archive
 round-trip means the declared authored payload survived that operation; it does
 not prove encrypted regulation data, compression dependencies or all game
