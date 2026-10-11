@@ -16,7 +16,7 @@
       },
       "multiplayer_recommendations": {
         "latency-first": {
-          "strategy": "mednafen-native-netplay",
+          "strategy": "native-netplay",
           "status": "candidate-until-measured"
         },
         "balanced": {
@@ -44,7 +44,7 @@
       },
       "multiplayer_recommendations": {
         "latency-first": {
-          "strategy": "mednafen-native-netplay",
+          "strategy": "native-netplay",
           "status": "candidate-until-measured"
         },
         "balanced": {
@@ -71,7 +71,7 @@
       },
       "multiplayer_recommendations": {
         "latency-first": {
-          "strategy": "mednafen-native-netplay",
+          "strategy": "native-netplay",
           "status": "candidate-until-measured"
         },
         "balanced": {

@@ -37,12 +37,21 @@ jobs:
           }
 
           for game in game_rows:
-              assert game['preferred_runtime'] in runtime_ids, (
-                  f"{game['id']} references unknown runtime {game['preferred_runtime']}"
+              choices = game.get('preferred_runtime_by_profile', {'default': game.get('preferred_runtime')})
+              recommendations = game.get('multiplayer_recommendations', {
+                  'default': {'strategy': game.get('multiplayer_strategy')}
+              })
+              assert choices and choices.keys() == recommendations.keys(), (
+                  f"{game['id']} has missing or mismatched recommendation profiles"
               )
-              assert game['multiplayer_strategy'] in known_strategy_ids, (
-                  f"{game['id']} references unknown strategy {game['multiplayer_strategy']}"
-              )
+              for profile, runtime in choices.items():
+                  assert runtime in runtime_ids, (
+                      f"{game['id']} references unknown runtime {runtime} for {profile}"
+                  )
+                  strategy = recommendations[profile]['strategy']
+                  assert strategy in known_strategy_ids, (
+                      f"{game['id']} references unknown strategy {strategy} for {profile}"
+                  )
 
           ps1_rows = ps1['cases']
           assert len(ps1_rows) == 20, f"expected 20 PS1 stress fixtures, got {len(ps1_rows)}"
@@ -123,3 +132,14 @@ jobs:
           ./nostalgia.ps1 ps1-plan twisted-metal-2-ps1
           ./nostalgia.ps1 ps1-plan crash-bash-ps1
           ./nostalgia.ps1 ps1-plan micro-maniacs-ps1
+
+  game-study:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm test
