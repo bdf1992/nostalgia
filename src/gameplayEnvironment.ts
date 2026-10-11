@@ -8,32 +8,41 @@ import { chromium, type Browser, type BrowserContext, type Page } from 'playwrig
 import * as z from 'zod/v4';
 import { verifyFileCheckpoint, restoreFileCheckpoint } from './fileCheckpoint.js';
 import { diagnostic, StudyError } from './errors.js';
+import { nativeStartInput, nativeStartOutput, nativeInspectOutput, nativeActInput, nativeActOutput, nativeStopOutput, nativeFocusOutput,
+  startNativeGameplayEnvironment, inspectNativeGameplayEnvironment, actInNativeGameplayEnvironment, stopNativeGameplayEnvironment, focusOnNativeGameplayEnvironment, isNativeSession } from './nativeGameplayEnvironment.js';
 
 const absolute = z.string().max(4096).refine(isAbsolute, 'Provide an absolute local path');
 const origin = z.string().max(2048).refine(value => {
   try { const url = new URL(value); return ['http:', 'https:'].includes(url.protocol) && url.origin === value && !url.username && !url.password; } catch { return false; }
 }, 'Provide an exact HTTP or HTTPS origin');
 const networkSchema = z.strictObject({ mode: z.enum(['isolated', 'networked']).default('isolated'), allowed_origins: z.array(origin).max(100).default([]) }).refine(value => value.mode !== 'isolated' || value.allowed_origins.length === 0, 'Isolated mode cannot allow external origins');
-export const startEnvironmentInput = z.strictObject({ checkpoint: absolute, destination: absolute,
+const browserStartInput = z.strictObject({ provider: z.literal('browser').default('browser'), checkpoint: absolute, destination: absolute,
   entrypoint: z.string().max(4096).default('index.html'), audience: z.enum(['agent', 'user', 'shared']).default('agent'),
   network: networkSchema.default({ mode: 'isolated', allowed_origins: [] }), lifetime_seconds: z.number().int().min(30).max(86400).default(3600) });
+export const startEnvironmentInput = z.union([browserStartInput, nativeStartInput]);
 export const inspectEnvironmentInput = z.strictObject({ session_path: absolute });
 const actionSchema = z.discriminatedUnion('kind', [z.strictObject({ kind: z.literal('key'), key: z.string().min(1).max(100) }),
   z.strictObject({ kind: z.literal('click'), x: z.number().min(0).max(1279), y: z.number().min(0).max(719) }),
   z.strictObject({ kind: z.literal('wait'), milliseconds: z.number().int().min(0).max(2000) })]);
-export const actEnvironmentInput = z.strictObject({ session_path: absolute, action: actionSchema });
+const browserActInput = z.strictObject({ session_path: absolute, action: actionSchema });
+export const actEnvironmentInput = z.union([browserActInput, nativeActInput]);
 export const stopEnvironmentInput = inspectEnvironmentInput;
 const identity = { session_path: absolute, session_id: z.string().uuid(), checkpoint_id: z.string().regex(/^cp_[a-f0-9]{64}$/) };
 const runtimeSchema = z.strictObject({ provider: z.literal('playwright-chromium'), playwright_version: z.literal('1.64.0'), browser_version: z.string(), executable: absolute, sha256: z.string().regex(/^[a-f0-9]{64}$/) });
-export const startEnvironmentOutput = z.strictObject({ ...identity, gameplay_url: z.string().url(), audience: z.enum(['agent', 'user', 'shared']), network: networkSchema,
+const browserStartOutput = z.strictObject({ ...identity, gameplay_url: z.string().url(), audience: z.enum(['agent', 'user', 'shared']), network: networkSchema,
   working_directory: absolute, runtime: runtimeSchema, guarantees: z.array(z.string()), limitations: z.array(z.string()) });
-export const inspectEnvironmentOutput = z.strictObject({ ...identity, status: z.enum(['running', 'stopped', 'failed']), url: z.string(), visible_text: z.string().max(16384), screenshot_png_base64: z.string().max(Math.ceil(8 * 1024 ** 2 / 3) * 4) });
-export const actEnvironmentOutput = z.strictObject({ action: actionSchema, observation: inspectEnvironmentOutput });
-export const stopEnvironmentOutput = z.strictObject({ ...identity, status: z.literal('stopped') });
+export const startEnvironmentOutput = z.union([browserStartOutput, nativeStartOutput]);
+const browserInspectOutput = z.strictObject({ ...identity, status: z.enum(['running', 'stopped', 'failed']), url: z.string(), visible_text: z.string().max(16384), screenshot_png_base64: z.string().max(Math.ceil(8 * 1024 ** 2 / 3) * 4) });
+export const inspectEnvironmentOutput = z.union([browserInspectOutput, nativeInspectOutput]);
+export const actEnvironmentOutput = z.union([z.strictObject({ action: actionSchema, observation: browserInspectOutput }), nativeActOutput]);
+const browserStopOutput = z.strictObject({ ...identity, status: z.literal('stopped') });
+export const stopEnvironmentOutput = z.union([browserStopOutput, nativeStopOutput]);
+export const focusEnvironmentInput = inspectEnvironmentInput;
+export const focusEnvironmentOutput = nativeFocusOutput;
 const controlUrl = z.string().refine(value => { try { const url = new URL(value); return url.protocol === 'http:' && url.hostname === '127.0.0.1' && Number(url.port) > 0 && url.pathname === '/control' && !url.search && !url.hash && !url.username && !url.password; } catch { return false; } });
-const receiptSchema = startEnvironmentOutput.extend({ control_url: controlUrl, token: z.string().regex(/^[a-f0-9]{64}$/), status: z.enum(['running', 'stopped', 'failed']), expires_at: z.string().datetime() });
+const receiptSchema = browserStartOutput.extend({ control_url: controlUrl, token: z.string().regex(/^[a-f0-9]{64}$/), status: z.enum(['running', 'stopped', 'failed']), expires_at: z.string().datetime() });
 type Receipt = z.output<typeof receiptSchema>;
-type Observation = z.output<typeof inspectEnvironmentOutput>;
+type Observation = z.output<typeof browserInspectOutput>;
 type Action = z.output<typeof actionSchema>;
 type Session = { receipt: Receipt; browser: Browser; context: BrowserContext; page: Page; host: Server; control: Server; timer?: NodeJS.Timeout; queue: Promise<unknown>; observation?: Observation; journal: unknown[]; destinationIdentity: { dev: number; ino: number }; metadata: Map<string, Stats>; stopping: boolean };
 const sessions = new Map<string, Session>();
@@ -95,7 +104,7 @@ async function observe(session: Session) {
   if (screenshot.length > 8 * 1024 ** 2) fail('environment_limit', 'Rendered screenshot exceeds 8 MiB');
   const observation: Observation = { session_path: session.receipt.session_path, session_id: session.receipt.session_id, checkpoint_id: session.receipt.checkpoint_id,
     status: 'running', url: session.page.url(), visible_text: new TextDecoder().decode(Buffer.from(await session.page.locator('body').innerText({ timeout: 10000 })).subarray(0, 16384), { stream: true }), screenshot_png_base64: screenshot.toString('base64') };
-  session.observation = inspectEnvironmentOutput.parse(observation); await writeOwned(session, 'observation.json', observation); return observation;
+  session.observation = browserInspectOutput.parse(observation); await writeOwned(session, 'observation.json', observation); return observation;
 }
 async function stop(session: Session, status: 'stopped' | 'failed' = 'stopped', responding = false) {
   if (session.receipt.status !== 'running') return stopEnvironmentOutput.parse({ session_path: session.receipt.session_path, session_id: session.receipt.session_id, checkpoint_id: session.receipt.checkpoint_id, status: 'stopped' });
@@ -136,7 +145,7 @@ const mime: Record<string, string> = { '.html': 'text/html; charset=utf-8', '.js
 async function requestBody(req: IncomingMessage) { let count = 0; const chunks: Buffer[] = []; for await (const chunk of req) { const bytes = Buffer.from(chunk); count += bytes.length; if (count > 16384) fail('environment_limit', 'Control request exceeds 16 KiB'); chunks.push(bytes); } return JSON.parse(Buffer.concat(chunks).toString('utf8')) as unknown; }
 function reply(res: ServerResponse, status: number, value: unknown) { res.writeHead(status, { 'content-type': 'application/json', 'cache-control': 'no-store', connection: 'close' }); res.end(JSON.stringify(value)); }
 async function startOwnedGameplayEnvironment(raw: unknown, signal?: AbortSignal) {
-  const input = startEnvironmentInput.parse(raw); signal?.throwIfAborted();
+  const input = browserStartInput.parse(raw); signal?.throwIfAborted();
   const installed = createRequire(import.meta.url)('playwright/package.json') as { version?: string };
   if (installed.version !== '1.64.0') fail('environment_provider_mismatch', 'Gameplay provider requires pinned Playwright 1.64.0');
   const checkpoint = resolve(input.checkpoint), destination = resolve(input.destination);
@@ -214,7 +223,7 @@ async function startOwnedGameplayEnvironment(raw: unknown, signal?: AbortSignal)
     page.on('close', closedByPlayer); browser.on('disconnected', closedByPlayer);
     session.timer = setTimeout(() => { if (session) void serialized(session, () => stop(session!)).catch(() => {}); }, Math.max(0, Date.parse(receipt.expires_at) - Date.now()));
     const { control_url, token, status, expires_at, ...publicReceipt } = receipt;
-    return startEnvironmentOutput.parse(publicReceipt);
+    return browserStartOutput.parse(publicReceipt);
   } catch (error) {
     if (session) { await stop(session, 'failed').catch(() => {}); }
     else {
@@ -229,11 +238,12 @@ async function startOwnedGameplayEnvironment(raw: unknown, signal?: AbortSignal)
     fail('environment_start_failed', 'Owned browser environment failed to start');
   }
 }
-export function startGameplayEnvironment(raw: unknown, signal?: AbortSignal) {
+export async function startGameplayEnvironment(raw: unknown, signal?: AbortSignal) {
   if (closing) return Promise.reject(new StudyError('environment_closing', 'Owned gameplay environments are shutting down'));
   const controller = new AbortController();
   const combined = signal ? AbortSignal.any([signal, controller.signal]) : controller.signal;
-  const result = startOwnedGameplayEnvironment(raw, combined);
+  const input = startEnvironmentInput.parse(raw);
+  const result = input.provider === 'windows-native' ? startNativeGameplayEnvironment(input, combined) : startOwnedGameplayEnvironment(input, combined);
   pendingStarts.set(controller, result);
   void result.then(() => pendingStarts.delete(controller), () => pendingStarts.delete(controller));
   return result;
@@ -256,12 +266,13 @@ async function rpc(receipt: Receipt, operation: string, action?: Action) {
   return output;
 }
 export async function inspectGameplayEnvironment(raw: unknown) {
-  const input = inspectEnvironmentInput.parse(raw), receipt = await receiptAt(input.session_path);
+  const input = inspectEnvironmentInput.parse(raw); if (await isNativeSession(input.session_path)) return inspectNativeGameplayEnvironment(input); const receipt = await receiptAt(input.session_path);
   if (receipt.status !== 'running') { const observation = inspectEnvironmentOutput.parse(JSON.parse((await readRegular(join(dirname(receipt.session_path), 'observation.json'), 12 * 1024 ** 2)).toString('utf8'))); if (observation.session_id !== receipt.session_id || observation.checkpoint_id !== receipt.checkpoint_id) fail('environment_session_invalid', 'Retained observation identity differs'); return observation; }
   return inspectEnvironmentOutput.parse(await rpc(receipt, 'inspect'));
 }
-export async function actInGameplayEnvironment(raw: unknown) { const input = actEnvironmentInput.parse(raw), receipt = await receiptAt(input.session_path); if (receipt.status !== 'running') fail('environment_stopped', 'Gameplay session is no longer running'); return actEnvironmentOutput.parse(await rpc(receipt, 'act', input.action)); }
-export async function stopGameplayEnvironment(raw: unknown) { const input = stopEnvironmentInput.parse(raw), receipt = await receiptAt(input.session_path); if (receipt.status !== 'running') return stopEnvironmentOutput.parse({ session_path: receipt.session_path, session_id: receipt.session_id, checkpoint_id: receipt.checkpoint_id, status: 'stopped' }); return stopEnvironmentOutput.parse(await rpc(receipt, 'stop')); }
+export async function actInGameplayEnvironment(raw: unknown) { const selected = actEnvironmentInput.parse(raw); if (await isNativeSession(selected.session_path)) return actInNativeGameplayEnvironment(selected); const input = browserActInput.parse(raw), receipt = await receiptAt(input.session_path); if (receipt.status !== 'running') fail('environment_stopped', 'Gameplay session is no longer running'); return actEnvironmentOutput.parse(await rpc(receipt, 'act', input.action)); }
+export async function stopGameplayEnvironment(raw: unknown) { const input = stopEnvironmentInput.parse(raw); if (await isNativeSession(input.session_path)) return stopNativeGameplayEnvironment(input); const receipt = await receiptAt(input.session_path); if (receipt.status !== 'running') return stopEnvironmentOutput.parse({ session_path: receipt.session_path, session_id: receipt.session_id, checkpoint_id: receipt.checkpoint_id, status: 'stopped' }); return stopEnvironmentOutput.parse(await rpc(receipt, 'stop')); }
+export async function focusOnGameplayEnvironment(raw: unknown) { const input = focusEnvironmentInput.parse(raw); if (!await isNativeSession(input.session_path)) fail('environment_focus_unsupported', 'Explicit focus is currently supported by the Windows native provider'); return focusOnNativeGameplayEnvironment(input); }
 export async function closeAllGameplayEnvironments() {
   closing = true;
   try {

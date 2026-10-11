@@ -6,10 +6,13 @@ is `start-gameplay-environment`. Starting a session returns its identity, owned
 working directory, checkpoint, runtime identity, gameplay URL and private local
 session path. Inspect, input and stop operations use that path.
 
-The implemented provider runs captured HTML browser games in Playwright Chromium.
+The default provider runs captured HTML browser games in Playwright Chromium.
 It supports keyboard input, viewport clicks, bounded waits, visible text and actual
 rendered frames. User/shared sessions show a browser window; agent sessions run
-headless. Native games, emulators and engine exports need their own adapters.
+headless. The Windows native provider selects hidden Booth/ProtoInput or
+foreground Computer Use, with ME3 for Elden Ring; see [native gameplay](NATIVE-GAMEPLAY.md) for its host setup,
+separate saves and recovery boundaries. Other native games, emulators and engine
+exports need their own adapters.
 The command must report unsupported capability rather than launch a native game
 in the player's normal installation under an isolation label.
 

@@ -43,15 +43,18 @@ test('compiled CLI and real stdio MCP inspect and compare the same identified da
   const data = await fixtures(t);
   const client = await connect(t);
   const catalog = await client.listTools();
-  assert.deepEqual(catalog.tools.map(tool => tool.name).sort(), ['act_in_gameplay_environment', 'compare_game_tables', 'create_file_checkpoint', 'inspect_game_table', 'inspect_gameplay_environment', 'inspect_toolchain', 'query_design_context', 'restore_file_checkpoint', 'start_gameplay_environment', 'stop_gameplay_environment', 'verify_file_checkpoint']);
+  assert.deepEqual(catalog.tools.map(tool => tool.name).sort(), ['act_in_gameplay_environment', 'compare_game_tables', 'create_file_checkpoint', 'focus_on_gameplay_environment', 'inspect_game_table', 'inspect_gameplay_environment', 'inspect_toolchain', 'query_design_context', 'restore_file_checkpoint', 'start_gameplay_environment', 'stop_gameplay_environment', 'verify_file_checkpoint']);
   for (const tool of catalog.tools) {
-    const writes = ['create_file_checkpoint', 'restore_file_checkpoint', 'start_gameplay_environment', 'inspect_gameplay_environment', 'act_in_gameplay_environment', 'stop_gameplay_environment'].includes(tool.name);
+    const writes = ['create_file_checkpoint', 'restore_file_checkpoint', 'start_gameplay_environment', 'inspect_gameplay_environment', 'act_in_gameplay_environment', 'focus_on_gameplay_environment', 'stop_gameplay_environment'].includes(tool.name);
     assert.equal(tool.annotations.readOnlyHint, !writes);
     assert.equal(tool.annotations.idempotentHint, tool.name === 'stop_gameplay_environment' || !writes);
     assert.equal(tool.annotations.destructiveHint, tool.name === 'stop_gameplay_environment');
     assert.equal(tool.annotations.openWorldHint, tool.name.includes('gameplay_environment') && tool.name !== 'stop_gameplay_environment');
     assert.ok(tool.outputSchema);
-    assert.equal(tool.inputSchema.additionalProperties, false);
+    if (['start_gameplay_environment', 'act_in_gameplay_environment'].includes(tool.name) && tool.inputSchema.anyOf) {
+      assert.ok(tool.inputSchema.anyOf.length >= 2);
+      for (const provider of tool.inputSchema.anyOf) assert.equal(provider.additionalProperties, false);
+    } else assert.equal(tool.inputSchema.additionalProperties, false);
   }
   const inspect = { source: source(data.before), columns: ['skill', 'mana'], limit: 1 };
   const fromCli = await invoke(data.root, 'inspect-game-table', inspect);

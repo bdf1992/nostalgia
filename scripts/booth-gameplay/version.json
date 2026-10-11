@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "upstream": "https://github.com/Ilyaki/ProtoInput.git",
+  "commit": "dd29bf8d22349605d0e1950c1c5dc4893d72670e",
+  "patch_sha256": "9798c52af9f0e7c767fa4854049c6d8310547b70e8aaefe9e458f52909430c3c",
+  "build_modes": [
+    "ordinary",
+    "early"
+  ],
+  "source_only": true
+}

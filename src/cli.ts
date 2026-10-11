@@ -8,7 +8,7 @@ import { inspectToolchain } from './toolchain.js';
 import { queryDesignContext } from './designContext.js';
 import { createFileCheckpoint, verifySelectedFileCheckpoint, restoreFileCheckpoint } from './fileCheckpoint.js';
 import { startGameplayEnvironment, inspectGameplayEnvironment,
-  actInGameplayEnvironment, stopGameplayEnvironment, closeAllGameplayEnvironments } from './gameplayEnvironment.js';
+  actInGameplayEnvironment, stopGameplayEnvironment, focusOnGameplayEnvironment, closeAllGameplayEnvironments } from './gameplayEnvironment.js';
 
 let closing = false;
 async function shutdown() {
@@ -33,6 +33,7 @@ const operations = {
   'inspect-gameplay-environment': inspectGameplayEnvironment,
   'act-in-gameplay-environment': actInGameplayEnvironment,
   'stop-gameplay-environment': stopGameplayEnvironment,
+  'focus-on-gameplay-environment': focusOnGameplayEnvironment,
 };
 
 const [command, requestPath, ...rest] = process.argv.slice(2);

@@ -1,0 +1,72 @@
+[
+  {
+    "upstream_path": "LICENSE",
+    "retained_as": "LICENSE",
+    "sha256": "013797822a031d618679eba6a0ef7061381a0ab1565230a9a792342f1a5a30a8"
+  },
+  {
+    "upstream_path": "lib/Blackbone/LICENSE",
+    "retained_as": "lib--Blackbone--LICENSE",
+    "sha256": "a3df485039a6422df210eb0a1ea4327d6af2ad3efa4cbfdd7d3fc4319ef1fb4e"
+  },
+  {
+    "upstream_path": "lib/cereal/LICENSE",
+    "retained_as": "lib--cereal--LICENSE",
+    "sha256": "0b476cd1b1bacea6ebb7ae0d939d0ab9d5f8e6a1a8d358283e561abb165c7ae0"
+  },
+  {
+    "upstream_path": "lib/EasyHook/LICENSE",
+    "retained_as": "lib--EasyHook--LICENSE",
+    "sha256": "6de6ed90d9af409b875e3d393d575be387c6a52cc88cf1e2661e8e615b19b871"
+  },
+  {
+    "upstream_path": "lib/glew/LICENSE.txt",
+    "retained_as": "lib--glew--LICENSE.txt",
+    "sha256": "38a38de1748714672193f12c6412489a00ff65a61e1bd2da9f360db990d156cf"
+  },
+  {
+    "upstream_path": "lib/imgui/LICENSE.txt",
+    "retained_as": "lib--imgui--LICENSE.txt",
+    "sha256": "e06a3394ffbde6fee1ae1b6273d7f5cb2bbf1baa7074858ae00211210107c9cb"
+  },
+  {
+    "upstream_path": "lib/Blackbone/src/3rd_party/AsmJit/LICENSE.md",
+    "retained_as": "lib--Blackbone--src--3rd_party--AsmJit--LICENSE.md",
+    "sha256": "d7296cf2691dc0b35779916648e42bf1bf633092d9cda0d7e2b2294c0b6a400b"
+  },
+  {
+    "upstream_path": "lib/cereal/include/cereal/external/rapidxml/license.txt",
+    "retained_as": "lib--cereal--include--cereal--external--rapidxml--license.txt",
+    "sha256": "794bf3b2ecf5cf0c740ac6c524d66ce6284c4b1de1f983d21a242b8abbeb9720"
+  },
+  {
+    "upstream_path": "lib/imgui/examples/libs/glfw/COPYING.txt",
+    "retained_as": "lib--imgui--examples--libs--glfw--COPYING.txt",
+    "sha256": "3d63403fef9242cbfd31ce987464fffdc88a874685236c187b4a110978b31654"
+  },
+  {
+    "upstream_path": "lib/glew/LICENSE.txt",
+    "retained_as": "lib--glew--LICENSE.txt",
+    "sha256": "38a38de1748714672193f12c6412489a00ff65a61e1bd2da9f360db990d156cf"
+  },
+  {
+    "upstream_path": "lib/imgui/LICENSE.txt",
+    "retained_as": "lib--imgui--LICENSE.txt",
+    "sha256": "e06a3394ffbde6fee1ae1b6273d7f5cb2bbf1baa7074858ae00211210107c9cb"
+  },
+  {
+    "upstream_path": "lib/cereal/include/cereal/external/rapidxml/license.txt",
+    "retained_as": "lib--cereal--include--cereal--external--rapidxml--license.txt",
+    "sha256": "794bf3b2ecf5cf0c740ac6c524d66ce6284c4b1de1f983d21a242b8abbeb9720"
+  },
+  {
+    "upstream_path": "lib/openxinput-OpenXinput1_4/OpenXinput.h (copyright/license notice)",
+    "retained_as": "OpenXinput-NOTICE.txt",
+    "sha256": "a67a6c73d1f9e6c451a0d32f7a09d7526eb45a7b877b9b0317eb6c39d8f1be9a"
+  },
+  {
+    "source_url": "https://www.gnu.org/licenses/gpl-3.0.txt",
+    "retained_as": "GPL-3.0.txt",
+    "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+  }
+]
