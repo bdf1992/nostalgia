@@ -4,7 +4,7 @@
 
 The operating principles are in [SKILL.md](SKILL.md), with the [game-study guide](docs/GAME-STUDY.md) translating REA's investigation practices into game study, design, production, and evaluation. Bdo's ARPG is the first personal project: a take on Diablo II with possible influences from later Diablo games and Path of Exile. Its destination engine and specific mechanics remain undecided.
 
-**Implementation status:** shared CLI/MCP operations inspect and compare extracted game tables, inspect provisioned tool identities, and query retained design context from REA-SON checkpoints. They return file identities, exact table values, differences, tool drift, and connected study records; they do not establish gameplay effects or change a running game. Generation and live-change adapters remain development targets. The proposed evaluation suite comprises ten creative projects of increasing scope, rather than ten supported games.
+**Implementation status:** shared CLI/MCP operations inspect game tables and tools, query REA-SON design records, capture and restore declared files, and start, observe, control and stop captured browser games. Actual browser frames and input trials support evaluation of the original fixture. Native-game adapters, generation and live changes remain development targets. The proposed evaluation suite comprises ten creative projects of increasing scope, rather than ten supported games.
 
 The [REA-SON acceptance journey](docs/REA-SON-JOURNEY.md) defines the first
 combat study, playable reconstruction, and deliberate change for Bdo's ARPG.
@@ -13,6 +13,14 @@ The [local baseline evaluation](docs/BASELINE-EVALUATION.md) preserves declared
 file state and checks unchanged reference, replica, and fresh restore scenarios
 before investigation. Run `npm run evaluate:baseline` for the original fixture;
 real-game baseline adapters remain work.
+
+[Managed gameplay environments](docs/GAMEPLAY-ENVIRONMENTS.md) expose start,
+inspect, input and stop through CLI/MCP. The first provider runs captured browser
+games in a fresh workspace and browser profile, with visible or headless play and
+declared HTTP/WebSocket access. Try `npm run provision:browser` followed by
+`npm run play:fixture -- --user` for the original playable fixture. Native games
+need their own launch, isolation and control adapters; the
+[Diablo baseline study](docs/DIABLO-BASELINE.md) records that gap.
 
 ## Game-study CLI and MCP
 
@@ -31,7 +39,12 @@ node dist/cli.js mcp
 See [game-table inputs and evidence](docs/GAME-TABLES.md). The MCP server exposes
 `inspect_game_table`, `compare_game_tables`, `inspect_toolchain`, and
 `query_design_context` using the same operations as the
-CLI. It reads caller-selected local inputs and artifacts and writes protocol results to
+CLI. It also exposes `create_file_checkpoint`, `verify_file_checkpoint`,
+`restore_file_checkpoint`, `start_gameplay_environment`,
+`inspect_gameplay_environment`, `act_in_gameplay_environment` and
+`stop_gameplay_environment`. These operations own declared copies and browser
+sessions; metadata distinguishes reads, writes and lifecycle effects.
+It reads caller-selected local inputs and artifacts and writes protocol results to
 stdout. This repository revision does not install itself into an agent's settings.
 
 See [design-context queries and studio discussion](docs/DESIGN-CONTEXT.md) for

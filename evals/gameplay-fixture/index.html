@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nostalgia gameplay fixture</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#101914;color:#e4ecde;font:18px system-ui;padding:32px}main{max-width:880px}h1{font-size:28px;margin:0 0 8px}.note{color:#a4b3a1;margin-bottom:24px}canvas{display:block;border:1px solid #4b6250;background:#17291d;width:800px;height:400px}#stats{padding:14px 0;color:#eedaa4}button{background:#d2c190;color:#172016;border:0;padding:12px 20px;font:inherit;margin-right:10px;cursor:pointer}#events{color:#a4b3a1;margin-top:16px}
+</style>
+<main><h1>Nostalgia gameplay fixture</h1><p class="note">Original test scene. Move with arrow keys. Space attacks. This is a controls fixture, not an ARPG evaluation.</p>
+<canvas id="world" width="800" height="400" aria-label="A player and targets in an original test scene"></canvas>
+<div id="stats" role="status"></div><button id="collect">Collect gold</button><button id="reset">Reset scene</button><p id="events">Scene ready.</p></main>
+<script>
+const canvas=document.querySelector('#world'),ctx=canvas.getContext('2d');
+const state={position:0,kills:0,gold:Number(localStorage.getItem('fixture-gold')||0)};
+function render(){
+  ctx.clearRect(0,0,800,400);ctx.strokeStyle='#294632';
+  for(let x=0;x<800;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,400);ctx.stroke()}
+  for(let y=0;y<400;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(800,y);ctx.stroke()}
+  ctx.fillStyle='#ce6d54';for(let i=state.kills;i<4;i++){ctx.fillRect(430+i*65,180,24,24)}
+  ctx.fillStyle='#e8d295';ctx.beginPath();ctx.arc(120+state.position*24,200,14,0,Math.PI*2);ctx.fill();
+  document.querySelector('#stats').textContent=`Position: ${state.position} | Kills: ${state.kills} | Gold: ${state.gold}`;
+}
+addEventListener('keydown',event=>{
+  if(event.key==='ArrowRight'){state.position=Math.min(10,state.position+1)}
+  else if(event.key==='ArrowLeft'){state.position=Math.max(0,state.position-1)}
+  else if(event.code==='Space'){state.kills=Math.min(4,state.kills+1)}else{return}
+  event.preventDefault();document.querySelector('#events').textContent=`Input received: ${event.code}`;render();
+});
+document.querySelector('#collect').onclick=()=>{state.gold++;localStorage.setItem('fixture-gold',String(state.gold));document.querySelector('#events').textContent='Collected one gold.';render()};
+document.querySelector('#reset').onclick=()=>{state.position=state.kills=state.gold=0;localStorage.removeItem('fixture-gold');document.querySelector('#events').textContent='Scene reset.';render()};
+render();
+</script></html>

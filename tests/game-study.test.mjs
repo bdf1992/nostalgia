@@ -43,9 +43,13 @@ test('compiled CLI and real stdio MCP inspect and compare the same identified da
   const data = await fixtures(t);
   const client = await connect(t);
   const catalog = await client.listTools();
-  assert.deepEqual(catalog.tools.map(tool => tool.name).sort(), ['compare_game_tables', 'inspect_game_table', 'inspect_toolchain', 'query_design_context']);
+  assert.deepEqual(catalog.tools.map(tool => tool.name).sort(), ['act_in_gameplay_environment', 'compare_game_tables', 'create_file_checkpoint', 'inspect_game_table', 'inspect_gameplay_environment', 'inspect_toolchain', 'query_design_context', 'restore_file_checkpoint', 'start_gameplay_environment', 'stop_gameplay_environment', 'verify_file_checkpoint']);
   for (const tool of catalog.tools) {
-    assert.equal(tool.annotations.readOnlyHint, true);
+    const writes = ['create_file_checkpoint', 'restore_file_checkpoint', 'start_gameplay_environment', 'inspect_gameplay_environment', 'act_in_gameplay_environment', 'stop_gameplay_environment'].includes(tool.name);
+    assert.equal(tool.annotations.readOnlyHint, !writes);
+    assert.equal(tool.annotations.idempotentHint, tool.name === 'stop_gameplay_environment' || !writes);
+    assert.equal(tool.annotations.destructiveHint, tool.name === 'stop_gameplay_environment');
+    assert.equal(tool.annotations.openWorldHint, tool.name.includes('gameplay_environment') && tool.name !== 'stop_gameplay_environment');
     assert.ok(tool.outputSchema);
     assert.equal(tool.inputSchema.additionalProperties, false);
   }

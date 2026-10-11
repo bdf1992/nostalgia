@@ -92,6 +92,16 @@ Restoration for those inputs needs its own observed test.
 
 ## Running the current evaluation
 
+The file component is callable through CLI commands `create-file-checkpoint`,
+`verify-file-checkpoint`, and `restore-file-checkpoint`, or corresponding MCP
+names with underscores. Create takes `files:[{source:absolute,path:relative}]`
+and an absent absolute `destination`. Verify takes `checkpoint:absolute`.
+Restore takes `checkpoint:absolute` and an absent absolute `destination`.
+Create/restore optionally accept `max_bytes`. Sources are explicit regular files;
+these commands do not recursively discover a game installation or launch it.
+Use [gameplay environments](GAMEPLAY-ENVIRONMENTS.md) for the implemented browser
+launch, input, observation and stop route after preparing a compatible checkpoint.
+
 ```powershell
 npm run evaluate:baseline
 ```

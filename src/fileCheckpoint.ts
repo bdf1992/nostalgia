@@ -20,13 +20,20 @@ export const checkpointInput = z.strictObject({
   files: z.array(z.strictObject({ source: absolute, path: portablePath })).min(1).max(MAX_FILES),
   destination: absolute, max_bytes: z.number().int().positive().max(MAX_BYTES).default(DEFAULT_BYTES),
 });
-const restoreInput = z.strictObject({ checkpoint: absolute, destination: absolute, max_bytes: z.number().int().positive().max(MAX_BYTES).default(DEFAULT_BYTES) });
+export const restoreInput = z.strictObject({ checkpoint: absolute, destination: absolute, max_bytes: z.number().int().positive().max(MAX_BYTES).default(DEFAULT_BYTES) });
+export const verifyCheckpointInput = z.strictObject({ checkpoint: absolute });
 const fileRecord = z.strictObject({ path: portablePath, bytes: z.number().int().nonnegative().max(MAX_BYTES), sha256: z.string().regex(/^[a-f0-9]{64}$/) });
 const manifestSchema = z.strictObject({
   version: z.literal(1), checkpoint_id: z.string().regex(/^cp_[a-f0-9]{64}$/), recorded_at: z.iso.datetime(),
   files: z.array(fileRecord).min(1).max(MAX_FILES), coverage: z.literal('declared-files-only'), runtime_state: z.literal('not_captured'),
 });
 export type FileCheckpointManifest = z.output<typeof manifestSchema>;
+export const createCheckpointOutput = manifestSchema.extend({ checkpoint: absolute });
+export const verifyCheckpointOutput = createCheckpointOutput.extend({ provenance: z.literal('caller-supplied-not-authenticated') });
+export const restoreCheckpointOutput = z.strictObject({
+  checkpoint_id: manifestSchema.shape.checkpoint_id, checkpoint: absolute, destination: absolute,
+  files: manifestSchema.shape.files, coverage: z.literal('declared-files-only'), runtime_state: z.literal('not_captured'),
+});
 type FileRecord = z.output<typeof fileRecord>;
 type Budget = { remaining: number };
 type Staging = { path: string; parent: string; identity: Stats; parentIdentity: Stats };
@@ -256,6 +263,10 @@ export async function verifyFileCheckpoint(checkpointAbsolute: string, signal?: 
   const current = await guardedPath(checkpoint, 'checkpoint_changed');
   if (!sameIdentity(rootIdentity, current) || after.sha256 !== manifestIdentity.sha256 || after.bytes !== manifestIdentity.bytes) fail('checkpoint_changed', 'Checkpoint changed during verification');
   return { ...manifest, checkpoint, provenance: 'caller-supplied-not-authenticated' as const };
+}
+
+export async function verifySelectedFileCheckpoint(raw: unknown, signal?: AbortSignal) {
+  return verifyFileCheckpoint(verifyCheckpointInput.parse(raw).checkpoint, signal);
 }
 
 export async function restoreFileCheckpoint(raw: unknown, signal?: AbortSignal) {

@@ -12,6 +12,14 @@ This is a guide, not a required sequence for every request. Use [SKILL.md](SKILL
 
 Current implementation: compatibility catalogs, recipes, a Windows helper, and read-only game-table inspection/comparison, toolchain inspection, and REA-SON checkpoint design-context queries through shared CLI/MCP operations. Generation, game-data mutation, archive extraction, and live-change providers remain development targets. Table observations and supplied study records do not establish gameplay effects.
 
+Declared-file checkpoint capture/verification/restore and managed browser gameplay
+environments are also shared CLI/MCP operations. All agents needing a gameplay
+workspace use `start_gameplay_environment`, then its inspect, input and stop
+commands. Read [docs/GAMEPLAY-ENVIRONMENTS.md](docs/GAMEPLAY-ENVIRONMENTS.md).
+Select player-visible, agent or shared use and declared network access. Bind QA
+observations to the returned session and checkpoint. Check adapter support before
+launch: the current browser provider does not establish native-game support.
+
 ## Study and creation principles
 
 - Start from the player's intended experience and questions that need answers.
