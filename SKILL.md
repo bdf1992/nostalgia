@@ -35,11 +35,25 @@ reference game, and what should differ. Use session context before asking again.
 Record unresolved choices without silently substituting an engine, game edition,
 feature list, or smaller project. Start independent work while those choices remain open.
 
+When the user leaves the version open, prefer the latest stable available release
+that fits the requested experience, mod support, and host. Check release and
+compatibility evidence; a newer major version or edition may change mechanics or
+break the required tools. Respect an explicit version, explain any reason to
+choose an older release, and pin the chosen edition/build in the project records.
+
 A named game is not a complete specification. Study the relevant controls,
 mechanics, pacing, progression, presentation, and world behavior. Convert vague
 requests into concrete candidate interpretations that the player can judge.
 
 ### Follow evidence through the game
+
+Before investigation experiments, establish the local baseline: preserve the
+declared source files, assets, configuration, and saves; run the unchanged local
+replica through the selected baseline scenarios; restore a fresh copy and repeat.
+Read [baseline evaluation](docs/BASELINE-EVALUATION.md) for the admission checks.
+SON reasoning checkpoints and REA analysis snapshots do not restore target state.
+If file copies cannot retain the relevant live state, use a supported save-state,
+VM, or application adapter and verify its restoration before relying on it.
 
 Identify the exact game edition, content, mods, runtime, and saves involved.
 Reuse existing findings when their identities match. Begin with questions and

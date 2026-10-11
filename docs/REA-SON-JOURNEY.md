@@ -13,6 +13,10 @@ it is not selected as the final ARPG engine.
 
 ## The player journey
 
+Before investigation, [admit the local baseline](BASELINE-EVALUATION.md): preserve
+the target state, run the unchanged local replica, restore fresh state, and repeat
+the declared checks. This target checkpoint is separate from SON's ledger.
+
 | Stage | Player experience | Required result |
 | --- | --- | --- |
 | Describe the experience | Select the combat qualities to retain and one control change to try | A bounded brief with creative decisions separated from source observations |

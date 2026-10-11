@@ -9,6 +9,11 @@ The operating principles are in [SKILL.md](SKILL.md), with the [game-study guide
 The [REA-SON acceptance journey](docs/REA-SON-JOURNEY.md) defines the first
 combat study, playable reconstruction, and deliberate change for Bdo's ARPG.
 
+The [local baseline evaluation](docs/BASELINE-EVALUATION.md) preserves declared
+file state and checks unchanged reference, replica, and fresh restore scenarios
+before investigation. Run `npm run evaluate:baseline` for the original fixture;
+real-game baseline adapters remain work.
+
 ## Game-study CLI and MCP
 
 With Node.js 24 or later:

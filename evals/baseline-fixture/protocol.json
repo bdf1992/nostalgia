@@ -1,0 +1,23 @@
+{
+  "name": "Original local baseline replication fixture",
+  "source_root": "evals/baseline-fixture",
+  "files": ["game.mjs", "config.json", "player.json"],
+  "entrypoint": "game.mjs",
+  "cases": [
+    {
+      "id": "startup",
+      "arguments": ["startup"],
+      "expected_output": {"status":"ready","version":"original-fixture-1","player":{"mana":50,"gold":3,"x":0}}
+    },
+    {
+      "id": "combat",
+      "arguments": ["combat"],
+      "expected_output": {"player":{"mana":40,"gold":3,"x":2},"target_hp":75}
+    },
+    {
+      "id": "save-load",
+      "arguments": ["save-load"],
+      "expected_output": {"saved":{"mana":50,"gold":5,"x":0}}
+    }
+  ]
+}
