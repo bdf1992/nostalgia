@@ -12,12 +12,13 @@ or a catalog of supported titles.
 
 ## Current capability
 
-This repository currently supplies compatibility catalogs, recipes, and a
-PowerShell helper. It does not yet implement a creation MCP server, generation
-providers, or live-change adapters. Use tools actually available in the session;
+This repository supplies compatibility catalogs, recipes, a PowerShell helper,
+and game-table inspection/comparison through CLI and MCP. Generation, game-data
+mutation, archive extraction, and live-change adapters are not implemented. Use tools actually available in the session;
 state missing capabilities precisely. Instructions are not implementation proof.
 
 For studying and creating games, read [the game-study guide](docs/GAME-STUDY.md).
+For extracted mechanics tables, read [the CLI/MCP tool guide](docs/GAME-TABLES.md).
 For compatibility and multiplayer work, read
 [the existing compatibility guidance](docs/COMPATIBILITY-SKILL.md). Paths in that
 guidance are relative to the repository root. Use only the relevant guidance.
@@ -71,6 +72,12 @@ For a live request, determine whether the target supports immediate application,
 a safe application point, reload, or restart. Verify the changed behavior and the
 recovery path. Preserve the player's current progress; do not silently attach to
 a different process, change a shared server, or expand the requested action.
+
+Distinguish a one-time state write, a maintained runtime override, and a persistent
+rule or data change. Stopping an override need not restore state that changed
+during play. Bind any future runtime operation to the exact process or emulator,
+game revision, and verified state interpretation; a remembered address is not
+enough. The current table tools do not perform runtime reads or writes.
 
 ### Judge through evidence and play
 

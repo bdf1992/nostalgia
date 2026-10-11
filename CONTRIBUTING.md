@@ -4,6 +4,10 @@ Nostalgia should grow from reproducible game-study, production, and play evidenc
 
 ## Game-study and creation contributions
 
+Run `npm ci` and `npm test` for the Node.js CLI/MCP. Tests exercise the compiled
+CLI and real stdio transport with original synthetic tables; they do not validate
+a commercial game's data formats or runtime. `npm run check` checks source types.
+
 Useful contributions include source-linked gameplay observations, measured mechanics, game/engine adapters, generation and conversion providers, playable builds, and independent evaluations of creative briefs. Keep observed behavior, inferred explanations, and chosen design differences separate.
 
 Identify the request, source versions, changed state, producing tools, build, checks, playtest outcome, recovery outcome, and remaining uncertainty. Report implemented capability separately from proposed contracts or operating instructions. A simulated provider does not establish that a real game can be changed.

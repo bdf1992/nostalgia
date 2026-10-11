@@ -4,7 +4,25 @@
 
 The operating principles are in [SKILL.md](SKILL.md), with the [game-study guide](docs/GAME-STUDY.md) translating REA's investigation practices into game study, design, production, and evaluation. Bdo's ARPG is the first personal project: a take on Diablo II with possible influences from later Diablo games and Path of Exile. Its destination engine and specific mechanics remain undecided.
 
-**Implementation status:** this repository currently provides the compatibility and multiplayer bootstrap described below. A creation CLI/MCP system and live-change providers are development targets; they are not implemented here yet. The proposed evaluation suite comprises ten creative projects of increasing scope, rather than ten supported games.
+**Implementation status:** the first shared CLI/MCP operations inspect and compare extracted game tables. They return source identities, exact string values, and differences; they do not establish gameplay effects or change a running game. Generation and live-change providers remain development targets. The proposed evaluation suite comprises ten creative projects of increasing scope, rather than ten supported games.
+
+## Game-study CLI and MCP
+
+With Node.js 24 or later:
+
+```powershell
+npm ci
+npm run build
+node dist/cli.js --help
+node dist/cli.js inspect-game-table request.json
+node dist/cli.js compare-game-tables comparison.json
+node dist/cli.js mcp
+```
+
+See [game-table inputs and evidence](docs/GAME-TABLES.md). The MCP server exposes
+`inspect_game_table` and `compare_game_tables` using the same operations as the
+CLI. It reads only the caller-selected table files and writes protocol results to
+stdout. This repository revision does not install itself into an agent's settings.
 
 ## Existing compatibility bootstrap
 
@@ -72,11 +90,14 @@ catalog/runtimes.json      emulator + networking/runtime catalog
 catalog/sources.json       trusted source registry
 docs/CONTENT.md            local byte handling + file hygiene
 docs/GAME-STUDY.md         REA translation + Bdo's ARPG + evaluation design
+docs/GAME-TABLES.md        implemented table operations and input contracts
 docs/COMPATIBILITY-SKILL.md existing compatibility skill guidance
 docs/TRUSTED-SOURCES.md    knowledge center + download trap guide
 docs/MULTIPLAYER.md        multiplayer strategies + troubleshooting
 recipes/game.example.json  recipe shape for per-game refinement
 nostalgia.ps1              tiny Windows helper
+src/                       shared game-study operations + CLI/MCP adapters
+tests/                     compiled CLI + real stdio MCP verification
 ```
 
 ## Compatibility packaging

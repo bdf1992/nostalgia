@@ -10,7 +10,7 @@ The operating loop is:
 
 This is a guide, not a required sequence for every request. Use [SKILL.md](SKILL.md) and [docs/GAME-STUDY.md](docs/GAME-STUDY.md). A source game is material and evidence; it does not dictate the destination engine or final design.
 
-Current implementation: compatibility catalogs, recipes, and a Windows helper. Creation and live-change CLI/MCP capabilities are development targets, not implemented tools.
+Current implementation: compatibility catalogs, recipes, a Windows helper, and read-only game-table inspection/comparison through shared CLI/MCP operations. Generation, game-data mutation, archive extraction, and live-change providers remain development targets. Table observations do not establish gameplay effects.
 
 ## Study and creation principles
 

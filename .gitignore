@@ -45,3 +45,7 @@ backups/
 Thumbs.db
 .vscode/
 .idea/
+
+# Creation CLI/MCP build outputs
+node_modules/
+dist/

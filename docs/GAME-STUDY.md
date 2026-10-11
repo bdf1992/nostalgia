@@ -1,7 +1,8 @@
 # Studying games and requests
 
-This is the operating design for Nostalgia's creation capabilities. It does not
-describe tools already implemented. The first personal project is Bdo's ARPG:
+This is the operating design for Nostalgia's creation capabilities. Implemented
+table-study operations are documented separately in [GAME-TABLES.md](GAME-TABLES.md).
+The first personal project is Bdo's ARPG:
 a personal take on Diablo II, potentially using controls and mechanics informed
 by Diablo III, Diablo IV, Path of Exile, and Path of Exile 2. The source edition,
 destination engine, and selected mechanics remain open.
@@ -76,6 +77,26 @@ A request made during play uses the same study and acceptance principles. Determ
 the actual application boundary, preserve progress, apply within the authorized
 session, observe the result, and record whether reversal restored the relevant state.
 Do not promise immediate application of changes that need a reload or rebuild.
+
+## Runtime changes and the GameShark reference
+
+GameShark supplies a reference for player-directed state changes during play.
+Nostalgia's proposed runtime capability also needs to investigate which state or
+rule serves the request and verify the result. This provider is not implemented.
+
+Keep three operations distinct:
+
+- A one-time state write changes a selected value; the game may overwrite it.
+- A maintained override repeatedly enforces a value or rule while it is active.
+- A persistent content or rule change survives the session and may require a reload or rebuild.
+
+For any runtime implementation, establish exact game/process identity, revision,
+state meaning, and access method. Separate finding a candidate location from
+proving its interpretation. Verify dependencies and record the original value,
+override lifetime, and recovery semantics. Disabling an override and restoring a
+save are different outcomes. Addresses and patches must not silently carry across
+game versions or process restarts. Shared multiplayer state needs the relevant
+server authority; local process access alone cannot establish it.
 
 ## Evaluation projects
 
