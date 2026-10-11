@@ -1,8 +1,16 @@
 # Contributing to Nostalgia
 
-Nostalgia should grow from **reproducible play evidence**, not giant scraped compatibility tables.
+Nostalgia should grow from reproducible game-study, production, and play evidence. Contributions serve the creation mission in [SKILL.md](SKILL.md) and [docs/GAME-STUDY.md](docs/GAME-STUDY.md), as well as the existing compatibility bootstrap.
 
-## Good contributions
+## Game-study and creation contributions
+
+Useful contributions include source-linked gameplay observations, measured mechanics, game/engine adapters, generation and conversion providers, playable builds, and independent evaluations of creative briefs. Keep observed behavior, inferred explanations, and chosen design differences separate.
+
+Identify the request, source versions, changed state, producing tools, build, checks, playtest outcome, recovery outcome, and remaining uncertainty. Report implemented capability separately from proposed contracts or operating instructions. A simulated provider does not establish that a real game can be changed.
+
+Evaluate projects and playable milestones, including projects spanning multiple games. Compatibility validation states below apply to existing session recipes; they are not a quality score for generated games.
+
+## Compatibility contributions
 
 Useful contributions include:
 
@@ -125,4 +133,4 @@ Record the symptom, expected shape, safer path, and evidence. Avoid moralizing; 
 
 ## Design rule
 
-Keep the shared schema small enough that a human can add a game by hand. Add structure only when real recipes repeatedly need it.
+Keep compatibility recipes small enough that a human can add a game by hand. For creation capabilities, begin with a concrete player request, inspect existing operations, and add shared contracts only where actual projects need them. Keep provider details outside shared game semantics and make CLI/MCP adapters use the same operations when those interfaces are implemented.

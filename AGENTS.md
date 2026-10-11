@@ -2,11 +2,27 @@
 
 ## Mission
 
-Help the user reach a playable classic-game session with the least risky, least complicated path available.
+Equip an agent to study existing games and create the playable experience the player requests: live changes, mods, expansions, remakes, combinations of games, and sustained productions.
 
 The operating loop is:
 
-`intent -> identify -> verify -> resolve runtime -> boot locally -> configure input -> connect -> play -> preserve findings`
+`study the request and games -> design differences -> produce -> play and evaluate -> revise and preserve findings`
+
+This is a guide, not a required sequence for every request. Use [SKILL.md](SKILL.md) and [docs/GAME-STUDY.md](docs/GAME-STUDY.md). A source game is material and evidence; it does not dictate the destination engine or final design.
+
+Current implementation: compatibility catalogs, recipes, and a Windows helper. Creation and live-change CLI/MCP capabilities are development targets, not implemented tools.
+
+## Study and creation principles
+
+- Start from the player's intended experience and questions that need answers.
+- Study gameplay and implementation together. Static files do not establish runtime behavior; a successful launch does not establish quality.
+- Separate observed facts, derived conclusions, inferred intent, requested differences, and unresolved questions.
+- Decide what to preserve, adapt, replace, or create. Trace the interactions affected by that decision.
+- Keep source identities, design decisions, generated artifacts, builds, and evaluation evidence connected.
+- Verify intentional differences against the request and preserved behavior against relevant original observations.
+- Evaluate technical correctness and player experience separately. Obtain independent judgment for material quality claims.
+- Support short live requests and productions spanning games and releases. Evaluate long projects through playable milestones.
+- Prefer reusable operations and composable providers to separate workflows for each title. REA supplies investigation capabilities where applicable; Nostalgia owns game design, production, and evaluation.
 
 ## Help posture
 
@@ -30,6 +46,9 @@ Agents MAY:
 - test controllers and networking;
 - create backups before changing saves/configuration;
 - diagnose failures and propose/apply reversible fixes;
+- study gameplay, assets, mechanics, and implementation within the requested project;
+- produce designs, source changes, and builds in isolated project workspaces;
+- apply authorized reversible live changes when the target supports them, with a recorded recovery path;
 - add or refine recipes when evidence is discovered.
 
 Agents MUST NOT:
@@ -91,11 +110,10 @@ Prefer small factual changes over giant compatibility claims.
 ## North-star success condition
 
 ```text
-GAME BOOTS
-+ CONTROLLERS WORK
-+ PLAYERS CONNECT
-+ SESSION IS PLAYABLE
-+ SAVES / ORIGINAL DATA ARE SAFE
+REQUESTED EXPERIENCE HAS A PLAYABLE RESULT
++ PRESERVED QUALITIES AND INTENTIONAL CHANGES ARE EVALUATED
++ ORIGINAL DATA AND SAVES HAVE A RECOVERY PATH
++ BUILD, DECISIONS, EVIDENCE, AND REMAINING WORK ARE RECORDED
 ```
 
-Everything else exists to move toward or preserve that state.
+For compatibility-only requests, the result remains a playable session with working controls and any requested multiplayer connection. Existing recipe validation states describe those sessions; they do not establish remake quality or general system capability.

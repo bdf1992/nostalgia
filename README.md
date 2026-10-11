@@ -1,6 +1,12 @@
 # Nostalgia
 
-**Nostalgia** is a small, agent-assisted compatibility and multiplayer helper for classic games.
+**Nostalgia** equips agents to study existing games and create the playable experience a player requests: live changes, mods, expansions, remakes, and combinations of games.
+
+The operating principles are in [SKILL.md](SKILL.md), with the [game-study guide](docs/GAME-STUDY.md) translating REA's investigation practices into game study, design, production, and evaluation. Bdo's ARPG is the first personal project: a take on Diablo II with possible influences from later Diablo games and Path of Exile. Its destination engine and specific mechanics remain undecided.
+
+**Implementation status:** this repository currently provides the compatibility and multiplayer bootstrap described below. A creation CLI/MCP system and live-change providers are development targets; they are not implemented here yet. The proposed evaluation suite comprises ten creative projects of increasing scope, rather than ten supported games.
+
+## Existing compatibility bootstrap
 
 **State: `v0.1-bootstrap`.** The Windows helper, source registry, and recipe catalog are available to try. A documented multiplayer route is a candidate until a complete playable session is recorded; see [the validation vocabulary](AGENTS.md#validation-vocabulary).
 
@@ -59,19 +65,21 @@ Every game entry begins as `experimental` until somebody actually validates a co
 
 ```text
 AGENTS.md                  agent/repository operating rules
-SKILL.md                   Nostalgia skill kernel
+SKILL.md                   game-study and creation skill kernel
 CONTRIBUTING.md            recipe and evidence contribution rules
 catalog/games.json         20-game starter catalog
 catalog/runtimes.json      emulator + networking/runtime catalog
 catalog/sources.json       trusted source registry
 docs/CONTENT.md            local byte handling + file hygiene
+docs/GAME-STUDY.md         REA translation + Bdo's ARPG + evaluation design
+docs/COMPATIBILITY-SKILL.md existing compatibility skill guidance
 docs/TRUSTED-SOURCES.md    knowledge center + download trap guide
 docs/MULTIPLAYER.md        multiplayer strategies + troubleshooting
 recipes/game.example.json  recipe shape for per-game refinement
 nostalgia.ps1              tiny Windows helper
 ```
 
-## Principle
+## Compatibility packaging
 
 **The game is not the package. The reproducible play recipe is the package.**
 
