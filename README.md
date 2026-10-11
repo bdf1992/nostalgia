@@ -9,6 +9,12 @@ The operating principles are in [SKILL.md](SKILL.md), with the [game-study guide
 The [REA-SON acceptance journey](docs/REA-SON-JOURNEY.md) defines the first
 combat study, playable reconstruction, and deliberate change for Bdo's ARPG.
 
+[Bdo's Elden Ring project](docs/BDOS-SOULS.md) uses Elden Ring and Nightreign as
+the first major Souls targets, with possible Diablo II design material. While
+the games download, `npm run rehearse:studio` exercises unchanged baseline,
+one declared configuration change, actual fixture outcomes and fresh recovery.
+It uses original data; native game admission and the final ARPG design remain open.
+
 The [local baseline evaluation](docs/BASELINE-EVALUATION.md) preserves declared
 file state and checks unchanged reference, replica, and fresh restore scenarios
 before investigation. Run `npm run evaluate:baseline` for the original fixture;

@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "recorded_on": "2026-10-11",
+  "project": "Bdo's Elden Ring interpretation",
+  "decision": "Use Elden Ring as the first major source target, Nightreign as a source and transformation reference, and potentially Diablo II as additional design material.",
+  "design_status": "open",
+  "arpg_direction": "Explore different combat, loot, progression and session structures; no final camera, engine, campaign or rules selected.",
+  "targets": [
+    {"id":"elden-ring","steam_appid":"1245620","role":"primary source","baseline_status":"not_evaluated"},
+    {"id":"nightreign","steam_appid":"2622380","role":"source and transformation reference","baseline_status":"not_evaluated"},
+    {"id":"diablo-ii","role":"possible design reference","edition":"select compatible stable edition when admitted","baseline_status":"not_evaluated"}
+  ],
+  "milestones": [
+    {"id":"baseline","result":"Pin build, runtime, test profile and dependencies; reproduce unchanged declared movement/combat/death/save-load cases in a separate admitted environment.","state":"pending_native_adapter"},
+    {"id":"study","result":"Explain one selected encounter from observed combat and related parameter, event and asset records, retaining unanswered questions.","state":"pending_baseline"},
+    {"id":"change","result":"Apply one declared reversible encounter or progression difference; evaluate the intended difference and preserved baseline behavior.","state":"pending_study"},
+    {"id":"experience","result":"Produce and evaluate a coherent expedition, dungeon campaign or loot-focused prototype after Bdo chooses the first direction.","state":"pending_design"}
+  ],
+  "measurement_candidates": [
+    {"name":"launch and recovery","method":"Actual process identity, rendered scene, profile write locations, stop, fresh restore and repeat","status":"not_measured"},
+    {"name":"combat outcomes","method":"Fixed attacker/target/build and input sequence; record damage, resource use, death and timing with declared tolerances","status":"not_measured"},
+    {"name":"encounter pacing","method":"Compare completion time, deaths and encounter choices across repeated declared cases","status":"not_measured"},
+    {"name":"loot and progression","method":"Record reward distribution, build choices and persistence across a declared sample; distinguish RNG variation from regressions","status":"not_measured"},
+    {"name":"player judgment","method":"Bdo evaluates control feel, clarity, challenge and desire to continue; automated checks retain technical evidence separately","status":"not_measured"}
+  ],
+  "prerequisite_rehearsal": {"command":"npm run rehearse:studio","scope":"original Node fixture only","game_compatibility":"not_established"},
+  "sources": ["https://www.bandainamcoent.com/games/nightreign/gameplay-guide","https://github.com/vawser/Smithbox","https://github.com/garyttierney/me3","https://github.com/ividyon/WitchyBND"],
+  "limits": ["This record is a project brief, not observed game behavior or a REA-SON knowledge graph.","Elden Ring and Nightreign have no implemented Nostalgia native gameplay provider yet.","Downloaded file presence does not establish complete installation, compatibility, isolation or a runnable baseline."]
+}

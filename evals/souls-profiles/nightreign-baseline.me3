@@ -1,0 +1,10 @@
+profileVersion = "v1"
+savefile = "Nostalgia_Nightreign_Baseline.sl2"
+natives = []
+packages = []
+start_online = false
+
+[[supports]]
+game = "nightreign"
+
+[debug_properties]
