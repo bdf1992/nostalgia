@@ -6,6 +6,9 @@ The operating principles are in [SKILL.md](SKILL.md), with the [game-study guide
 
 **Implementation status:** shared CLI/MCP operations inspect and compare extracted game tables and inspect provisioned tool identities. They return file identities, exact table values, differences, and tool drift; they do not establish gameplay effects or change a running game. Generation and live-change adapters remain development targets. The proposed evaluation suite comprises ten creative projects of increasing scope, rather than ten supported games.
 
+The [REA-SON acceptance journey](docs/REA-SON-JOURNEY.md) defines the first
+combat study, playable reconstruction, and deliberate change for Bdo's ARPG.
+
 ## Game-study CLI and MCP
 
 With Node.js 24 or later:

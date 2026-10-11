@@ -56,6 +56,10 @@ a baseline but cannot establish that a remake meets its creative brief.
 
 ## Bdo's ARPG: example investigation
 
+The [REA-SON acceptance journey](REA-SON-JOURNEY.md) makes the first shared
+demonstration concrete: study one casting and movement interaction, reproduce it
+in a playable scene, and measure an intentional control change.
+
 Start by identifying what Bdo wants to retain from Diablo II and what the other
 games contribute. Do not assume that naming Diablo IV selects its engine or
 requests every one of its systems. Existing session intent establishes the
