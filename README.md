@@ -4,7 +4,7 @@
 
 The operating principles are in [SKILL.md](SKILL.md), with the [game-study guide](docs/GAME-STUDY.md) translating REA's investigation practices into game study, design, production, and evaluation. Bdo's ARPG is the first personal project: a take on Diablo II with possible influences from later Diablo games and Path of Exile. Its destination engine and specific mechanics remain undecided.
 
-**Implementation status:** the first shared CLI/MCP operations inspect and compare extracted game tables. They return source identities, exact string values, and differences; they do not establish gameplay effects or change a running game. Generation and live-change providers remain development targets. The proposed evaluation suite comprises ten creative projects of increasing scope, rather than ten supported games.
+**Implementation status:** shared CLI/MCP operations inspect and compare extracted game tables and inspect provisioned tool identities. They return file identities, exact table values, differences, and tool drift; they do not establish gameplay effects or change a running game. Generation and live-change adapters remain development targets. The proposed evaluation suite comprises ten creative projects of increasing scope, rather than ten supported games.
 
 ## Game-study CLI and MCP
 
@@ -20,9 +20,13 @@ node dist/cli.js mcp
 ```
 
 See [game-table inputs and evidence](docs/GAME-TABLES.md). The MCP server exposes
-`inspect_game_table` and `compare_game_tables` using the same operations as the
-CLI. It reads only the caller-selected table files and writes protocol results to
+`inspect_game_table`, `compare_game_tables`, and `inspect_toolchain` using the same operations as the
+CLI. It reads caller-selected local inputs and artifacts and writes protocol results to
 stdout. This repository revision does not install itself into an agent's settings.
+
+The [first ten providers](docs/TOOLCHAIN.md) are selected from researched upstream
+capabilities. Their [registry](catalog/toolchain.json) records reasons and alternatives.
+Local provisioning receipts and synthetic checks are separate from playable game validation.
 
 ## Existing compatibility bootstrap
 
