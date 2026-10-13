@@ -1,5 +1,7 @@
 # Nostalgia
 
+**Paused October 11, 2026:** [gameplay progress and resumption handoff](docs/RESUME-GAMEPLAY.md) records the Booth integration, latency and audio blockers, retained evidence, and proposed Elden Ring dragon encounter in Diablo II.
+
 **Nostalgia** equips agents to study existing games and create the playable experience a player requests: live changes, mods, expansions, remakes, and combinations of games.
 
 The operating principles are in [SKILL.md](SKILL.md), with the [game-study guide](docs/GAME-STUDY.md) translating REA's investigation practices into game study, design, production, and evaluation. Bdo's ARPG is the first personal project: a take on Diablo II with possible influences from later Diablo games and Path of Exile. Its destination engine and specific mechanics remain undecided.

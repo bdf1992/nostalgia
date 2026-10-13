@@ -6,6 +6,8 @@ gamepad input and viewer audio. The Sky backend uses foreground Computer Use.
 Keep the host alive while agents use its private bridge/session paths. These
 files contain local control credentials and must remain local.
 
+The viewer is Workstation’s existing Booth watch page. Nostalgia registers private audio and gamepad capabilities against the exact owned recording; it serves no HTML page. Run the compatible Workstation Booth service first. Capability registration is revoked before shutdown starts. Viewer gamepad actions retain the native before/after ownership, audio, frame and save checks, so response latency can exceed a frame interval.
+
 ## Hidden Booth host
 
 Build the repository and provision the [input package](BOOTH-GAMEPLAY.md) and
@@ -17,6 +19,8 @@ in a private JSON file with actual absolute paths and workstation authority:
   "runtime_root": "C:/GameWork/nostalgia/scripts/booth-gameplay/local/early/runtime",
   "python": "C:/Tools/Python/python.exe",
   "ws_script": "C:/Workstation/scripts/ws.py",
+  "booth_runtime_root": "C:/Workstation/control/runtime/booths",
+  "booth_viewer_url": "http://127.0.0.1:8730/booth/watch",
   "ws_session": "ACTUAL_WORKSTATION_SESSION",
   "task": "OWNED_TASK",
   "audio": {
@@ -55,6 +59,8 @@ const bridge = await createNativeBoothBridge({
     runtime_root: 'C:/GameWork/nostalgia/scripts/booth-gameplay/local/early/runtime',
     python: 'C:/Tools/Python/python.exe',
     ws_script: 'C:/Workstation/scripts/ws.py',
+    booth_runtime_root: 'C:/Workstation/control/runtime/booths',
+    booth_viewer_url: 'http://127.0.0.1:8730/booth/watch',
     ws_session: 'ACTUAL_WORKSTATION_SESSION', task: 'OWNED_TASK',
     audio: {
       cable_endpoint: 'ACTUAL_CABLE_RENDER_ENDPOINT_ID',
@@ -95,9 +101,9 @@ capture, and ordered shutdown. A second process loaded a checkpoint of the
 stopped alternate save and returned to Belurat. Original saves and all six
 global audio defaults remained unchanged after the first run.
 
-The fifth public-host session, retained under
+The superseded custom-viewer fifth public-host session, retained under
 `state/elden-booth-viewer-retry-20261011/`, demonstrated the combined viewer:
-its image used `/stream.mjpg`, decoded at 2560�1440, and a browser screenshot
+its image used `/stream.mjpg`, decoded at 2560ï¿½1440, and a browser screenshot
 showed Mary at Belurat. Mute was selected before explicit Play; the viewer
 reported Audio connected while muted, then Audio stopped after Stop. The
 retained `viewer-audio-proof.json` contains 529,200 PCM bytes and 261,450
@@ -200,7 +206,7 @@ Refuse an ambiguous or unrelated window instead of targeting a title match.
 
 The workstation's `ws booth` desktop provider launched the installed Elden Ring
 build 25080141 through ME3 0.13.0 on a separate Windows desktop. Its existing
-`PrintWindow(PW_RENDERFULLCONTENT)` capture returned a usable 1280×720 title
+`PrintWindow(PW_RENDERFULLCONTENT)` capture returned a usable 1280Ã—720 title
 screen, and Booth retained a recording. Enter addressed to the observed game
 window and a click at the displayed title prompt both left the game at that
 prompt. Message delivery receipts therefore establish attempted input only.

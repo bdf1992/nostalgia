@@ -146,7 +146,8 @@ class Session:
   if self.phase!='new':fail('invalid_phase','Allocation already attempted')
   self.runtime,manifest=runtime_artifacts(absolute(request['runtime_root']))
   if manifest['mode']!='early':fail('runtime_invalid','Early runtime required')
-  ws=absolute(request['ws_script']);run=absolute(request['run_directory']);minutes=request['lifetime_minutes']
+  ws=absolute(request['ws_script']);run=absolute(request['run_directory']);minutes=request['lifetime_minutes'];fps=request['capture_fps']
+  if type(fps) is not int or not 1<=fps<=24:fail('invalid_request','Capture FPS must be an integer1..24')
   if type(minutes) is not int or not 1<=minutes<=60 or not ws.is_file() or not run.is_dir() or run.is_symlink():fail('invalid_request','Existing local providers and lifetime1..60 required')
   for field in ('ws_session','task'):
    if not isinstance(request[field],str) or not 1<=len(request[field])<=128:fail('invalid_request','Bounded explicit workstation authority required')
@@ -160,7 +161,7 @@ class Session:
   spec=importlib.util.spec_from_file_location('_nostalgia_owned_ws_capture',capture_source);module=importlib.util.module_from_spec(spec);sys.modules[spec.name]=module;spec.loader.exec_module(module);self.win=module
   self.record('anchor-intent',{'booth':self.booth,'pythonw':str(pythonw),'pythonw_sha256':hash_file(pythonw),'anchor_sha256':hash_file(anchor)})
   try:
-   self.open_receipt=self.ws('open',self.booth,'--kind','desktop','--app',str(pythonw),'--task',self.task,'--size','320x240','--fps','4','--record-max-mb','16','--for',str(minutes),'--','-I',str(anchor),'--receipt',str(self.home/'anchor.json'),'--minutes',str(minutes),timeout=35)
+   self.open_receipt=self.ws('open',self.booth,'--kind','desktop','--app',str(pythonw),'--task',self.task,'--size','1280x720','--fps',str(fps),'--record-max-mb','16','--for',str(minutes),'--','-I',str(anchor),'--receipt',str(self.home/'anchor.json'),'--minutes',str(minutes),timeout=35)
    r=self.open_receipt
    if r.get('name')!=self.booth or r.get('desktop_name')!='ws-booth-'+self.booth or r.get('source_session')!=self.config.ws_session or r.get('source_task')!=self.task or len(r.get('started_pids',[]))!=1:fail('anchor_invalid','Actual owned anchor receipt differs')
    self.desktop=r['desktop_name'];pid=r['started_pids'][0];self.anchor=read_owned_process_metadata(pid,str(pythonw))
@@ -234,8 +235,9 @@ class Session:
   if not self.ownership or not self.target_handle or _KERNEL.WaitForSingleObject(self.target_handle,0)!=258:fail('target_exited','Exact owned game is no longer running')
   current=read_owned_process_metadata(self.ownership['pid'],self.ownership['executable'])
   if any(current[k]!=self.ownership[k] for k in ('pid','created_high','created_low','executable')):fail('identity_changed','Owned target changed')
-  windows=self.ws('do',self.booth,'windows')
-  if windows.get('booth')!=self.booth or not any(r['pid']==self.ownership['pid'] and r['handle']==self.ownership['hwnd'] for r in windows['windows']):fail('window_changed','Owned target window changed')
+  if self.win.input_desktop_name() in (None,self.desktop):fail('desktop_changed','Owned target must remain on an inactive desktop')
+  windows=self.win.desktop_windows(self.desktop,visible_only=False)
+  if not any(r.pid==self.ownership['pid'] and r.handle==self.ownership['hwnd'] for r in windows):fail('window_changed','Owned target window changed')
  def ready(self):
   self.lifetime()
   if self.phase!='ready':fail('invalid_phase','Worker is not ready for gameplay')
@@ -259,7 +261,7 @@ class Session:
   Driver._validate_png(data);width,height=struct.unpack('>II',data[16:24])
   if not 1<=width<=8192 or not 1<=height<=8192 or width*height>32*1024*1024 or receipt.get('size')!=[width,height]:fail('frame_invalid','Actual capture dimensions differ')
   self.identity()
-  if self.win.input_desktop_name()==self.desktop or not any(item.handle==self.ownership['hwnd'] and item.pid==self.ownership['pid'] for item in self.win.desktop_windows(self.desktop,visible_only=False)):fail('frame_invalid','Capture desktop identity changed')
+  if self.win.input_desktop_name() in (None,self.desktop) or not any(item.handle==self.ownership['hwnd'] and item.pid==self.ownership['pid'] for item in self.win.desktop_windows(self.desktop,visible_only=False)):fail('frame_invalid','Capture desktop identity changed')
   return {'ownership':self.ownership,'frame':{'data_url':'data:image/png;base64,'+base64.b64encode(data).decode(),'width':width,'height':height,'sha256':hashlib.sha256(data).hexdigest(),'path':str(path)},'capture_receipt':receipt}
  def focus(self):self.ready();return {'ownership':self.ownership,'selection':'owned hidden target','owner_desktop_changed':False}
  def gamepad(self,request):
@@ -314,7 +316,7 @@ def serve():
   except BaseException:requests.put(('invalid',None))
   finally:cancelled.set();requests.put(('eof',None))
  threading.Thread(target=receive,daemon=True).start();expected=1
- schemas={'allocate':{'runtime_root','ws_script','ws_session','task','run_directory','lifetime_minutes'},'launch':{'me3_executable','game_executable','profile','savefile','game_sha256','me3_sha256'},'inspect':set(),'focus':set(),'gamepad':{'state'},'stop':set(),'close':set()}
+ schemas={'allocate':{'runtime_root','ws_script','ws_session','task','run_directory','lifetime_minutes','capture_fps'},'launch':{'me3_executable','game_executable','profile','savefile','game_sha256','me3_sha256'},'inspect':set(),'focus':set(),'gamepad':{'state'},'stop':set(),'close':set()}
  try:
   while True:
    try:kind,request=requests.get(timeout=.25)

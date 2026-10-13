@@ -7,12 +7,12 @@ import { StudyError } from '../../dist/errors.js';
 
 const SOURCE = join(dirname(fileURLToPath(import.meta.url)), 'session_worker.py');
 const failure = (code, message) => new StudyError(code, message);
-export async function createBoothWorker({ python, diagnostics_directory }) {
+export async function createBoothWorker({ python, diagnostics_directory }, deps = {}) {
   const [pythonHash, sourceHash] = await Promise.all([nativeFileDigest(python), nativeFileDigest(SOURCE)]);
-  const child = spawn(python, ['-I', SOURCE], { shell: false, windowsHide: true,
+  const child = (deps.spawn ?? spawn)(python, ['-I', SOURCE], { shell: false, windowsHide: true,
     stdio: ['pipe', 'pipe', 'pipe'], cwd: resolve(diagnostics_directory) });
   let sequence = 0, pending, exited = false, uncertain = false, closed = false;
-  let buffer = Buffer.alloc(0), stderr = Buffer.alloc(0), exit, corrupt = false;
+  let buffer = Buffer.alloc(0), stderr = Buffer.alloc(0), exit, corrupt = false, lateCompletion;
   child.once('exit', (code, signal) => { exited = true; exit = { code, signal }; });
   const exitPromise = new Promise(done => { child.once('close', (code, signal) => {
     exited = true; exit = { code, signal }; pending?.reject(failure('booth_worker_exited', 'Owned Booth worker exited during a request')); done(exit);
@@ -29,6 +29,7 @@ export async function createBoothWorker({ python, diagnostics_directory }) {
         if (!pending || value.seq !== pending.seq || typeof value.ok !== 'boolean' ||
             line.length > (pending.op === 'inspect' ? 12 * 1024 ** 2 : 65536)) throw new Error('Unexpected worker reply');
         const request = pending; pending = undefined;
+        if(request.timedOut) lateCompletion = { seq: request.seq, op: request.op, ok: value.ok, error_code: value.error?.code };
         if (value.ok) request.resolve(value.result);
         else request.reject(failure(value.error?.code ?? 'booth_worker_refused', String(value.error?.message ?? 'Worker refused operation').slice(0, 4096)));
       } catch (error) { corrupt = true; buffer = Buffer.alloc(0); uncertain = true; pending?.reject(failure('booth_worker_protocol', error.message)); return; }
@@ -40,15 +41,17 @@ export async function createBoothWorker({ python, diagnostics_directory }) {
   return {
     identity: { pid: child.pid, python: { path: python, sha256: pythonHash }, source: { path: SOURCE, sha256: sourceHash } },
     async request(op, fields = {}, timeout = 30000) {
-      if (exited || closed || uncertain || pending) throw failure('booth_worker_unavailable', 'Worker is closed, busy, or requires reconciliation');
-      const seq = ++sequence, body = JSON.stringify({ ...fields, seq, op });
+      const cleanup = ['stop','close'].includes(op) && lateCompletion && !corrupt;
+      if (exited || closed || (uncertain && !cleanup) || pending) throw failure('booth_worker_unavailable', 'Worker is closed, busy, or requires reconciliation');
+      const seq = sequence + 1, body = JSON.stringify({ ...fields, seq, op });
       if (Buffer.byteLength(body) > 4096) throw failure('booth_worker_limit', 'Worker request exceeded 4 KiB');
+      sequence = seq;
       let timer;
       try {
         return await new Promise((resolve, reject) => {
           pending = { seq, op, resolve, reject };
-          timer = setTimeout(() => { uncertain = true; reject(failure('booth_worker_uncertain', 'Worker deadline expired; retained owned worker for reconciliation')); }, timeout);
-          child.stdin.write(body + '\n', error => { if (error) { uncertain = true; reject(failure('booth_worker_write_failed', error.message)); } });
+          timer = setTimeout(() => { uncertain = true; lateCompletion = undefined; pending.timedOut = true; reject(failure('booth_worker_uncertain', 'Worker deadline expired; retained owned worker for reconciliation')); }, timeout);
+          child.stdin.write(body + '\n', error => { if (error) { uncertain = true; lateCompletion = undefined; reject(failure('booth_worker_write_failed', error.message)); } });
         });
       } finally { clearTimeout(timer); }
     },
@@ -60,6 +63,6 @@ export async function createBoothWorker({ python, diagnostics_directory }) {
       const outcome = await Promise.race([exitPromise.then(exit => ({ exited: true, exit })), deadline]).finally(() => clearTimeout(timer));
       return { ...outcome, uncertain, stderr: stderr.toString('utf8') };
     },
-    status: () => ({ exited, uncertain, pending: pending?.op, exit, stderr: stderr.toString('utf8') })
+    status: () => ({ exited, uncertain, pending: pending?.op, late_completion: lateCompletion, exit, stderr: stderr.toString('utf8') })
   };
 }

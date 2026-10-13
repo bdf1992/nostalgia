@@ -1,4 +1,5 @@
 import { createServer } from 'node:http';
+import { performance } from 'node:perf_hooks';
 import { constants } from 'node:fs';
 import { lstat, mkdir, open, readdir } from 'node:fs/promises';
 import { dirname, isAbsolute, join, resolve, sep } from 'node:path';
@@ -11,8 +12,13 @@ import { admitNativePath, readNativeFile, nativeFileDigest, nativeStartInput, na
 import { validateImage } from './native-sky-bridge.mjs';
 import { createBoothWorker } from './booth-gameplay/worker-client.mjs';
 import { createBoothAudioRoute } from './booth-audio/route.mjs';
-import { startViewer } from './booth-audio/server.mjs';
+import { startGameplayProvider } from './booth-audio/server.mjs';
+import { attachBoothCapabilities } from './booth-gameplay/capabilities.mjs';
 
+const phaseKeys = ['audio_observation','native_capture','original_save_protection','artifact_validation','controller_input','before_observation','after_observation','total'];
+const phases = () => Object.fromEntries(phaseKeys.map(key=>[key,0]));
+const elapsed = start => Math.max(0,performance.now()-start);
+async function timed(durations,key,work){const start=performance.now();try{return await work();}finally{durations[key]+=elapsed(start);}}
 const fail = (code, message) => { throw new StudyError(code, message); };
 const same = (a,b) => a.dev === b.dev && a.ino === b.ino;
 const hash = b => createHash('sha256').update(b).digest('hex');
@@ -35,13 +41,15 @@ async function primarySaves(appdata) {
 /** Trusted local configuration supplies providers; public RPC cannot supply commands or authority. */
 export async function createNativeBoothBridge({destination,runtime,configuration}, deps={}) {
   if(runtime?.platform!=='win32'||typeof runtime.appdata!=='string'||!isAbsolute(runtime.appdata)||!configuration||typeof destination!=='string'||!isAbsolute(destination))fail('native_runtime_invalid','Explicit Windows runtime and trusted Booth configuration required');
-  for(const name of ['runtime_root','python','ws_script'])if(typeof configuration[name]!=='string'||!isAbsolute(configuration[name]))fail('native_runtime_invalid','Absolute private provider paths required');
+  for(const name of ['runtime_root','python','ws_script','booth_runtime_root'])if(typeof configuration[name]!=='string'||!isAbsolute(configuration[name]))fail('native_runtime_invalid','Absolute private provider paths required');
+  if(typeof configuration.booth_viewer_url!=='string'||!/^http:\/\/127\.0\.0\.1:[1-9]\d{0,4}\/booth\/watch$/.test(configuration.booth_viewer_url)||Number(new URL(configuration.booth_viewer_url).port)>65535)fail('native_runtime_invalid','Existing local Booth watch page required');
   for(const name of ['ws_session','task'])if(typeof configuration[name]!=='string'||configuration[name].length<1||configuration[name].length>128)fail('native_runtime_invalid','Bounded private workstation authority required');
   if(!configuration.audio?.toolchain||typeof configuration.audio.cable_endpoint!=='string'||typeof configuration.audio.tool_receipt!=='string'||!isAbsolute(configuration.audio.tool_receipt))fail('native_runtime_invalid','Explicit audio toolchain, endpoint and capture receipt required');
   for(const name of ['msbuild','pwsh'])if(typeof configuration.audio.toolchain[name]!=='string'||!isAbsolute(configuration.audio.toolchain[name]))fail('native_runtime_invalid','Absolute audio compiler and PowerShell paths required');
+  if(configuration.capture_fps!==undefined&&(!Number.isSafeInteger(configuration.capture_fps)||configuration.capture_fps<1||configuration.capture_fps>24))fail('native_runtime_invalid','Private capture FPS must be an integer1..24');
   destination=resolve(destination);await admitNativePath(dirname(destination),true);await absent(destination);await mkdir(destination);
   const bridgeIdentity=await admitNativePath(destination,true),bridgePath=join(destination,'bridge.json');
-  const cfg=structuredClone(configuration),workerFactory=deps.workerFactory??createBoothWorker,audioFactory=deps.audioFactory??createBoothAudioRoute,viewerFactory=deps.viewerFactory??startViewer;
+  const cfg=structuredClone(configuration),workerFactory=deps.workerFactory??createBoothWorker,audioFactory=deps.audioFactory??createBoothAudioRoute,viewerFactory=deps.viewerFactory??startGameplayProvider,capabilitiesFactory=deps.capabilitiesFactory??attachBoothCapabilities;
   const audioObserver=deps.audioObserver??(async options=>(await import('./booth-audio/route.mjs')).observeBoothAudio(options));
   const savePaths=deps.originalSavePaths??(()=>primarySaves(runtime.appdata));
   const receipt={version:1,provider:'windows-native-booth-bridge',bridge_id:randomUUID(),bridge_path:bridgePath,url:'',token:randomBytes(32).toString('hex'),status:'running'};
@@ -70,18 +78,31 @@ export async function createNativeBoothBridge({destination,runtime,configuration
     if(!Number.isSafeInteger(result.active_on_cable)||result.active_on_cable<0||!Number.isSafeInteger(result.active_off_cable)||result.active_off_cable<0)fail('native_audio_unproven','Actual session audio counts unavailable');
     await record(s,'audio-observation.json',result);if(result.active_off_cable>0)fail('native_audio_isolation_failed','Owned target has active audio outside admitted Cable');return result;
   }
-  async function observe(s){
-    await audioStatus(s);
-    const raw=await s.worker.request('inspect');if(!equalTarget(raw.ownership,s.ownership))fail('native_ownership_unproven','Frame ownership differs');
-    const image=validateImage(raw.frame.data_url);if(image.mime!=='image/png'||image.width!==raw.frame.width||image.height!==raw.frame.height||hash(Buffer.from(image.encoded,'base64'))!==raw.frame.sha256)fail('native_frame_invalid','Actual frame dimensions or digest differ');
-    const output=nativeInspectOutput.parse({provider:'windows-native',session_path:s.receipt.session_path,session_id:s.receipt.session_id,checkpoint_id:s.receipt.checkpoint_id,status:s.receipt.status==='starting'?'running':s.receipt.status,url:s.public.gameplay_url,visible_text:'',screenshot_image_base64:image.encoded,screenshot_mime_type:'image/png',window:{app:'process:'+s.ownership.executable,id:s.ownership.hwnd},screenshots:[{id:raw.frame.sha256,url:'',width:image.width,height:image.height,zIndex:0}],input_behavior:'owned-hidden-desktop-virtual-input'});
-    await protect(s);s.observation=output;await record(s,'observation.json',output);return output;
+  async function observe(s,aggregate){
+    const durations=phases(),started=performance.now();let outcome='failed';
+    try{
+      await timed(durations,'audio_observation',()=>audioStatus(s));
+      const raw=await timed(durations,'native_capture',()=>s.worker.request('inspect'));
+      const output=await timed(durations,'artifact_validation',()=>{
+        if(!equalTarget(raw.ownership,s.ownership))fail('native_ownership_unproven','Frame ownership differs');
+        const image=validateImage(raw.frame.data_url);if(image.mime!=='image/png'||image.width!==raw.frame.width||image.height!==raw.frame.height||hash(Buffer.from(image.encoded,'base64'))!==raw.frame.sha256)fail('native_frame_invalid','Actual frame dimensions or digest differ');
+        return nativeInspectOutput.parse({provider:'windows-native',session_path:s.receipt.session_path,session_id:s.receipt.session_id,checkpoint_id:s.receipt.checkpoint_id,status:s.receipt.status==='starting'?'running':s.receipt.status,url:s.public.gameplay_url,visible_text:'',screenshot_image_base64:image.encoded,screenshot_mime_type:'image/png',window:{app:'process:'+s.ownership.executable,id:s.ownership.hwnd},screenshots:[{id:raw.frame.sha256,url:'',width:image.width,height:image.height,zIndex:0}],input_behavior:'owned-hidden-desktop-virtual-input'});
+      });
+      await timed(durations,'original_save_protection',()=>protect(s));s.observation=output;await record(s,'observation.json',output);outcome='completed';return output;
+    }finally{
+      durations.total=elapsed(started);
+      if(aggregate)for(const key of ['audio_observation','native_capture','original_save_protection','artifact_validation'])aggregate[key]+=durations[key];
+      // Timing metadata cannot replace an existing provider failure or change public responses.
+      await record(s,'observation-timing.json',{version:1,kind:'observation',outcome,durations_ms:durations}).catch(()=>{});
+    }
   }
   async function cleanup(s,publish=true){
+    s.inputDisabled=true;
     if(s.receipt?.status==='stopped')return nativeStopOutput.parse({provider:'windows-native',session_path:s.public.session_path,session_id:s.public.session_id,checkpoint_id:s.public.checkpoint_id,status:'stopped'});
     if(s.cleanupComplete){if(publish){s.receipt.status='stopped';await record(s,'session.json',s.receipt);if(s.observation)await record(s,'observation.json',{...s.observation,status:'stopped'});}return nativeStopOutput.parse({provider:'windows-native',session_path:s.public.session_path,session_id:s.public.session_id,checkpoint_id:s.public.checkpoint_id,status:'stopped'});}
     clearTimeout(s.timer);const evidence={};
     try{
+      if(s.capabilities&&!s.capabilitiesClosed){await s.capabilities.close();s.capabilitiesClosed=true;}evidence.capabilities_revoked=true;
       let quiesceError;try{if(s.worker)evidence.quiesce=await s.worker.request('stop',{},30000);}catch(e){quiesceError=e;}
       if(s.viewer&&!s.viewerClosed){await s.viewer.close();s.viewerClosed=true;}evidence.viewer_closed=true;
       if(quiesceError)throw quiesceError;if(s.worker&&(evidence.quiesce.game_exited!==true||evidence.quiesce.controller_closed!==true))fail('native_shutdown_incomplete','Owned game/controller quiescence unproven');
@@ -112,7 +133,7 @@ export async function createNativeBoothBridge({destination,runtime,configuration
       s.receipt=nativeSessionReceiptSchema.parse({...s.public,bridge_path:bridgePath,status:'starting',expires_at:new Date(Date.now()+input.lifetime_seconds*1000).toISOString()});sessions.set(s.receipt.session_path,s);await record(s,'session.json',s.receipt);await record(s,'protected-saves.json',saves);await record(s,'runtime-pins.json',pins);
       if(seed){const parent=await admitNativePath(dirname(seed.metadata.created_save_path),true),f=await open(seed.metadata.created_save_path,'wx',0o600);try{if(!same(parent,await admitNativePath(dirname(seed.metadata.created_save_path),true)))fail('native_path_refused','Seed parent changed');await f.writeFile(seed.bytes);}finally{await f.close();}if(await nativeFileDigest(seed.metadata.created_save_path)!==seed.metadata.sha256)fail('native_seed_invalid','Created seed differs');await record(s,'seed.json',seed.metadata);}
       s.worker=await workerFactory({python:cfg.python,diagnostics_directory:s.directory});signal?.throwIfAborted();
-      const allocated=await s.worker.request('allocate',{runtime_root:cfg.runtime_root,ws_script:cfg.ws_script,ws_session:cfg.ws_session,task:cfg.task,run_directory:s.directory,lifetime_minutes:Math.min(60,Math.ceil(input.lifetime_seconds/60)+2)},40000);s.allocation=allocated;await record(s,'allocation.json',allocated);
+      const allocated=await s.worker.request('allocate',{runtime_root:cfg.runtime_root,ws_script:cfg.ws_script,ws_session:cfg.ws_session,task:cfg.task,run_directory:s.directory,lifetime_minutes:Math.min(60,Math.ceil(input.lifetime_seconds/60)+2),capture_fps:cfg.capture_fps??4},40000);s.allocation=allocated;await record(s,'allocation.json',allocated);
       if(allocated.phase!=='await_parent_audio'||typeof allocated.desktop!=='string'||!Number.isSafeInteger(allocated.open_receipt?.ends_ms))fail('native_ownership_unproven','Actual allocation lease is absent');
       if(typeof allocated.appdata!=='string'||!isAbsolute(allocated.appdata)||resolve(allocated.appdata).toLowerCase()!==resolve(runtime.appdata).toLowerCase())fail('native_profile_unknown','Actual worker APPDATA differs from protected save directory');
       const expires=Math.min(Date.parse(s.receipt.expires_at),allocated.open_receipt.ends_ms-120000);if(expires<=Date.now())fail('native_lifetime_invalid','Booth lease has no cleanup reserve');s.receipt.expires_at=new Date(expires).toISOString();await record(s,'session.json',s.receipt);
@@ -122,17 +143,26 @@ export async function createNativeBoothBridge({destination,runtime,configuration
       const ticks=(BigInt(s.ownership.created_high)*4294967296n+BigInt(s.ownership.created_low)+504911232000000000n).toString();s.startTicks=ticks;
       const audioDeadline=Date.now()+30000;let actualAudio;do{signal?.throwIfAborted();actualAudio=await audioStatus(s);if(Date.now()>audioDeadline)fail('native_audio_unproven','Actual audio observation arrived after30second admission deadline');if(actualAudio.active_on_cable>0)break;await new Promise(r=>setTimeout(r,250));}while(Date.now()<audioDeadline);
       if(actualAudio.active_on_cable<1)fail('native_audio_unproven','No active owned Cable session appeared within30seconds');await record(s,'audio-admission.json',actualAudio);
-      s.viewer=await viewerFactory({'--pid':String(s.ownership.pid),'--ticks':ticks,'--exe':game.path,'--booth-stream-url':viewerStream(launch.viewer_url),'--tool-receipt':cfg.audio.tool_receipt,'--receipt':join(s.directory,'viewer.json')});s.public.gameplay_url=s.viewer.url;s.receipt.gameplay_url=s.viewer.url;
+      s.viewer=await viewerFactory({'--pid':String(s.ownership.pid),'--ticks':ticks,'--exe':game.path,'--booth-stream-url':viewerStream(launch.viewer_url),'--tool-receipt':cfg.audio.tool_receipt}, {input:async state=>{
+        const result=await serialize(()=>operation({operation:'act',session_path:s.public.session_path,action:{...state,kind:'gamepad'}}));
+        return {session_id:result.observation.session_id,frame_sha256:result.observation.screenshots[0].id};
+      }});
+      s.capabilities=await capabilitiesFactory({runtime_root:cfg.booth_runtime_root,viewer_url:cfg.booth_viewer_url,allocation:allocated,provider:s.viewer,expires_at:s.receipt.expires_at,ws_session:cfg.ws_session,task:cfg.task});
+      s.public.gameplay_url=s.capabilities.url;s.receipt.gameplay_url=s.capabilities.url;
+      await record(s,'viewer.json',{url:s.capabilities.url,recording_id:s.capabilities.recording_id,provider:'existing-booth'});
       await observe(s);await protect(s);for(const a of [game,me3,s.public.runtime.profile])if(await nativeFileDigest(a.path)!==a.sha256)fail('native_artifact_changed','Launch artifact changed');signal?.throwIfAborted();
       s.receipt.status='running';await record(s,'session.json',s.receipt);s.timer=setTimeout(()=>{void serialize(()=>cleanup(s)).catch(()=>{});},Math.max(0,Date.parse(s.receipt.expires_at)-Date.now()));return s.public;
     }catch(e){if(s.receipt){s.receipt.status='failed';await record(s,'session.json',s.receipt).catch(()=>{});}await record(s,'failure.json',diagnostic(e)).catch(()=>{});try{await cleanup(s,false);}catch{}throw e;}
   }
   const requestSchema=z.discriminatedUnion('operation',[z.strictObject({operation:z.literal('start'),input:nativeStartInput}),...['inspect','focus','stop'].map(operation=>z.strictObject({operation:z.literal(operation),session_path:z.string().max(4096)})),z.strictObject({operation:z.literal('act'),session_path:z.string().max(4096),action:nativeActionSchema})]);
-  async function operationInner(raw,signal){signal?.throwIfAborted();if(!same(await admitNativePath(destination,true),bridgeIdentity))fail('native_path_refused','Bridge directory identity changed');const request=requestSchema.parse(raw);if(request.operation==='start')return start(request.input,signal);const s=sessions.get(resolve(request.session_path));if(!s)fail('native_session_unknown','Bridge does not own selected session');if(request.operation==='stop')return cleanup(s);await guardSession(s);if(s.receipt.status!=='running'||Date.now()>=Date.parse(s.receipt.expires_at))fail('native_session_stopped','Session is not running within its lifetime');
+  async function operationInner(raw,signal){const operationStarted=performance.now();signal?.throwIfAborted();if(!same(await admitNativePath(destination,true),bridgeIdentity))fail('native_path_refused','Bridge directory identity changed');const request=requestSchema.parse(raw);if(request.operation==='start')return start(request.input,signal);const s=sessions.get(resolve(request.session_path));if(!s)fail('native_session_unknown','Bridge does not own selected session');if(request.operation==='stop')return cleanup(s);await guardSession(s);if(s.inputDisabled||s.receipt.status!=='running'||Date.now()>=Date.parse(s.receipt.expires_at))fail('native_session_stopped','Session is not running within its lifetime');
     if(request.operation==='inspect')return observe(s);if(request.operation==='focus'){const focus=await s.worker.request('focus');if(!equalTarget(focus.ownership,s.ownership)||focus.owner_desktop_changed!==false)fail('native_ownership_unproven','Hidden selection differs');return nativeFocusOutput.parse({focused:true,observation:await observe(s)});}
-    const action=request.action;if(!['gamepad','wait'].includes(action.kind))fail('native_action_unsupported','Booth bridge currently supports leased gamepad and bounded wait');if((s.actionSequence??0)>=10000)fail('native_limit','Session reached its10000action record bound');await artifacts();for(const a of [s.public.runtime.game,s.public.runtime.me3,s.public.runtime.profile])if(await nativeFileDigest(a.path)!==a.sha256)fail('native_artifact_changed','Selected launch artifact changed');await observe(s);
-    s.actionSequence=(s.actionSequence??0)+1;const prefix='action-'+String(s.actionSequence).padStart(4,'0');await record(s,prefix+'-attempt.json',{action,at:new Date().toISOString()});
-    try{signal?.throwIfAborted();if(Date.now()>=Date.parse(s.receipt.expires_at))fail('native_session_stopped','Session lifetime ended before input');let result;if(action.kind==='wait'){await new Promise(r=>setTimeout(r,action.milliseconds));result={bounded_wait_complete:true};}else{const {kind,...state}=action;result=await s.worker.request('gamepad',{state});if(result.ok!==true||result.pid!==s.ownership.pid||result.hwnd!==s.ownership.hwnd)fail('native_input_unproven','Owned controller acknowledgment differs');}await record(s,prefix+'-receipt.json',result);const observation=await observe(s);await record(s,prefix+'-observed.json',{session_id:observation.session_id,checkpoint_id:observation.checkpoint_id,frame_sha256:observation.screenshots[0].id});return nativeActOutput.parse({action,observation});}catch(e){await record(s,prefix+'-failure.json',diagnostic(e)).catch(()=>{});throw e;}
+    const action=request.action;if(!['gamepad','wait'].includes(action.kind))fail('native_action_unsupported','Booth bridge currently supports leased gamepad and bounded wait');if((s.actionSequence??0)>=10000)fail('native_limit','Session reached its10000action record bound');
+    const durations=phases(),started=operationStarted;let timingOutcome='failed',prefix;
+    try{await timed(durations,'artifact_validation',async()=>{await artifacts();for(const a of [s.public.runtime.game,s.public.runtime.me3,s.public.runtime.profile])if(await nativeFileDigest(a.path)!==a.sha256)fail('native_artifact_changed','Selected launch artifact changed');});await timed(durations,'before_observation',()=>observe(s,durations));
+    s.actionSequence=(s.actionSequence??0)+1;prefix='action-'+String(s.actionSequence).padStart(4,'0');await record(s,prefix+'-attempt.json',{action,at:new Date().toISOString()});
+    try{signal?.throwIfAborted();if(Date.now()>=Date.parse(s.receipt.expires_at))fail('native_session_stopped','Session lifetime ended before input');let result;await timed(durations,'controller_input',async()=>{if(action.kind==='wait'){await new Promise(r=>setTimeout(r,action.milliseconds));result={bounded_wait_complete:true};}else{const {kind,...state}=action;result=await s.worker.request('gamepad',{state});if(result.ok!==true||result.pid!==s.ownership.pid||result.hwnd!==s.ownership.hwnd)fail('native_input_unproven','Owned controller acknowledgment differs');}});await record(s,prefix+'-receipt.json',result);const observation=await timed(durations,'after_observation',()=>observe(s,durations));await record(s,prefix+'-observed.json',{session_id:observation.session_id,checkpoint_id:observation.checkpoint_id,frame_sha256:observation.screenshots[0].id});const output=nativeActOutput.parse({action,observation});timingOutcome='completed';return output;}catch(e){await record(s,prefix+'-failure.json',diagnostic(e)).catch(()=>{});throw e;}
+    }finally{durations.total=elapsed(started);await record(s,prefix?prefix+'-timing.json':'action-preflight-timing.json',{version:1,kind:'action',outcome:timingOutcome,durations_ms:durations}).catch(()=>{});}
   }
   async function operation(raw,signal){try{return await operationInner(raw,signal);}catch(error){if(error.code==='native_audio_isolation_failed'&&typeof raw?.session_path==='string'){const s=sessions.get(resolve(raw.session_path));if(s){s.receipt.status='failed';await record(s,'session.json',s.receipt).catch(()=>{});await record(s,'audio-isolation-failure.json',diagnostic(error)).catch(()=>{});try{await cleanup(s);}catch{/* Exact cleanup failure retained; input remains disabled. */}}}throw error;}}
   const server=createServer((req,res)=>{void(async()=>{const auth=Buffer.from(req.headers.authorization??''),expected=Buffer.from('Bearer '+receipt.token);if(req.method!=='POST'||req.url!=='/control'||req.headers.host!==`127.0.0.1:${server.address().port}`||req.headers.origin!==undefined||auth.length!==expected.length||!timingSafeEqual(auth,expected)){res.writeHead(403).end();return;}const signal=new AbortController();res.once('close',()=>{if(!res.writableEnded)signal.abort();});let count=0,chunks=[];for await(const b of req){count+=b.length;if(count>16384)fail('native_limit','Request exceeds16KiB');chunks.push(b);}const raw=JSON.parse(new TextDecoder('utf8',{fatal:true}).decode(Buffer.concat(chunks))),output=await serialize(()=>operation(raw,signal.signal));const body=JSON.stringify(output);if(Buffer.byteLength(body)>24*1024**2)fail('native_limit','Response exceeds24MiB');res.writeHead(200,{'content-type':'application/json','cache-control':'no-store',connection:'close'}).end(body);})().catch(e=>{if(!res.destroyed)res.writeHead(400,{'content-type':'application/json',connection:'close'}).end(JSON.stringify(diagnostic(e)));});});server.requestTimeout=350000;server.headersTimeout=10000;
